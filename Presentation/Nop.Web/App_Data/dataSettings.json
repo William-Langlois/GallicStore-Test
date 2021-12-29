@@ -1,0 +1,6 @@
+﻿{
+  "DataConnectionString": "server=mysql-langlois-william.alwaysdata.net;database=langlois-william_nopcommerce_marketplace_test;allowuservariables=True;user id=192615_mrkplcadm;password=MarketplaceBDD1234!",
+  "DataProvider": "mysql",
+  "SQLCommandTimeout": null,
+  "RawDataSettings": {}
+}
