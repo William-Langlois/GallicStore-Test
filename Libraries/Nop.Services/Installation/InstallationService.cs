@@ -2854,7 +2854,7 @@ namespace Nop.Services.Installation
                 FontFileName = "FreeSerif.ttf",
                 InvoiceFooterTextColumn1 = null,
                 InvoiceFooterTextColumn2 = null
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new SitemapSettings
             {
@@ -2867,7 +2867,7 @@ namespace Nop.Services.Installation
                 SitemapIncludeBlogPosts = true,
                 SitemapIncludeNews = false,
                 SitemapIncludeTopics = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new SitemapXmlSettings
             {
@@ -2880,7 +2880,7 @@ namespace Nop.Services.Installation
                 SitemapXmlIncludeProductTags = true,
                 SitemapXmlIncludeCustomUrls = true,
                 SitemapXmlIncludeTopics = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new CommonSettings
             {
@@ -2899,7 +2899,7 @@ namespace Nop.Services.Installation
                 EnableJsBundling = false,
                 EnableCssBundling = false,
                 RestartTimeout = NopCommonDefaults.RestartTimeout
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new SeoSettings
             {
@@ -2921,7 +2921,7 @@ namespace Nop.Services.Installation
                 MicrodataEnabled = true,
                 ReservedUrlRecordSlugs = NopSeoDefaults.ReservedUrlRecordSlugs,
                 CustomHeadTags = string.Empty
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new AdminAreaSettings
             {
@@ -2936,7 +2936,7 @@ namespace Nop.Services.Installation
                 CheckCopyrightRemovalKey = true,
                 UseIsoDateFormatInJsonResult = true,
                 ShowDocumentationReferenceLinks = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new ProductEditorSettings
             {
@@ -2945,7 +2945,7 @@ namespace Nop.Services.Installation
                 ProductAttributes = true,
                 SpecificationAttributes = true,
                 PAngV = isGermany
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new GdprSettings
             {
@@ -2953,7 +2953,7 @@ namespace Nop.Services.Installation
                 LogPrivacyPolicyConsent = true,
                 LogNewsletterConsent = true,
                 LogUserProfileChanges = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new CatalogSettings
             {
@@ -3052,7 +3052,7 @@ namespace Nop.Services.Installation
                 EnableManufacturerFiltering = true,
                 EnablePriceRangeFiltering = true,
                 AttributeValueOutOfStockDisplayType = AttributeValueOutOfStockDisplayType.AlwaysDisplay
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new LocalizationSettings
             {
@@ -3064,7 +3064,7 @@ namespace Nop.Services.Installation
                 LoadAllLocalizedPropertiesOnStartup = true,
                 LoadAllUrlRecordsOnStartup = false,
                 IgnoreRtlPropertyForAdminArea = false
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new CustomerSettings
             {
@@ -3133,12 +3133,12 @@ namespace Nop.Services.Installation
                 PhoneNumberValidationEnabled = false,
                 PhoneNumberValidationUseRegex = false,
                 PhoneNumberValidationRule = "^[0-9]{1,14}?$"
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new MultiFactorAuthenticationSettings
             {
                 ForceMultifactorAuthentication = false
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new AddressSettings
             {
@@ -3157,7 +3157,7 @@ namespace Nop.Services.Installation
                 PhoneEnabled = true,
                 PhoneRequired = true,
                 FaxEnabled = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new MediaSettings
             {
@@ -3180,7 +3180,7 @@ namespace Nop.Services.Installation
                 ImportProductImagesUsingHash = true,
                 AzureCacheControlHeader = string.Empty,
                 UseAbsoluteImagePath = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new StoreInformationSettings
             {
@@ -3192,14 +3192,14 @@ namespace Nop.Services.Installation
                 TwitterLink = "https://twitter.com/nopCommerce",
                 YoutubeLink = "https://www.youtube.com/user/nopCommerce",
                 HidePoweredByNopCommerce = false
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new ExternalAuthenticationSettings
             {
                 RequireEmailValidation = false,
                 LogErrors = false,
                 AllowCustomersToRemoveAssociations = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new RewardPointsSettings
             {
@@ -3217,7 +3217,7 @@ namespace Nop.Services.Installation
                 DisplayHowMuchWillBeEarned = true,
                 PointsAccumulatedForAllStores = true,
                 PageSize = 10
-            });
+            },0);
 
             var primaryCurrency = "USD";
             await settingService.SaveSettingAsync(new CurrencySettings
@@ -3227,7 +3227,7 @@ namespace Nop.Services.Installation
                 PrimaryExchangeRateCurrencyId = _currencyRepository.Table.Single(c => c.CurrencyCode == primaryCurrency).Id,
                 ActiveExchangeRateProviderSystemName = "CurrencyExchange.ECB",
                 AutoUpdateEnabled = false
-            });
+            },0);
 
             var baseDimension = isMetric ? "meters" : "inches";
             var baseWeight = isMetric ? "kg" : "lb";
@@ -3236,7 +3236,7 @@ namespace Nop.Services.Installation
             {
                 BaseDimensionId = _measureDimensionRepository.Table.Single(m => m.SystemKeyword == baseDimension).Id,
                 BaseWeightId = _measureWeightRepository.Table.Single(m => m.SystemKeyword == baseWeight).Id
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new MessageTemplatesSettings
             {
@@ -3244,7 +3244,7 @@ namespace Nop.Services.Installation
                 Color1 = "#b9babe",
                 Color2 = "#ebecee",
                 Color3 = "#dde2e6"
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new ShoppingCartSettings
             {
@@ -3269,7 +3269,7 @@ namespace Nop.Services.Installation
                 GroupTierPricesForDistinctShoppingCartItems = false,
                 AllowCartItemEditing = true,
                 RenderAssociatedAttributeValueQuantity = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new OrderSettings
             {
@@ -3304,7 +3304,7 @@ namespace Nop.Services.Installation
                 ExportWithProducts = true,
                 AllowAdminsToBuyCallForPriceProducts = true,
                 DisplayCustomerCurrencyOnOrders = false
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new SecuritySettings
             {
@@ -3313,7 +3313,7 @@ namespace Nop.Services.Installation
                 HoneypotEnabled = false,
                 HoneypotInputName = "hpinput",
                 AllowNonAsciiCharactersInHeaders = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new ShippingSettings
             {
@@ -3340,7 +3340,7 @@ namespace Nop.Services.Installation
                 ConsiderAssociatedProductsDimensions = true,
                 ShipSeparatelyOneItemEach = true,
                 RequestDelay = 300,
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new PaymentSettings
             {
@@ -3355,7 +3355,7 @@ namespace Nop.Services.Installation
                 SkipPaymentInfoStepForRedirectionPaymentMethods = false,
                 CancelRecurringPaymentsAfterFailedPayment = false,
                 RegenerateOrderGuidInterval = 180
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new TaxSettings
             {
@@ -3385,13 +3385,13 @@ namespace Nop.Services.Installation
                 EuVatAssumeValid = false,
                 EuVatEmailAdminWhenNewVatSubmitted = false,
                 LogErrors = false
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new DateTimeSettings
             {
                 DefaultStoreTimeZoneId = string.Empty,
                 AllowCustomersToSetTimeZone = false
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new BlogSettings
             {
@@ -3403,7 +3403,7 @@ namespace Nop.Services.Installation
                 ShowHeaderRssUrl = false,
                 BlogCommentsMustBeApproved = false,
                 ShowBlogCommentsPerStore = false
-            });
+            },0);
             await settingService.SaveSettingAsync(new NewsSettings
             {
                 Enabled = true,
@@ -3415,7 +3415,7 @@ namespace Nop.Services.Installation
                 ShowHeaderRssUrl = false,
                 NewsCommentsMustBeApproved = false,
                 ShowNewsCommentsPerStore = false
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new ForumSettings
             {
@@ -3452,7 +3452,7 @@ namespace Nop.Services.Installation
                 ForumFeedsEnabled = false,
                 ForumFeedCount = 10,
                 ForumSearchTermMinimumLength = 3
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new VendorSettings
             {
@@ -3466,7 +3466,7 @@ namespace Nop.Services.Installation
                 NotifyStoreOwnerAboutVendorInformationChange = true,
                 MaximumProductNumber = 3000,
                 AllowVendorsToImportProducts = true
-            });
+            },0);
 
             var eaGeneral = _emailAccountRepository.Table.FirstOrDefault();
             if (eaGeneral == null)
@@ -3474,12 +3474,12 @@ namespace Nop.Services.Installation
             await settingService.SaveSettingAsync(new EmailAccountSettings
             {
                 DefaultEmailAccountId = eaGeneral.Id
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new WidgetSettings
             {
                 ActiveWidgetSystemNames = new List<string> { "Widgets.NivoSlider" }
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new DisplayDefaultMenuItemSettings
             {
@@ -3490,7 +3490,7 @@ namespace Nop.Services.Installation
                 DisplayBlogMenuItem = true,
                 DisplayForumsMenuItem = true,
                 DisplayContactUsMenuItem = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new DisplayDefaultFooterItemSettings
             {
@@ -3509,7 +3509,7 @@ namespace Nop.Services.Installation
                 DisplayShoppingCartFooterItem = true,
                 DisplayWishlistFooterItem = true,
                 DisplayApplyVendorAccountFooterItem = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new CaptchaSettings
             {
@@ -3534,12 +3534,12 @@ namespace Nop.Services.Installation
                 ShowOnNewsCommentPage = false,
                 ShowOnProductReviewPage = false,
                 ShowOnRegistrationPage = false,
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new MessagesSettings
             {
                 UsePopupNotifications = false
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new ProxySettings
             {
@@ -3550,14 +3550,14 @@ namespace Nop.Services.Installation
                 Password = string.Empty,
                 BypassOnLocal = true,
                 PreAuthenticate = true
-            });
+            },0);
 
             await settingService.SaveSettingAsync(new CookieSettings
             {
                 CompareProductsCookieExpires = 24 * 10,
                 RecentlyViewedProductsCookieExpires = 24 * 10,
                 CustomerCookieExpires = 24 * 365
-            });
+            },0);
         }
 
         /// <returns>A task that represents the asynchronous operation</returns>
@@ -9467,7 +9467,7 @@ namespace Nop.Services.Installation
                 DisplayBlogMenuItem = false,
                 DisplayForumsMenuItem = false,
                 DisplayContactUsMenuItem = false
-            });
+            },0);
         }
 
         #endregion

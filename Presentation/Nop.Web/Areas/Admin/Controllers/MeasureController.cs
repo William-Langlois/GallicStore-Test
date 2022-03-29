@@ -158,7 +158,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 ?? throw new ArgumentException("No weight found with the specified id", nameof(id));
 
             _measureSettings.BaseWeightId = weight.Id;
-            await _settingService.SaveSettingAsync(_measureSettings);
+            await _settingService.SaveSettingAsync(_measureSettings, 0);
 
             return Json(new { result = true });
         }
@@ -259,7 +259,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 ?? throw new ArgumentException("No dimension found with the specified id", nameof(id));
 
             _measureSettings.BaseDimensionId = dimension.Id;
-            await _settingService.SaveSettingAsync(_measureSettings);
+            await _settingService.SaveSettingAsync(_measureSettings, 0);
 
             return Json(new { result = true });
         }

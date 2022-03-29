@@ -25,7 +25,8 @@
     }
     @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.OpCheckoutConfirmBottom })
     <div class="section order-summary">
-        @await Component.InvokeAsync("OrderSummary", new { prepareAndDisplayOrderReviewData = true })
+        @Model.VendorIdForCheckout
+        @await Component.InvokeAsync("OrderSummary", new { prepareAndDisplayOrderReviewData = true ,vendorId = Model.VendorIdForCheckout})
     </div>
     @if (string.IsNullOrEmpty(Model.MinOrderTotalWarning) && Model.TermsOfServiceOnOrderConfirmPage)
     {

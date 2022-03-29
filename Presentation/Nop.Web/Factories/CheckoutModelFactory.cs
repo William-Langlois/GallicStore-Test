@@ -445,9 +445,13 @@ namespace Nop.Web.Factories
         /// A task that represents the asynchronous operation
         /// The task result contains the payment method model
         /// </returns>
-        public virtual async Task<CheckoutPaymentMethodModel> PreparePaymentMethodModelAsync(IList<ShoppingCartItem> cart, int filterByCountryId)
+        public virtual async Task<CheckoutPaymentMethodModel> PreparePaymentMethodModelAsync(IList<ShoppingCartItem> cart, int filterByCountryId,bool orderFromDistributor = false)
         {
             var model = new CheckoutPaymentMethodModel();
+            //Valeur à false par défaut (passe à true si la commande est celle d'un districuteur / revendeur auprès de son déposant)
+            model.RestrictedForDistributor = false;
+
+            var customer = await _workContext.GetCurrentCustomerAsync();
 
             //reward points
             if (_rewardPointsSettings.Enabled && !await _shoppingCartService.ShoppingCartIsRecurringAsync(cart))
@@ -469,12 +473,19 @@ namespace Nop.Web.Factories
                 }
             }
 
-            //filter by country
-            var paymentMethods = await (await _paymentPluginManager
-                .LoadActivePluginsAsyncAsync(await _workContext.GetCurrentCustomerAsync(), (await _storeContext.GetCurrentStoreAsync()).Id, filterByCountryId))
-                .Where(pm => pm.PaymentMethodType == PaymentMethodType.Standard || pm.PaymentMethodType == PaymentMethodType.Redirection)
-                .WhereAwait(async pm => !await pm.HidePaymentMethodAsync(cart))
-                .ToListAsync();
+           
+                //filter by country
+                var paymentMethods = await (await _paymentPluginManager
+                    .LoadActivePluginsAsyncAsync(await _workContext.GetCurrentCustomerAsync(), (await _storeContext.GetCurrentStoreAsync()).Id, filterByCountryId))
+                    .Where(pm => pm.PaymentMethodType == PaymentMethodType.Standard || pm.PaymentMethodType == PaymentMethodType.Redirection)
+                    .WhereAwait(async pm => !await pm.HidePaymentMethodAsync(cart))
+                    .ToListAsync();
+
+            if (orderFromDistributor)
+            {
+                model.RestrictedForDistributor = true;
+            }
+
             foreach (var pm in paymentMethods)
             {
                 if (await _shoppingCartService.ShoppingCartIsRecurringAsync(cart) && pm.RecurringPaymentType == RecurringPaymentType.NotSupported)
@@ -486,6 +497,7 @@ namespace Nop.Web.Factories
                     Description = _paymentSettings.ShowPaymentMethodDescriptions ? await pm.GetPaymentMethodDescriptionAsync() : string.Empty,
                     PaymentMethodSystemName = pm.PluginDescriptor.SystemName,
                     LogoUrl = await _paymentPluginManager.GetPluginLogoUrlAsync(pm)
+                    //TODO : add property bool active 
                 };
                 //payment method additional fee
                 var paymentMethodAdditionalFee = await _paymentService.GetAdditionalHandlingFeeAsync(cart, pm.PluginDescriptor.SystemName);
@@ -545,11 +557,29 @@ namespace Nop.Web.Factories
         /// </returns>
         public virtual async Task<CheckoutConfirmModel> PrepareConfirmOrderModelAsync(IList<ShoppingCartItem> cart)
         {
+            string vendorId = null;
+            if(cart.GroupBy(i => i.VendorId).Count() > 1)
+            {
+                List<string> errors = new List<string>();
+                errors.Add("ERREUR : plusieurs vendeurs pour cette commande");
+                return new CheckoutConfirmModel
+                {
+                    //terms of service
+                    Warnings = errors
+                };
+            }
+            else
+            {
+                vendorId = cart.First().VendorId.ToString();
+            }
+
+
             var model = new CheckoutConfirmModel
             {
                 //terms of service
                 TermsOfServiceOnOrderConfirmPage = _orderSettings.TermsOfServiceOnOrderConfirmPage,
-                TermsOfServicePopup = _commonSettings.PopupForTermsOfServiceLinks
+                TermsOfServicePopup = _commonSettings.PopupForTermsOfServiceLinks,
+                VendorIdForCheckout = vendorId,
             };
             //min order amount validation
             var minOrderTotalAmountOk = await _orderProcessingService.ValidateMinOrderTotalAmountAsync(cart);

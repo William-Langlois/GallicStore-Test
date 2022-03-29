@@ -116,7 +116,7 @@ namespace Nop.Services.Payments
 
             var settingKey = string.Format(NopPaymentDefaults.RestrictedCountriesSettingName, paymentMethod.PluginDescriptor.SystemName);
 
-            await _settingService.SetSettingAsync(settingKey, countryIds.ToList());
+            await _settingService.SetSettingAsync(settingKey, countryIds.ToList(),0,0);
         }
 
         #endregion

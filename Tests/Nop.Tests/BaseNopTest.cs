@@ -343,7 +343,7 @@ namespace Nop.Tests
             var settings = typeFinder.FindClassesOfType(typeof(ISettings), false).ToList();
             foreach (var setting in settings)
                 services.AddTransient(setting,
-                    context => context.GetRequiredService<ISettingService>().LoadSettingAsync(setting).Result);
+                    context => context.GetRequiredService<ISettingService>().LoadSettingAsync(setting, vendorId: 0, storeId:0).Result) ;
 
             //event consumers
             var consumers = typeFinder.FindClassesOfType(typeof(IConsumer<>)).ToList();

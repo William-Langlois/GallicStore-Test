@@ -318,7 +318,7 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip
 
             //fixed rates
             var fixedRates = await (await _taxCategoryService.GetAllTaxCategoriesAsync())
-                .SelectAwait(async taxCategory => await _settingService.GetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, taxCategory.Id)))
+                .SelectAwait(async taxCategory => await _settingService.GetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, taxCategory.Id),storeId:0,vendorId:0))
                 .Where(setting => setting != null).ToListAsync();
             await _settingService.DeleteSettingsAsync(fixedRates);
 

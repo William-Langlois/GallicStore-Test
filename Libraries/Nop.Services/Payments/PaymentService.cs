@@ -121,7 +121,10 @@ namespace Nop.Services.Payments
                 return false;
 
             var customer = await _customerService.GetCustomerByIdAsync(order.CustomerId);
+            //Set du vendorScope en session pour le chargement du plugin de paiement juste en dessous
+
             var paymentMethod = await _paymentPluginManager.LoadPluginBySystemNameAsync(order.PaymentMethodSystemName, customer, order.StoreId);
+
             if (paymentMethod == null)
                 return false; //Payment method couldn't be loaded (for example, was uninstalled)
 

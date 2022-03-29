@@ -40,7 +40,7 @@ namespace Nop.Plugin.Shipping.FixedByWeightByTotal.Infrastructure.Cache
                 return;
 
             //delete saved fixed rate if exists
-            var setting = await _settingService.GetSettingAsync(string.Format(FixedByWeightByTotalDefaults.FixedRateSettingsKey, shippingMethod.Id));
+            var setting = await _settingService.GetSettingAsync(string.Format(FixedByWeightByTotalDefaults.FixedRateSettingsKey, shippingMethod.Id),storeId:0,vendorId:0);
             if (setting != null)
                 await _settingService.DeleteSettingAsync(setting);
         }

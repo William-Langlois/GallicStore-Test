@@ -22,6 +22,8 @@ namespace Nop.Web.Models.Order
             CustomValues = new Dictionary<string, object>();
         }
 
+        public int VendorId { get; set; }
+
         public bool PrintMode { get; set; }
         public bool PdfInvoiceDisabled { get; set; }
 

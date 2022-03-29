@@ -229,7 +229,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
 
             //set API key
             sendinblueSettings.ApiKey = model.ApiKey;
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.ApiKey, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.ApiKey, storeId: storeId,vendorId:0, clearCache: false);
             await _settingService.ClearCacheAsync();
 
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Plugins.Saved"));
@@ -252,7 +252,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
 
             //create webhook for the unsubscribe event
             sendinblueSettings.UnsubscribeWebhookId = await _sendinblueEmailManager.GetUnsubscribeWebHookIdAsync();
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.UnsubscribeWebhookId, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.UnsubscribeWebhookId,storeId: storeId,vendorId:0, clearCache: false);
 
             //set list of contacts to synchronize
             sendinblueSettings.ListId = model.ListId;
@@ -319,7 +319,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
             {
                 //set case invariant for true because tokens are used in uppercase format in Sendinblue's transactional emails
                 _messageTemplatesSettings.CaseInvariantReplacement = true;
-                await _settingService.SaveSettingAsync(_messageTemplatesSettings, settings => settings.CaseInvariantReplacement, clearCache: false);
+                await _settingService.SaveSettingAsync(_messageTemplatesSettings, settings => settings.CaseInvariantReplacement, storeId,vendorId:0, clearCache: false);
 
                 //check whether SMTP enabled on account
                 var (smtpIsEnabled, smtpErrors) = await _sendinblueEmailManager.SmtpIsEnabledAsync();
@@ -352,7 +352,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
 
             //set SMTP key
             sendinblueSettings.SmtpKey = model.SmtpKey;
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.SmtpKey, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.SmtpKey,storeId,vendorId:0, clearCache: false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
@@ -460,7 +460,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
             sendinblueSettings.SmsSenderName = model.SmsSenderName;
             await _settingService.SaveSettingOverridablePerStoreAsync(sendinblueSettings, settings => settings.SmsSenderName, model.SmsSenderName_OverrideForStore, storeId, false);
             sendinblueSettings.StoreOwnerPhoneNumber = model.StoreOwnerPhoneNumber;
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.StoreOwnerPhoneNumber, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.StoreOwnerPhoneNumber,storeId,vendorId:0, clearCache: false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
@@ -618,9 +618,9 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
             if (!string.IsNullOrEmpty(accountErrors))
                 _notificationService.ErrorNotification($"{SendinblueDefaults.NotificationMessage} {accountErrors}");
 
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.MarketingAutomationKey, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.MarketingAutomationKey,storeId,vendorId:0, clearCache: false);
             sendinblueSettings.TrackingScript = model.TrackingScript;
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.TrackingScript, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.TrackingScript, storeId, vendorId: 0, clearCache: false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();

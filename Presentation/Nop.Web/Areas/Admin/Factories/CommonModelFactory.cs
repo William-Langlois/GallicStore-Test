@@ -612,7 +612,7 @@ namespace Nop.Web.Areas.Admin.Factories
         /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task PreparePluginsEnabledWarningModelAsync(List<SystemWarningModel> models)
         {
-            var plugins = await _pluginService.GetPluginsAsync<IPlugin>();
+            var plugins = await _pluginService.GetPluginsAsync<IPlugin>(LoadPluginsMode.InstalledOnly);
 
             var notEnabled = new List<string>();
             var notEnabledSystemNames = new List<string>();

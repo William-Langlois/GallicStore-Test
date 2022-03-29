@@ -184,7 +184,7 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageTaxSettings))
                 return Content("Access denied");
 
-            await _settingService.SetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, model.TaxCategoryId), model.Rate);
+            await _settingService.SetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, model.TaxCategoryId), model.Rate,storeId:0,vendorId:0);
 
             return new NullJsonResult();
         }

@@ -178,7 +178,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as disabled
                     _shippingSettings.ActiveShippingRateComputationMethodSystemNames.Remove(srcm.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_shippingSettings);
+                    await _settingService.SaveSettingAsync(_shippingSettings, 0);
                 }
             }
             else
@@ -187,7 +187,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as active
                     _shippingSettings.ActiveShippingRateComputationMethodSystemNames.Add(srcm.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_shippingSettings);
+                    await _settingService.SaveSettingAsync(_shippingSettings,0);
                 }
             }
 
@@ -248,7 +248,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as disabled
                     _shippingSettings.ActivePickupPointProviderSystemNames.Remove(pickupPointProvider.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_shippingSettings);
+                    await _settingService.SaveSettingAsync(_shippingSettings, 0);
                 }
             }
             else
@@ -257,7 +257,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as active
                     _shippingSettings.ActivePickupPointProviderSystemNames.Add(pickupPointProvider.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_shippingSettings);
+                    await _settingService.SaveSettingAsync(_shippingSettings,0);
                 }
             }
 

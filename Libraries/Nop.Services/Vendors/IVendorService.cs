@@ -58,6 +58,18 @@ namespace Nop.Services.Vendors
         Task DeleteVendorAsync(Vendor vendor);
 
         /// <summary>
+        /// Gets all vendors IEnumerable
+        /// </summary>
+        /// <param name="name">Vendor name</param>
+        /// <param name="email">Vendor email</param>
+        /// <param name="showHidden">A value indicating whether to show hidden records</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the vendors
+        /// </returns>
+        Task<IList<Vendor>> GetAllVendorsListAsync(string name = "", string email = "", bool showHidden = false);
+
+        /// <summary>
         /// Gets all vendors
         /// </summary>
         /// <param name="name">Vendor name</param>

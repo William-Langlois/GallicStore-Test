@@ -90,7 +90,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as disabled
                     _widgetSettings.ActiveWidgetSystemNames.Remove(widget.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_widgetSettings);
+                    await _settingService.SaveSettingAsync(_widgetSettings,0);
                 }
             }
             else
@@ -99,7 +99,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as active
                     _widgetSettings.ActiveWidgetSystemNames.Add(widget.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_widgetSettings);
+                    await _settingService.SaveSettingAsync(_widgetSettings,0);
                 }
             }
 

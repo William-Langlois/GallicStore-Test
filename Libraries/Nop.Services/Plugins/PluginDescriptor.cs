@@ -65,6 +65,13 @@ namespace Nop.Services.Plugins
         {
             //try to resolve plugin as unregistered service
             var instance = EngineContext.Current.ResolveUnregistered(PluginType);
+            
+            /*for payemnt divided by vendor tests
+            if(PluginType.Name.Contains("Paypal"))
+            {
+
+            }
+            */
 
             //try to get typed instance
             var typedInstance = instance as TPlugin;

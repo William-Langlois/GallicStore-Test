@@ -126,7 +126,7 @@ namespace Nop.Plugin.DiscountRules.CustomerRoles.Controllers
                 }
 
                 //save restricted customer role identifier
-                await _settingService.SetSettingAsync(string.Format(DiscountRequirementDefaults.SettingsKey, discountRequirement.Id), model.CustomerRoleId);
+                await _settingService.SetSettingAsync(string.Format(DiscountRequirementDefaults.SettingsKey, discountRequirement.Id), model.CustomerRoleId,storeId:0,vendorId:0);
 
                 return Ok(new { NewRequirementId = discountRequirement.Id });
             }

@@ -383,7 +383,8 @@ namespace Nop.Web.Factories
             {
                 Id = sci.Id,
                 Sku = await _productService.FormatSkuAsync(product, sci.AttributesXml),
-                VendorName = _vendorSettings.ShowVendorOnOrderDetailsPage ? (await _vendorService.GetVendorByProductIdAsync(product.Id))?.Name : string.Empty,
+                VendorId =  product.VendorId,
+                VendorName = (await _vendorService.GetVendorByProductIdAsync(product.Id))?.Name,
                 ProductId = sci.ProductId,
                 ProductName = await _localizationService.GetLocalizedAsync(product, x => x.Name),
                 ProductSeName = await _urlRecordService.GetSeNameAsync(product),

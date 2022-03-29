@@ -30,19 +30,19 @@ namespace Nop.Web.Framework.Migrations.UpgradeTo440
             var settingService = EngineContext.Current.Resolve<ISettingService>();
 
             //#4904 External authentication errors logging
-            var externalAuthenticationSettings = settingService.LoadSettingAsync<ExternalAuthenticationSettings>().Result;
-            if (!settingService.SettingExistsAsync(externalAuthenticationSettings, settings => settings.LogErrors).Result)
+            var externalAuthenticationSettings = settingService.LoadSettingAsync<ExternalAuthenticationSettings>(0).Result;
+            if (!settingService.SettingExistsAsync(externalAuthenticationSettings, settings => settings.LogErrors,0).Result)
             {
                 externalAuthenticationSettings.LogErrors = false;
-                settingService.SaveSettingAsync(externalAuthenticationSettings).Wait();
+                settingService.SaveSettingAsync(externalAuthenticationSettings,0).Wait();
             }
 
-            var multiFactorAuthenticationSettings = settingService.LoadSettingAsync<MultiFactorAuthenticationSettings>().Result;
-            if (!settingService.SettingExistsAsync(multiFactorAuthenticationSettings, settings => settings.ForceMultifactorAuthentication).Result)
+            var multiFactorAuthenticationSettings = settingService.LoadSettingAsync<MultiFactorAuthenticationSettings>(0).Result;
+            if (!settingService.SettingExistsAsync(multiFactorAuthenticationSettings, settings => settings.ForceMultifactorAuthentication,0).Result)
             {
                 multiFactorAuthenticationSettings.ForceMultifactorAuthentication = false;
 
-                settingService.SaveSettingAsync(multiFactorAuthenticationSettings).Wait();
+                settingService.SaveSettingAsync(multiFactorAuthenticationSettings,0).Wait();
             }
 
             //#5102 Delete Full-text settings
@@ -59,135 +59,135 @@ namespace Nop.Web.Framework.Migrations.UpgradeTo440
                 .Wait();
 
             //#5384
-            var seoSettings = settingService.LoadSettingAsync<SeoSettings>().Result;
+            var seoSettings = settingService.LoadSettingAsync<SeoSettings>(0).Result;
             foreach (var slug in NopSeoDefaults.ReservedUrlRecordSlugs)
             {
                 if (!seoSettings.ReservedUrlRecordSlugs.Contains(slug))
                     seoSettings.ReservedUrlRecordSlugs.Add(slug);
             }
-            settingService.SaveSettingAsync(seoSettings).Wait();
+            settingService.SaveSettingAsync(seoSettings,0).Wait();
 
             //#3015
-            if (!settingService.SettingExistsAsync(seoSettings, settings => settings.HomepageTitle).Result)
+            if (!settingService.SettingExistsAsync(seoSettings, settings => settings.HomepageTitle,0).Result)
             {
                 seoSettings.HomepageTitle = seoSettings.DefaultTitle;
-                settingService.SaveSettingAsync(seoSettings).Wait();
+                settingService.SaveSettingAsync(seoSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(seoSettings, settings => settings.HomepageDescription).Result)
+            if (!settingService.SettingExistsAsync(seoSettings, settings => settings.HomepageDescription,0).Result)
             {
                 seoSettings.HomepageDescription = "Your home page description";
-                settingService.SaveSettingAsync(seoSettings).Wait();
+                settingService.SaveSettingAsync(seoSettings,0).Wait();
             }
 
             //#5210
-            var adminAreaSettings = settingService.LoadSettingAsync<AdminAreaSettings>().Result;
-            if (!settingService.SettingExistsAsync(adminAreaSettings, settings => settings.ShowDocumentationReferenceLinks).Result)
+            var adminAreaSettings = settingService.LoadSettingAsync<AdminAreaSettings>(0).Result;
+            if (!settingService.SettingExistsAsync(adminAreaSettings, settings => settings.ShowDocumentationReferenceLinks,0).Result)
             {
                 adminAreaSettings.ShowDocumentationReferenceLinks = true;
-                settingService.SaveSettingAsync(adminAreaSettings).Wait();
+                settingService.SaveSettingAsync(adminAreaSettings,0).Wait();
             }
 
             //#4944
-            var shippingSettings = settingService.LoadSettingAsync<ShippingSettings>().Result;
-            if (!settingService.SettingExistsAsync(shippingSettings, settings => settings.RequestDelay).Result)
+            var shippingSettings = settingService.LoadSettingAsync<ShippingSettings>(0).Result;
+            if (!settingService.SettingExistsAsync(shippingSettings, settings => settings.RequestDelay,0).Result)
             {
                 shippingSettings.RequestDelay = 300;
-                settingService.SaveSettingAsync(shippingSettings).Wait();
+                settingService.SaveSettingAsync(shippingSettings,0).Wait();
             }
 
             //#276 AJAX filters
-            var catalogSettings = settingService.LoadSettingAsync<CatalogSettings>().Result;
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.UseAjaxCatalogProductsLoading).Result)
+            var catalogSettings = settingService.LoadSettingAsync<CatalogSettings>(0).Result;
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.UseAjaxCatalogProductsLoading,0).Result)
             {
                 catalogSettings.UseAjaxCatalogProductsLoading = true;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.EnableManufacturerFiltering).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.EnableManufacturerFiltering,0).Result)
             {
                 catalogSettings.EnableManufacturerFiltering = true;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.EnablePriceRangeFiltering).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.EnablePriceRangeFiltering,0).Result)
             {
                 catalogSettings.EnablePriceRangeFiltering = true;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPagePriceRangeFiltering).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPagePriceRangeFiltering,0).Result)
             {
                 catalogSettings.SearchPagePriceRangeFiltering = true;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPagePriceFrom).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPagePriceFrom,0).Result)
             {
                 catalogSettings.SearchPagePriceFrom = NopCatalogDefaults.DefaultPriceRangeFrom;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPagePriceTo).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPagePriceTo,0).Result)
             {
                 catalogSettings.SearchPagePriceTo = NopCatalogDefaults.DefaultPriceRangeTo;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPageManuallyPriceRange).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPageManuallyPriceRange,0).Result)
             {
                 catalogSettings.SearchPageManuallyPriceRange = false;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagPriceRangeFiltering).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagPriceRangeFiltering,0).Result)
             {
                 catalogSettings.ProductsByTagPriceRangeFiltering = true;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagPriceFrom).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagPriceFrom,0).Result)
             {
                 catalogSettings.ProductsByTagPriceFrom = NopCatalogDefaults.DefaultPriceRangeFrom;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagPriceTo).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagPriceTo,0).Result)
             {
                 catalogSettings.ProductsByTagPriceTo = NopCatalogDefaults.DefaultPriceRangeTo;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagManuallyPriceRange).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagManuallyPriceRange,0).Result)
             {
                 catalogSettings.ProductsByTagManuallyPriceRange = false;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
             //#4303
-            var orderSettings = settingService.LoadSettingAsync<OrderSettings>().Result;
-            if (!settingService.SettingExistsAsync(orderSettings, settings => settings.DisplayCustomerCurrencyOnOrders).Result)
+            var orderSettings = settingService.LoadSettingAsync<OrderSettings>(0).Result;
+            if (!settingService.SettingExistsAsync(orderSettings, settings => settings.DisplayCustomerCurrencyOnOrders,0).Result)
             {
                 orderSettings.DisplayCustomerCurrencyOnOrders = false;
-                settingService.SaveSettingAsync(orderSettings).Wait();
+                settingService.SaveSettingAsync(orderSettings,0).Wait();
             }
 
             //#16 #2909
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.AttributeValueOutOfStockDisplayType).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.AttributeValueOutOfStockDisplayType,0).Result)
             {
                 catalogSettings.AttributeValueOutOfStockDisplayType = AttributeValueOutOfStockDisplayType.AlwaysDisplay;
-                settingService.SaveSettingAsync(catalogSettings).Wait();
+                settingService.SaveSettingAsync(catalogSettings,0).Wait();
             }
 
             //#5482
-            settingService.SetSettingAsync("avalarataxsettings.gettaxratebyaddressonly", true).Wait();
-            settingService.SetSettingAsync("avalarataxsettings.taxratebyaddresscachetime", 480).Wait();
+            settingService.SetSettingAsync("avalarataxsettings.gettaxratebyaddressonly", true,0,0).Wait();
+            settingService.SetSettingAsync("avalarataxsettings.taxratebyaddresscachetime", 480,0,0).Wait();
 
             //#5349
-            if (!settingService.SettingExistsAsync(shippingSettings, settings => settings.EstimateShippingCityNameEnabled).Result)
+            if (!settingService.SettingExistsAsync(shippingSettings, settings => settings.EstimateShippingCityNameEnabled,0).Result)
             {
                 shippingSettings.EstimateShippingCityNameEnabled = false;
-                settingService.SaveSettingAsync(shippingSettings).Wait();
+                settingService.SaveSettingAsync(shippingSettings,0).Wait();
             }
         }
 

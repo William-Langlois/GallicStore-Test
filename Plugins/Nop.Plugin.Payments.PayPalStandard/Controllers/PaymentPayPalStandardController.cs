@@ -19,6 +19,11 @@ using Nop.Services.Security;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Controllers;
 using Nop.Web.Framework.Mvc.Filters;
+//Ajout pour récupérer les vendeurs disponibles
+using Nop.Services.Vendors;
+using Nop.Core.Domain.Vendors;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Nop.Plugin.Payments.PayPalStandard.Controllers
 {
@@ -39,6 +44,7 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
         private readonly IWebHelper _webHelper;
         private readonly IWorkContext _workContext;
         private readonly ShoppingCartSettings _shoppingCartSettings;
+        private readonly IVendorService _vendorService;
 
         #endregion
 
@@ -56,7 +62,8 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
             IStoreContext storeContext,
             IWebHelper webHelper,
             IWorkContext workContext,
-            ShoppingCartSettings shoppingCartSettings)
+            ShoppingCartSettings shoppingCartSettings,
+            IVendorService vendorService)
         {
             _genericAttributeService = genericAttributeService;
             _orderProcessingService = orderProcessingService;
@@ -71,23 +78,46 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
             _webHelper = webHelper;
             _workContext = workContext;
             _shoppingCartSettings = shoppingCartSettings;
+            _vendorService = vendorService; 
         }
 
         #endregion
 
         #region Methods
 
+        [HttpPost]
+        [AuthorizeAdmin]
+        [Area(AreaNames.Admin)]
+        [AutoValidateAntiforgeryToken]
+        [FormValueRequired("VendorScope")]
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public async Task<IActionResult> ChangeVendorScope(ConfigurationModel model) //Permet de changer le scope vendeur lors de la configuration du plugin de paiement
+        {
+            return await Configure(model.VendorIdScopeConfiguration);
+        }
+
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public async Task<IActionResult> Configure()
+        public async Task<IActionResult> Configure(int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePaymentMethods))
                 return AccessDeniedView();
 
             //load settings for a chosen store scope
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-            var payPalStandardPaymentSettings = await _settingService.LoadSettingAsync<PayPalStandardPaymentSettings>(storeScope);
+            PayPalStandardPaymentSettings payPalStandardPaymentSettings = await _settingService.LoadSettingAsync<PayPalStandardPaymentSettings>(storeScope,vendorId:vendorId);
+            vendorId = payPalStandardPaymentSettings.VendorIdScopeConfiguration > 0 ? payPalStandardPaymentSettings.VendorIdScopeConfiguration : vendorId;
+
+            IList<Vendor> availableVendors = await _vendorService.GetAllVendorsListAsync();
+            IList<SelectListItem> vendorsOptions = new List<SelectListItem>();
+            foreach (Vendor vendor in availableVendors)
+            {
+                vendorsOptions.Add(new SelectListItem(vendor.Name,vendor.Id.ToString(),vendorId == vendor.Id));
+            }
+            //Ajout d'une option pour le vendorScope 0
+            vendorsOptions.Add(new SelectListItem("Select vendor", "0",vendorId == 0));
+
 
             var model = new ConfigurationModel
             {
@@ -97,18 +127,21 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
                 PassProductNamesAndTotals = payPalStandardPaymentSettings.PassProductNamesAndTotals,
                 AdditionalFee = payPalStandardPaymentSettings.AdditionalFee,
                 AdditionalFeePercentage = payPalStandardPaymentSettings.AdditionalFeePercentage,
-                ActiveStoreScopeConfiguration = storeScope
+                ActiveStoreScopeConfiguration = storeScope,
+                VendorIdScopeConfiguration = vendorId,
+                AvailableVendors = vendorsOptions
             };
 
-            if (storeScope <= 0)
+            if (storeScope <= 0 && vendorId <= 0)
                 return View("~/Plugins/Payments.PayPalStandard/Views/Configure.cshtml", model);
 
-            model.UseSandbox_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.UseSandbox, storeScope);
-            model.BusinessEmail_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.BusinessEmail, storeScope);
-            model.PdtToken_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.PdtToken, storeScope);
-            model.PassProductNamesAndTotals_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.PassProductNamesAndTotals, storeScope);
-            model.AdditionalFee_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.AdditionalFee, storeScope);
-            model.AdditionalFeePercentage_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.AdditionalFeePercentage, storeScope);
+            model.UseSandbox_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.UseSandbox, storeScope,vendorId);
+            model.BusinessEmail_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.BusinessEmail, storeScope, vendorId);
+            model.PdtToken_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.PdtToken, storeScope, vendorId);
+            model.PassProductNamesAndTotals_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.PassProductNamesAndTotals, storeScope, vendorId);
+            model.AdditionalFee_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.AdditionalFee, storeScope, vendorId);
+            model.AdditionalFeePercentage_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.AdditionalFeePercentage, storeScope, vendorId);
+            model.VendorIdScopeConfiguration_OverrideForStore = await _settingService.SettingExistsAsync(payPalStandardPaymentSettings, x => x.VendorIdScopeConfiguration, storeScope, vendorId);
 
             return View("~/Plugins/Payments.PayPalStandard/Views/Configure.cshtml", model);
         }
@@ -117,18 +150,24 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
         [AutoValidateAntiforgeryToken]
+        [FormValueRequired("save")]
+
         /// <returns>A task that represents the asynchronous operation</returns>
-        public async Task<IActionResult> Configure(ConfigurationModel model)
-        {
+        public async Task<IActionResult> Configure(ConfigurationModel model, int vendorId = 0)
+     {
+
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePaymentMethods))
                 return AccessDeniedView();
 
+            if (vendorId <= 0)
+                vendorId = model.VendorIdScopeConfiguration;
+
             if (!ModelState.IsValid)
-                return await Configure();
+                return await Configure(vendorId);
 
             //load settings for a chosen store scope
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-            var payPalStandardPaymentSettings = await _settingService.LoadSettingAsync<PayPalStandardPaymentSettings>(storeScope);
+            var payPalStandardPaymentSettings = await _settingService.LoadSettingAsync<PayPalStandardPaymentSettings>(storeScope,vendorId);
 
             //save settings
             payPalStandardPaymentSettings.UseSandbox = model.UseSandbox;
@@ -137,23 +176,25 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
             payPalStandardPaymentSettings.PassProductNamesAndTotals = model.PassProductNamesAndTotals;
             payPalStandardPaymentSettings.AdditionalFee = model.AdditionalFee;
             payPalStandardPaymentSettings.AdditionalFeePercentage = model.AdditionalFeePercentage;
+            payPalStandardPaymentSettings.VendorIdScopeConfiguration = vendorId;
 
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
              * and loaded from database after each update */
-            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.UseSandbox, model.UseSandbox_OverrideForStore, storeScope, false);
-            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.BusinessEmail, model.BusinessEmail_OverrideForStore, storeScope, false);
-            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.PdtToken, model.PdtToken_OverrideForStore, storeScope, false);
-            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.PassProductNamesAndTotals, model.PassProductNamesAndTotals_OverrideForStore, storeScope, false);
-            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.AdditionalFee, model.AdditionalFee_OverrideForStore, storeScope, false);
-            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.AdditionalFeePercentage, model.AdditionalFeePercentage_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.UseSandbox, model.UseSandbox_OverrideForStore, storeScope, vendorId, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.BusinessEmail, model.BusinessEmail_OverrideForStore, storeScope, vendorId, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.PdtToken, model.PdtToken_OverrideForStore, storeScope, vendorId, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.PassProductNamesAndTotals, model.PassProductNamesAndTotals_OverrideForStore, storeScope, vendorId, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.AdditionalFee, model.AdditionalFee_OverrideForStore, storeScope, vendorId, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.AdditionalFeePercentage, model.AdditionalFeePercentage_OverrideForStore, storeScope, vendorId, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(payPalStandardPaymentSettings, x => x.VendorIdScopeConfiguration, model.VendorIdScopeConfiguration_OverrideForStore, storeScope, vendorId, false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
 
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Plugins.Saved"));
 
-            return await Configure();
+            return await Configure(vendorId);
         }
 
         //action displaying notification (warning) to a store owner about inaccurate PayPal rounding
@@ -244,7 +285,7 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
                 {
                     OrderId = order.Id,
                     Note = sb.ToString(),
-                    DisplayToCustomer = false,
+                    DisplayToCustomer = true,
                     CreatedOnUtc = DateTime.UtcNow
                 });
 
@@ -260,7 +301,7 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
                     {
                         OrderId = order.Id,
                         Note = errorStr,
-                        DisplayToCustomer = false,
+                        DisplayToCustomer = true,
                         CreatedOnUtc = DateTime.UtcNow
                     });
 
@@ -309,7 +350,7 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
                 {
                     OrderId = order.Id,
                     Note = "PayPal PDT failed. " + response,
-                    DisplayToCustomer = false,
+                    DisplayToCustomer = true,
                     CreatedOnUtc = DateTime.UtcNow
                 });
 

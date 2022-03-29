@@ -4,6 +4,7 @@ using Nop.Core.Domain.Catalog;
 using Nop.Web.Framework.Models;
 using Nop.Web.Models.Common;
 using Nop.Web.Models.Media;
+using System.Linq;
 
 namespace Nop.Web.Models.ShoppingCart
 {
@@ -56,10 +57,38 @@ namespace Nop.Web.Models.ShoppingCart
                 Warnings = new List<string>();
             }
 
+            //Convert an unique item from IGrouping To a ShoppingCartItemModel
+            public ShoppingCartItemModel(IGrouping<int,ShoppingCartItemModel> iGroupedItem)
+            {
+                List<ShoppingCartItemModel> itemList = new List<ShoppingCartItemModel>(iGroupedItem.ToList());
+                ShoppingCartItemModel item = new ShoppingCartItemModel(itemList.First());
+                Sku = item.Sku;
+                VendorId = item.VendorId;
+                VendorName = item.VendorName;
+                Picture = item.Picture;
+                ProductId = item.ProductId;
+                ProductName = item.ProductName;
+                ProductSeName = item.ProductSeName;
+                UnitPrice = item.UnitPrice;
+                SubTotal = item.SubTotal;
+                Discount = item.Discount;
+                MaximumDiscountedQty = item.MaximumDiscountedQty;
+                Quantity = item.Quantity;
+                AllowedQuantities = item.AllowedQuantities;
+                AttributeInfo = item.AttributeInfo;
+                RecurringInfo = item.RecurringInfo; 
+                RentalInfo = item.RentalInfo;
+                AllowItemEditing = item.AllowItemEditing;
+                DisableRemoval = item.DisableRemoval;
+                Warnings = item.Warnings;
+            }
+
             public string Sku { get; set; }
 
-            public string VendorName { get; set; }
+            public int VendorId { get; set; } //Ajout pour pouvoir diviser le panier d'achats par déposant
 
+            public string VendorName { get; set; }
+            
             public PictureModel Picture {get;set;}
 
             public int ProductId { get; set; }

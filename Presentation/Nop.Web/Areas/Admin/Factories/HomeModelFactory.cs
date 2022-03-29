@@ -129,7 +129,7 @@ namespace Nop.Web.Areas.Admin.Factories
                         continue;
 
                     _adminAreaSettings.LastNewsTitleAdminArea = newsItem.Title;
-                    await _settingService.SaveSettingAsync(_adminAreaSettings);
+                    await _settingService.SaveSettingAsync(_adminAreaSettings, 0);
 
                     //new item
                     if (!firstRequest)

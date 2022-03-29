@@ -113,7 +113,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return RedirectToAction("Providers");
 
             _taxSettings.ActiveTaxProviderSystemName = systemName;
-            await _settingService.SaveSettingAsync(_taxSettings);
+            await _settingService.SaveSettingAsync(_taxSettings,0);
 
             return RedirectToAction("Providers");
         }
