@@ -144,7 +144,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             _currencySettings.ActiveExchangeRateProviderSystemName = model.ExchangeRateProviderModel.ExchangeRateProvider;
             _currencySettings.AutoUpdateEnabled = model.ExchangeRateProviderModel.AutoUpdateEnabled;
-            await _settingService.SaveSettingAsync(_currencySettings);
+            await _settingService.SaveSettingAsync(_currencySettings, 0, 0);
 
             return RedirectToAction("List", "Currency");
         }
@@ -191,7 +191,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return AccessDeniedView();
 
             _currencySettings.PrimaryExchangeRateCurrencyId = id;
-            await _settingService.SaveSettingAsync(_currencySettings);
+            await _settingService.SaveSettingAsync(_currencySettings, 0, 0);
 
             return Json(new { result = true });
         }
@@ -204,7 +204,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return AccessDeniedView();
 
             _currencySettings.PrimaryStoreCurrencyId = id;
-            await _settingService.SaveSettingAsync(_currencySettings);
+            await _settingService.SaveSettingAsync(_currencySettings, 0);
 
             return Json(new { result = true });
         }

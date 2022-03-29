@@ -71,7 +71,8 @@ namespace Nop.Plugin.Payments.PayPalStandard
             ITaxService taxService,
             IWebHelper webHelper,
             PayPalStandardHttpClient payPalStandardHttpClient,
-            PayPalStandardPaymentSettings payPalStandardPaymentSettings)
+            PayPalStandardPaymentSettings payPalStandardPaymentSettings
+            )
         {
             _currencySettings = currencySettings;
             _addressService = addressService;
@@ -90,7 +91,12 @@ namespace Nop.Plugin.Payments.PayPalStandard
             _taxService = taxService;
             _webHelper = webHelper;
             _payPalStandardHttpClient = payPalStandardHttpClient;
-            _payPalStandardPaymentSettings = payPalStandardPaymentSettings;
+
+            //Chargement des settings payPayStandard
+            int VendorIdForCheckout = 0; //Initialisation du scope à 0 (global)
+            Int32.TryParse(httpContextAccessor.HttpContext.Session.GetString("VendorIdForCheckout"), out VendorIdForCheckout); //Parse de la valeur
+
+            _payPalStandardPaymentSettings = settingService.LoadSettingAsync<PayPalStandardPaymentSettings>(0, vendorId: VendorIdForCheckout).Result;
         }
 
         #endregion
@@ -365,7 +371,7 @@ namespace Nop.Plugin.Payments.PayPalStandard
         /// <returns>A task that represents the asynchronous operation</returns>
         public async Task PostProcessPaymentAsync(PostProcessPaymentRequest postProcessPaymentRequest)
         {
-            var baseUrl = _payPalStandardPaymentSettings.UseSandbox ?
+            var baseUrl = _payPalStandardPaymentSettings.UseSandbox ? //AJOUT_NINE
                 "https://www.sandbox.paypal.com/us/cgi-bin/webscr" :
                 "https://www.paypal.com/us/cgi-bin/webscr";
 
@@ -373,7 +379,7 @@ namespace Nop.Plugin.Payments.PayPalStandard
             var queryParameters = await CreateQueryParametersAsync(postProcessPaymentRequest);
 
             //whether to include order items in a transaction
-            if (_payPalStandardPaymentSettings.PassProductNamesAndTotals)
+            if (_payPalStandardPaymentSettings.PassProductNamesAndTotals) //AJOUT_NINE
             {
                 //add order items query parameters to the request
                 var parameters = new Dictionary<string, string>(queryParameters);
@@ -428,7 +434,7 @@ namespace Nop.Plugin.Payments.PayPalStandard
         /// The task result contains the additional handling fee
         /// </returns>
         public async Task<decimal> GetAdditionalHandlingFeeAsync(IList<ShoppingCartItem> cart)
-        {
+        { //ERROR object reference not set to an instance of object
             return await _paymentService.CalculateAdditionalFeeAsync(cart,
                 _payPalStandardPaymentSettings.AdditionalFee, _payPalStandardPaymentSettings.AdditionalFeePercentage);
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,6 +31,7 @@ namespace Nop.Plugin.Payments.PayPalStandard.Services
 
             _httpClient = client;
             _payPalStandardPaymentSettings = payPalStandardPaymentSettings;
+            //TODO HERE set vendorScoped Settings
         }
 
         #endregion
@@ -44,7 +46,7 @@ namespace Nop.Plugin.Payments.PayPalStandard.Services
         /// A task that represents the asynchronous operation
         /// The task result contains the asynchronous task whose result contains the PDT details
         /// </returns>
-        public async Task<string> GetPdtDetailsAsync(string tx)
+        public async Task<string> GetPdtDetailsAsync(string tx, int vendorId = 0)
         {
             //get response
             var url = _payPalStandardPaymentSettings.UseSandbox ?
@@ -65,7 +67,7 @@ namespace Nop.Plugin.Payments.PayPalStandard.Services
         /// A task that represents the asynchronous operation
         /// The task result contains the asynchronous task whose result contains the IPN verification details
         /// </returns>
-        public async Task<string> VerifyIpnAsync(string formString)
+        public async Task<string> VerifyIpnAsync(string formString, int vendorId = 0)
         {
             //get response
             var url = _payPalStandardPaymentSettings.UseSandbox ?

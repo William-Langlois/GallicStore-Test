@@ -226,6 +226,9 @@ namespace Nop.Web.Controllers
             if (order == null || order.Deleted || (await _workContext.GetCurrentCustomerAsync()).Id != order.CustomerId)
                 return Challenge();
 
+            var vendorIdForCheckout = order.VendorId.ToString();
+            HttpContext.Session.SetString("VendorIdForCheckout", vendorIdForCheckout);
+
             if (!await _paymentService.CanRePostProcessPaymentAsync(order))
                 return RedirectToRoute("OrderDetails", new { orderId = orderId });
 

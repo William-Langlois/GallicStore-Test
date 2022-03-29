@@ -289,11 +289,37 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
+        public virtual async Task<IActionResult> ListDistributors()
+        {
+            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageDistributors))
+                return AccessDeniedView();
+
+            var customerConnected = Nop.Core.Infrastructure.EngineContext.Current.Resolve<Nop.Core.IWorkContext>().GetCurrentCustomerAsync().Result;
+
+            //prepare model
+            var model = await _customerModelFactory.PrepareCustomerSearchModelAsync(new CustomerSearchModel(),distributorOfVendor:customerConnected.VendorId);
+
+            return View(model);
+        }
+
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CustomerList(CustomerSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCustomers))
+                return await AccessDeniedDataTablesJson();
+
+            //prepare model
+            var model = await _customerModelFactory.PrepareCustomerListModelAsync(searchModel);
+
+            return Json(model);
+        }
+
+        [HttpPost]
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public virtual async Task<IActionResult> DistributorList(CustomerSearchModel searchModel)
+        {
+            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageDistributors))
                 return await AccessDeniedDataTablesJson();
 
             //prepare model

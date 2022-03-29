@@ -24,6 +24,15 @@
                 }
             </div>
         }
+        @if (Model.RestrictedForDistributor)
+        {
+            <div>
+                <!-- TODO : traduction
+                <span>@T("Checkout.PaymentMethodsRestrictedForDistributor")</span>
+                -->
+                <span>Certaines options de paiement ne sont pas disponibles pour les commandes auprès des vendeurs dont vous êtes distributeur / revendeur</span>
+            </div>
+        }
         @if (Model.PaymentMethods.Count > 0)
         {
             <ul class="method-list" id="payment-method-block">

@@ -99,7 +99,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         public virtual async Task<IActionResult> NopCommerceNewsHideAdv()
         {
             _adminAreaSettings.HideAdvertisementsOnAdminArea = !_adminAreaSettings.HideAdvertisementsOnAdminArea;
-            await _settingService.SaveSettingAsync(_adminAreaSettings);
+            await _settingService.SaveSettingAsync(_adminAreaSettings, 0);
 
             return Content("Setting changed");
         }

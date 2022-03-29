@@ -14,11 +14,12 @@ namespace Nop.Web.Areas.Admin.Factories
         /// Prepare customer search model
         /// </summary>
         /// <param name="searchModel">Customer search model</param>
+        /// <param name="distributorOfVendor">Customer search model</param>
         /// <returns>
         /// A task that represents the asynchronous operation
         /// The task result contains the customer search model
         /// </returns>
-        Task<CustomerSearchModel> PrepareCustomerSearchModelAsync(CustomerSearchModel searchModel);
+        Task<CustomerSearchModel> PrepareCustomerSearchModelAsync(CustomerSearchModel searchModel,int distributorOfVendor = 0);
 
         /// <summary>
         /// Prepare paged customer list model

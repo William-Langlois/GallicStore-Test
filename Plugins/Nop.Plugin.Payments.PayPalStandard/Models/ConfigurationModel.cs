@@ -1,11 +1,18 @@
 ﻿using Nop.Web.Framework.Mvc.ModelBinding;
 using Nop.Web.Framework.Models;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Nop.Plugin.Payments.PayPalStandard.Models
 {
     public record ConfigurationModel : BaseNopModel
     {
         public int ActiveStoreScopeConfiguration { get; set; }
+
+        [NopResourceDisplayName("Plugins.Payments.PayPalStandard.Fields.VendorIdScopeConfiguration")]
+        public int VendorIdScopeConfiguration { get; set; }
+        public bool VendorIdScopeConfiguration_OverrideForStore { get; set; }
+        public IList<SelectListItem> AvailableVendors { get; set; }
 
         [NopResourceDisplayName("Plugins.Payments.PayPalStandard.Fields.UseSandbox")]
         public bool UseSandbox { get; set; }

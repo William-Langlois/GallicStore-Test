@@ -1093,7 +1093,8 @@ namespace Nop.Plugin.Tax.Avalara.Services
             {
                 //create dummy order to create tax transaction
                 var customer = taxTotalRequest.Customer;
-                var order = new Order { CustomerId = customer.Id };
+                var vendorId = taxTotalRequest.ShoppingCart.FirstOrDefault().VendorId;
+                var order = new Order { CustomerId = customer.Id,VendorId = vendorId }; //AJOUT_NINE
 
                 //addresses
                 order.BillingAddressId = customer.BillingAddressId ?? 0;

@@ -3502,9 +3502,9 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (await _workContext.GetCurrentVendorAsync() != null)
                 return RedirectToAction("List");
 
-            var productEditorSettings = await _settingService.LoadSettingAsync<ProductEditorSettings>();
+            var productEditorSettings = await _settingService.LoadSettingAsync<ProductEditorSettings>(0);
             productEditorSettings = model.ProductEditorSettingsModel.ToSettings(productEditorSettings);
-            await _settingService.SaveSettingAsync(productEditorSettings);
+            await _settingService.SaveSettingAsync(productEditorSettings,0);
 
             //product list
             if (string.IsNullOrEmpty(returnUrl))

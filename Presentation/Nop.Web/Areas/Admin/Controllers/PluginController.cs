@@ -440,7 +440,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _paymentSettings.ActivePaymentMethodSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_paymentSettings);
+                            await _settingService.SaveSettingAsync(_paymentSettings,0);
                             break;
                         }
 
@@ -448,7 +448,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _paymentSettings.ActivePaymentMethodSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_paymentSettings);
+                            await _settingService.SaveSettingAsync(_paymentSettings, 0);
                         }
 
                         break;
@@ -458,7 +458,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _shippingSettings.ActiveShippingRateComputationMethodSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_shippingSettings);
+                            await _settingService.SaveSettingAsync(_shippingSettings, 0);
                             break;
                         }
 
@@ -466,7 +466,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _shippingSettings.ActiveShippingRateComputationMethodSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_shippingSettings);
+                            await _settingService.SaveSettingAsync(_shippingSettings,0);
                         }
 
                         break;
@@ -476,7 +476,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _shippingSettings.ActivePickupPointProviderSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_shippingSettings);
+                            await _settingService.SaveSettingAsync(_shippingSettings, 0);
                             break;
                         }
 
@@ -484,7 +484,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _shippingSettings.ActivePickupPointProviderSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_shippingSettings);
+                            await _settingService.SaveSettingAsync(_shippingSettings,0);
                         }
 
                         break;
@@ -493,13 +493,13 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _taxSettings.ActiveTaxProviderSystemName = string.Empty;
-                            await _settingService.SaveSettingAsync(_taxSettings);
+                            await _settingService.SaveSettingAsync(_taxSettings,0);
                             break;
                         }
 
                         //mark as enabled
                         _taxSettings.ActiveTaxProviderSystemName = model.SystemName;
-                        await _settingService.SaveSettingAsync(_taxSettings);
+                        await _settingService.SaveSettingAsync(_taxSettings,0);
                         break;
                     case IExternalAuthenticationMethod externalAuthenticationMethod:
                         pluginIsActive = _authenticationPluginManager.IsPluginActive(externalAuthenticationMethod);
@@ -507,7 +507,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _externalAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_externalAuthenticationSettings);
+                            await _settingService.SaveSettingAsync(_externalAuthenticationSettings,0);
                             break;
                         }
 
@@ -515,7 +515,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _externalAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_externalAuthenticationSettings);
+                            await _settingService.SaveSettingAsync(_externalAuthenticationSettings,0);
                         }
 
                         break;
@@ -525,7 +525,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _multiFactorAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings);
+                            await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings,0);
                             break;
                         }
 
@@ -533,7 +533,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _multiFactorAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings);
+                            await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings,0);
                         }
 
                         break;
@@ -543,7 +543,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _widgetSettings.ActiveWidgetSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_widgetSettings);
+                            await _settingService.SaveSettingAsync(_widgetSettings,0);
                             break;
                         }
 
@@ -551,7 +551,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _widgetSettings.ActiveWidgetSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_widgetSettings);
+                            await _settingService.SaveSettingAsync(_widgetSettings,0);
                         }
 
                         break;

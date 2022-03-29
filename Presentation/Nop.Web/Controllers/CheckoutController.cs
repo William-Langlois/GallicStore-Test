@@ -21,6 +21,7 @@ using Nop.Services.Logging;
 using Nop.Services.Orders;
 using Nop.Services.Payments;
 using Nop.Services.Shipping;
+using Nop.Services.Configuration;
 using Nop.Web.Extensions;
 using Nop.Web.Factories;
 using Nop.Web.Framework.Controllers;
@@ -53,11 +54,11 @@ namespace Nop.Web.Controllers
         private readonly IStoreContext _storeContext;
         private readonly IWebHelper _webHelper;
         private readonly IWorkContext _workContext;
+        private readonly ISettingService _settingService;
         private readonly OrderSettings _orderSettings;
         private readonly PaymentSettings _paymentSettings;
         private readonly RewardPointsSettings _rewardPointsSettings;
         private readonly ShippingSettings _shippingSettings;
-
         #endregion
 
         #region Ctor
@@ -82,6 +83,7 @@ namespace Nop.Web.Controllers
             IStoreContext storeContext,
             IWebHelper webHelper,
             IWorkContext workContext,
+            ISettingService settingService,
             OrderSettings orderSettings,
             PaymentSettings paymentSettings,
             RewardPointsSettings rewardPointsSettings,
@@ -107,6 +109,7 @@ namespace Nop.Web.Controllers
             _storeContext = storeContext;
             _webHelper = webHelper;
             _workContext = workContext;
+            _settingService = settingService;
             _orderSettings = orderSettings;
             _paymentSettings = paymentSettings;
             _rewardPointsSettings = rewardPointsSettings;
@@ -201,11 +204,29 @@ namespace Nop.Web.Controllers
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Index()
         {
+            var vendorId = HttpContext.Session.GetString("VendorIdForCheckout");
+
+            if (vendorId != null)
+            {
+                vendorId = vendorId.Replace("\"", "");
+            }
+
             //validation
             if (_orderSettings.CheckoutDisabled)
                 return RedirectToRoute("ShoppingCart");
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id,vendorId:vendorId);
+            if (vendorId != null)
+            {
+                cart = cart.Where(i => i.VendorId.ToString() == vendorId).ToList();
+            }
+            else
+            {
+                if (cart.GroupBy(i => i.VendorId).Count() > 1)
+                {
+                    RedirectToRoute("ShoppingCart");
+                }
+            }
 
             if (!cart.Any())
                 return RedirectToRoute("ShoppingCart");
@@ -223,10 +244,12 @@ namespace Nop.Web.Controllers
             var paymentMethods = await (await _paymentPluginManager
                 .LoadActivePluginsAsyncAsync(await _workContext.GetCurrentCustomerAsync(), (await _storeContext.GetCurrentStoreAsync()).Id))
                 .WhereAwait(async pm => !await pm.HidePaymentMethodAsync(cart)).ToListAsync();
+
             //payment methods displayed during checkout (not with "Button" type)
             var nonButtonPaymentMethods = paymentMethods
                 .Where(pm => pm.PaymentMethodType != PaymentMethodType.Button)
                 .ToList();
+
             //"button" payment methods(*displayed on the shopping cart page)
             var buttonPaymentMethods = paymentMethods
                 .Where(pm => pm.PaymentMethodType == PaymentMethodType.Button)
@@ -243,6 +266,7 @@ namespace Nop.Web.Controllers
             var scWarnings = await _shoppingCartService.GetShoppingCartWarningsAsync(cart, checkoutAttributesXml, true);
             if (scWarnings.Any())
                 return RedirectToRoute("ShoppingCart");
+
             //validation (each shopping cart item)
             foreach (var sci in cart)
             {
@@ -1175,8 +1199,7 @@ namespace Nop.Web.Controllers
         protected virtual async Task<JsonResult> OpcLoadStepAfterShippingAddress(IList<ShoppingCartItem> cart)
         {
             var shippingMethodModel = await _checkoutModelFactory.PrepareShippingMethodModelAsync(cart, await _customerService.GetCustomerShippingAddressAsync(await _workContext.GetCurrentCustomerAsync()));
-            if (_shippingSettings.BypassShippingMethodSelectionIfOnlyOne &&
-                shippingMethodModel.ShippingMethods.Count == 1)
+            if (_shippingSettings.BypassShippingMethodSelectionIfOnlyOne && shippingMethodModel.ShippingMethods.Count == 1)
             {
                 //if we have only one shipping method, then a customer doesn't have to choose a shipping method
                 await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(),
@@ -1205,8 +1228,13 @@ namespace Nop.Web.Controllers
             //Check whether payment workflow is required
             //we ignore reward points during cart total calculation
             var isPaymentWorkflowRequired = await _orderProcessingService.IsPaymentWorkflowRequiredAsync(cart, false);
+            
             if (isPaymentWorkflowRequired)
             {
+
+                Customer customer = await _workContext.GetCurrentCustomerAsync();
+                var orderFromDistributor = customer.DistributorOfVendorId == cart[0].VendorId;
+
                 //filter by country
                 var filterByCountryId = 0;
                 if (_addressSettings.CountryEnabled)
@@ -1215,10 +1243,10 @@ namespace Nop.Web.Controllers
                 }
 
                 //payment is required
-                var paymentMethodModel = await _checkoutModelFactory.PreparePaymentMethodModelAsync(cart, filterByCountryId);
+                var paymentMethodModel = await _checkoutModelFactory.PreparePaymentMethodModelAsync(cart, filterByCountryId,orderFromDistributor: orderFromDistributor);
 
                 if (_paymentSettings.BypassPaymentMethodSelectionIfOnlyOne &&
-                    paymentMethodModel.PaymentMethods.Count == 1 && !paymentMethodModel.DisplayRewardPoints)
+                    paymentMethodModel.PaymentMethods.Count == 1 && !paymentMethodModel.DisplayRewardPoints && !paymentMethodModel.RestrictedForDistributor)
                 {
                     //if we have only one payment method and reward points are disabled or the current customer doesn't have any reward points
                     //so customer doesn't have to choose a payment method
@@ -1267,8 +1295,7 @@ namespace Nop.Web.Controllers
         /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task<JsonResult> OpcLoadStepAfterPaymentMethod(IPaymentMethod paymentMethod, IList<ShoppingCartItem> cart)
         {
-            if (paymentMethod.SkipPaymentInfo ||
-                (paymentMethod.PaymentMethodType == PaymentMethodType.Redirection && _paymentSettings.SkipPaymentInfoStepForRedirectionPaymentMethods))
+            if (paymentMethod.SkipPaymentInfo || (paymentMethod.PaymentMethodType == PaymentMethodType.Redirection && _paymentSettings.SkipPaymentInfoStepForRedirectionPaymentMethods))
             {
                 //skip payment info page
                 var paymentInfo = new ProcessPaymentRequest();
@@ -1304,11 +1331,28 @@ namespace Nop.Web.Controllers
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OnePageCheckout()
         {
+            var vendorId = HttpContext.Session.GetString("VendorIdForCheckout");
+            if(vendorId != null)
+            {
+                vendorId = vendorId.Replace("\"", "");
+            }
+            
             //validation
             if (_orderSettings.CheckoutDisabled)
                 return RedirectToRoute("ShoppingCart");
 
             var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            if (vendorId != null)
+            {
+                cart = cart.Where(i => i.VendorId.ToString() == vendorId).ToList();
+            }
+            else
+            {
+                if (cart.GroupBy(i => i.VendorId).Count() > 1)
+                {
+                    return RedirectToRoute("ShoppingCart");
+                }
+            }
 
             if (!cart.Any())
                 return RedirectToRoute("ShoppingCart");
@@ -1327,13 +1371,30 @@ namespace Nop.Web.Controllers
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OpcSaveBilling(CheckoutBillingAddressModel model, IFormCollection form)
         {
+            var vendorId = HttpContext.Session.GetString("VendorIdForCheckout");
+            if (vendorId != null)
+            {
+                vendorId = vendorId.Replace("\"", "");
+            }
+
             try
             {
                 //validation
                 if (_orderSettings.CheckoutDisabled)
                     throw new Exception(await _localizationService.GetResourceAsync("Checkout.Disabled"));
 
-                var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+                var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id,vendorId: vendorId);
+                if (vendorId != null)
+                {
+                    cart = cart.Where(i => i.VendorId.ToString() == vendorId).ToList();
+                }
+                else
+                {
+                    if (cart.GroupBy(i => i.VendorId).Count() > 1)
+                    {
+                        RedirectToRoute("ShoppingCart");
+                    }
+                }
 
                 if (!cart.Any())
                     throw new Exception("Your cart is empty");
@@ -1469,6 +1530,12 @@ namespace Nop.Web.Controllers
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OpcSaveShipping(CheckoutShippingAddressModel model, IFormCollection form)
         {
+            var vendorId = HttpContext.Session.GetString("VendorIdForCheckout");
+            if (vendorId != null)
+            {
+                vendorId = vendorId.Replace("\"", "");
+            }
+
             try
             {
                 //validation
@@ -1476,6 +1543,17 @@ namespace Nop.Web.Controllers
                     throw new Exception(await _localizationService.GetResourceAsync("Checkout.Disabled"));
 
                 var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+                if (vendorId != null)
+                {
+                    cart = cart.Where(i => i.VendorId.ToString() == vendorId).ToList();
+                }
+                else
+                {
+                    if (cart.GroupBy(i => i.VendorId).Count() > 1)
+                    {
+                        RedirectToRoute("ShoppingCart");
+                    }
+                }
 
                 if (!cart.Any())
                     throw new Exception("Your cart is empty");
@@ -1584,6 +1662,14 @@ namespace Nop.Web.Controllers
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OpcSaveShippingMethod(string shippingoption, IFormCollection form)
         {
+
+            var vendorId = HttpContext.Session.GetString("VendorIdForCheckout");
+            if (vendorId != null)
+            {
+                vendorId = vendorId.Replace("\"", "");
+            }
+
+            
             try
             {
                 //validation
@@ -1591,6 +1677,17 @@ namespace Nop.Web.Controllers
                     throw new Exception(await _localizationService.GetResourceAsync("Checkout.Disabled"));
 
                 var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+                if (vendorId != null)
+                {
+                    cart = cart.Where(i => i.VendorId.ToString() == vendorId).ToList();
+                }
+                else
+                {
+                    if (cart.GroupBy(i => i.VendorId).Count() > 1)
+                    {
+                        RedirectToRoute("ShoppingCart");
+                    }
+                }
 
                 if (!cart.Any())
                     throw new Exception("Your cart is empty");
@@ -1668,6 +1765,12 @@ namespace Nop.Web.Controllers
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OpcSavePaymentMethod(string paymentmethod, CheckoutPaymentMethodModel model)
         {
+            var vendorId = HttpContext.Session.GetString("VendorIdForCheckout");
+            if (vendorId != null)
+            {
+                vendorId = vendorId.Replace("\"", "");
+            }
+
             try
             {
                 //validation
@@ -1675,6 +1778,17 @@ namespace Nop.Web.Controllers
                     throw new Exception(await _localizationService.GetResourceAsync("Checkout.Disabled"));
 
                 var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+                if (vendorId != null)
+                {
+                    cart = cart.Where(i => i.VendorId.ToString() == vendorId).ToList();
+                }
+                else
+                {
+                    if (cart.GroupBy(i => i.VendorId).Count() > 1)
+                    {
+                        RedirectToRoute("ShoppingCart");
+                    }
+                }
 
                 if (!cart.Any())
                     throw new Exception("Your cart is empty");
@@ -1716,7 +1830,7 @@ namespace Nop.Web.Controllers
                         goto_section = "confirm_order"
                     });
                 }
-
+                int intVendorId = Int32.Parse(vendorId);
                 var paymentMethodInst = await _paymentPluginManager
                     .LoadPluginBySystemNameAsync(paymentmethod, await _workContext.GetCurrentCustomerAsync(), (await _storeContext.GetCurrentStoreAsync()).Id);
                 if (!_paymentPluginManager.IsPluginActive(paymentMethodInst))
@@ -1739,6 +1853,12 @@ namespace Nop.Web.Controllers
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OpcSavePaymentInfo(IFormCollection form)
         {
+            var vendorId = HttpContext.Session.GetString("VendorIdForCheckout");
+            if (vendorId != null)
+            {
+                vendorId = vendorId.Replace("\"", "");
+            }
+
             try
             {
                 //validation
@@ -1746,6 +1866,17 @@ namespace Nop.Web.Controllers
                     throw new Exception(await _localizationService.GetResourceAsync("Checkout.Disabled"));
 
                 var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+                if (vendorId != null)
+                {
+                    cart = cart.Where(i => i.VendorId.ToString() == vendorId).ToList();
+                }
+                else
+                {
+                    if (cart.GroupBy(i => i.VendorId).Count() > 1)
+                    {
+                        RedirectToRoute("ShoppingCart");
+                    }
+                }
 
                 if (!cart.Any())
                     throw new Exception("Your cart is empty");
@@ -1809,6 +1940,12 @@ namespace Nop.Web.Controllers
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OpcConfirmOrder()
         {
+            var vendorId = HttpContext.Session.GetString("VendorIdForCheckout");
+            if (vendorId != null)
+            {
+                vendorId = vendorId.Replace("\"", "");
+            }
+
             try
             {
                 //validation
@@ -1816,6 +1953,17 @@ namespace Nop.Web.Controllers
                     throw new Exception(await _localizationService.GetResourceAsync("Checkout.Disabled"));
 
                 var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+                if (vendorId != null)
+                {
+                    cart = cart.Where(i => i.VendorId.ToString() == vendorId).ToList();
+                }
+                else
+                {
+                    if (cart.GroupBy(i => i.VendorId).Count() > 1)
+                    {
+                        RedirectToRoute("ShoppingCart");
+                    }
+                }
 
                 if (!cart.Any())
                     throw new Exception("Your cart is empty");
@@ -1842,12 +1990,18 @@ namespace Nop.Web.Controllers
 
                     processPaymentRequest = new ProcessPaymentRequest();
                 }
+
+                if(vendorId != null)
+                {
+                    processPaymentRequest.VendorIdForCheckout = vendorId;
+                }
                 _paymentService.GenerateOrderGuid(processPaymentRequest);
                 processPaymentRequest.StoreId = (await _storeContext.GetCurrentStoreAsync()).Id;
                 processPaymentRequest.CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id;
                 processPaymentRequest.PaymentMethodSystemName = await _genericAttributeService.GetAttributeAsync<string>(await _workContext.GetCurrentCustomerAsync(),
                     NopCustomerDefaults.SelectedPaymentMethodAttribute, (await _storeContext.GetCurrentStoreAsync()).Id);
                 HttpContext.Session.Set<ProcessPaymentRequest>("OrderPaymentInfo", processPaymentRequest);
+
                 var placeOrderResult = await _orderProcessingService.PlaceOrderAsync(processPaymentRequest);
                 if (placeOrderResult.Success)
                 {
@@ -1883,6 +2037,11 @@ namespace Nop.Web.Controllers
 
                 //error
                 var confirmOrderModel = new CheckoutConfirmModel();
+                if(vendorId != null)
+                {
+                    confirmOrderModel.VendorIdForCheckout = vendorId;
+                }
+
                 foreach (var error in placeOrderResult.Errors)
                     confirmOrderModel.Warnings.Add(error);
 

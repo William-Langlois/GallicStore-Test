@@ -54,6 +54,11 @@ namespace Nop.Core.Domain.Customers
         public int VendorId { get; set; }
 
         /// <summary>
+        /// Gets or sets the vendor identifier with which this customer is the distributor (reseller)
+        /// </summary>
+        public int DistributorOfVendorId { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether this customer has some products in the shopping cart
         /// <remarks>The same as if we run ShoppingCartItems.Count > 0
         /// We use this property for performance optimization:

@@ -135,6 +135,39 @@ namespace Nop.Services.Vendors
         /// A task that represents the asynchronous operation
         /// The task result contains the vendors
         /// </returns>
+        public virtual async Task<IList<Vendor>> GetAllVendorsListAsync(string name = "", string email = "", bool showHidden = false)
+        {
+            var query = _vendorRepository.GetAll();
+
+                if (!string.IsNullOrWhiteSpace(name))
+                    query = query.Where(v => v.Name.Contains(name)).ToList();
+
+                if (!string.IsNullOrWhiteSpace(email))
+                    query = query.Where(v => v.Email.Contains(email)).ToList();
+
+                if (!showHidden)
+                    query = query.Where(v => v.Active).ToList();
+
+                query = query.Where(v => !v.Deleted).ToList();
+                query = query.OrderBy(v => v.DisplayOrder).ThenBy(v => v.Name).ThenBy(v => v.Email).ToList();
+
+            IList<Vendor> vendors = await query.ToListAsync();
+
+            return vendors;
+        }
+
+        /// <summary>
+        /// Gets all vendors
+        /// </summary>
+        /// <param name="name">Vendor name</param>
+        /// <param name="email">Vendor email</param>
+        /// <param name="pageIndex">Page index</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="showHidden">A value indicating whether to show hidden records</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the vendors
+        /// </returns>
         public virtual async Task<IPagedList<Vendor>> GetAllVendorsAsync(string name = "", string email = "", int pageIndex = 0, int pageSize = int.MaxValue, bool showHidden = false)
         {
             var vendors = await _vendorRepository.GetAllPagedAsync(query =>

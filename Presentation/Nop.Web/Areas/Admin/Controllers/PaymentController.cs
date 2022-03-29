@@ -127,7 +127,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as disabled
                     _paymentSettings.ActivePaymentMethodSystemNames.Remove(pm.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_paymentSettings);
+                    await _settingService.SaveSettingAsync(_paymentSettings, 0);
                 }
             }
             else
@@ -136,7 +136,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as active
                     _paymentSettings.ActivePaymentMethodSystemNames.Add(pm.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_paymentSettings);
+                    await _settingService.SaveSettingAsync(_paymentSettings,0);
                 }
             }
 

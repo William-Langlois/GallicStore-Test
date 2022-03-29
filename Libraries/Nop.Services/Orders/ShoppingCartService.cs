@@ -303,14 +303,14 @@ namespace Nop.Services.Orders
         /// The task result contains the warnings
         /// </returns>
         protected virtual async Task<IList<string>> GetStandardWarningsAsync(Customer customer, ShoppingCartType shoppingCartType, Product product,
-            string attributesXml, decimal customerEnteredPrice, int quantity, int shoppingCartItemId, int storeId)
+            string attributesXml, decimal customerEnteredPrice, int quantity, int shoppingCartItemId, int storeId, string vendorId = null)
         {
             if (customer == null)
                 throw new ArgumentNullException(nameof(customer));
 
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
-
+            
             var warnings = new List<string>();
 
             //deleted
@@ -423,7 +423,7 @@ namespace Nop.Services.Orders
                                 var onlyCombinableAttributes = productAttributeMappings.All(mapping => !mapping.IsNonCombinable());
                                 if (!onlyCombinableAttributes)
                                 {
-                                    var cart = await GetShoppingCartAsync(customer, shoppingCartType, storeId);
+                                    var cart = await GetShoppingCartAsync(customer, shoppingCartType, storeId,vendorId: vendorId);
                                     var totalAddedQuantity = cart
                                         .Where(item => item.ProductId == product.Id && item.Id != shoppingCartItemId)
                                         .Sum(product => product.Quantity);
@@ -451,7 +451,7 @@ namespace Nop.Services.Orders
                             //validate product quantity and product quantity into bundles
                             if (string.IsNullOrEmpty(attributesXml))
                             {
-                                var cart = await GetShoppingCartAsync(customer, shoppingCartType, storeId);
+                                var cart = await GetShoppingCartAsync(customer, shoppingCartType, storeId, vendorId: vendorId);
                                 var totalQuantityInCart = cart.Where(item => item.ProductId == product.Id && item.Id != shoppingCartItemId && string.IsNullOrEmpty(item.AttributesXml))
                                     .Sum(product => product.Quantity);
 
@@ -711,12 +711,16 @@ namespace Nop.Services.Orders
         /// The task result contains the shopping Cart
         /// </returns>
         public virtual async Task<IList<ShoppingCartItem>> GetShoppingCartAsync(Customer customer, ShoppingCartType? shoppingCartType = null,
-            int storeId = 0, int? productId = null, DateTime? createdFromUtc = null, DateTime? createdToUtc = null)
+            int storeId = 0, int? productId = null, DateTime? createdFromUtc = null, DateTime? createdToUtc = null, string vendorId = null)
         {
             if (customer == null)
                 throw new ArgumentNullException(nameof(customer));
 
             var items = _sciRepository.Table.Where(sci => sci.CustomerId == customer.Id);
+
+            int parsedVendorId = 0;
+            bool vendorIdIsParsable = false;
+            vendorIdIsParsable = Int32.TryParse(vendorId,out parsedVendorId);
 
             //filter by type
             if (shoppingCartType.HasValue)
@@ -736,7 +740,11 @@ namespace Nop.Services.Orders
             if (createdToUtc.HasValue)
                 items = items.Where(item => createdToUtc.Value >= item.CreatedOnUtc);
 
-            var key = _staticCacheManager.PrepareKeyForShortTermCache(NopOrderDefaults.ShoppingCartItemsAllCacheKey, customer, shoppingCartType, storeId, productId, createdFromUtc, createdToUtc);
+            //filter by vendor
+            if (vendorId != null && vendorIdIsParsable == true && parsedVendorId > 0)
+                items = items.Where(item => item.VendorId == (int)parsedVendorId);
+
+            var key = _staticCacheManager.PrepareKeyForShortTermCache(NopOrderDefaults.ShoppingCartItemsAllCacheKey, customer, shoppingCartType, storeId, productId, createdFromUtc, createdToUtc,parsedVendorId);
 
             return await _staticCacheManager.GetAsync(key, async () => await items.ToListAsync());
         }
@@ -1634,7 +1642,8 @@ namespace Nop.Services.Orders
                     RentalEndDateUtc = rentalEndDate,
                     CreatedOnUtc = now,
                     UpdatedOnUtc = now,
-                    CustomerId = customer.Id
+                    CustomerId = customer.Id,
+                    VendorId = product.VendorId
                 };
 
                 await _sciRepository.InsertAsync(shoppingCartItem);

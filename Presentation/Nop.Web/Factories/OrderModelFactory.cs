@@ -207,6 +207,7 @@ namespace Nop.Web.Factories
             var model = new OrderDetailsModel
             {
                 Id = order.Id,
+                VendorId = order.VendorId,
                 CreatedOn = await _dateTimeHelper.ConvertToUserTimeAsync(order.CreatedOnUtc, DateTimeKind.Utc),
                 OrderStatus = await _localizationService.GetLocalizedEnumAsync(order.OrderStatus),
                 IsReOrderAllowed = _orderSettings.IsReOrderAllowed,

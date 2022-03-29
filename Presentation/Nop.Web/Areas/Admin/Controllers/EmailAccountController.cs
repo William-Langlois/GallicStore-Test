@@ -117,7 +117,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return RedirectToAction("List");
 
             _emailAccountSettings.DefaultEmailAccountId = defaultEmailAccount.Id;
-            await _settingService.SaveSettingAsync(_emailAccountSettings);
+            await _settingService.SaveSettingAsync(_emailAccountSettings, 0);
 
             return RedirectToAction("List");
         }

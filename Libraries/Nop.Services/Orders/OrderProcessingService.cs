@@ -451,7 +451,11 @@ namespace Nop.Services.Orders
             details.CheckoutAttributeDescription = await _checkoutAttributeFormatter.FormatAttributesAsync(details.CheckoutAttributesXml, details.Customer);
 
             //load shopping cart
-            details.Cart = await _shoppingCartService.GetShoppingCartAsync(details.Customer, ShoppingCartType.ShoppingCart, processPaymentRequest.StoreId);
+            details.Cart = await _shoppingCartService.GetShoppingCartAsync(details.Customer, ShoppingCartType.ShoppingCart, processPaymentRequest.StoreId,vendorId: processPaymentRequest.VendorIdForCheckout);
+            if(processPaymentRequest.VendorIdForCheckout != null)
+            {
+                details.Cart = details.Cart.Where(i => i.VendorId.ToString() == processPaymentRequest.VendorIdForCheckout).ToList();
+            }
 
             if (!details.Cart.Any())
                 throw new NopException("Cart is empty");
@@ -765,8 +769,10 @@ namespace Nop.Services.Orders
         protected virtual async Task<Order> SaveOrderDetailsAsync(ProcessPaymentRequest processPaymentRequest,
             ProcessPaymentResult processPaymentResult, PlaceOrderContainer details)
         {
+            
             var order = new Order
             {
+                VendorId = Int32.Parse(processPaymentRequest.VendorIdForCheckout), //
                 StoreId = processPaymentRequest.StoreId,
                 OrderGuid = processPaymentRequest.OrderGuid,
                 CustomerId = details.Customer.Id,

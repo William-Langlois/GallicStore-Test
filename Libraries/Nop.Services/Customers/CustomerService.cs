@@ -140,7 +140,7 @@ namespace Nop.Services.Customers
             string email = null, string username = null, string firstName = null, string lastName = null,
             int dayOfBirth = 0, int monthOfBirth = 0,
             string company = null, string phone = null, string zipPostalCode = null, string ipAddress = null,
-            int pageIndex = 0, int pageSize = int.MaxValue, bool getOnlyTotalCount = false)
+            int pageIndex = 0, int pageSize = int.MaxValue, bool getOnlyTotalCount = false, int distributorForVendorId = 0)
         {
             var customers = await _customerRepository.GetAllPagedAsync(query =>
             {
@@ -152,6 +152,8 @@ namespace Nop.Services.Customers
                     query = query.Where(c => affiliateId == c.AffiliateId);
                 if (vendorId > 0)
                     query = query.Where(c => vendorId == c.VendorId);
+                if (distributorForVendorId > 0)
+                    query = query.Where(c => distributorForVendorId == c.DistributorOfVendorId);
 
                 query = query.Where(c => !c.Deleted);
 

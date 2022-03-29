@@ -1244,12 +1244,28 @@ namespace Nop.Web.Controllers
             return RedirectToRoute("Homepage");
         }
 
+
         [HttpPost, ActionName("Cart")]
         [FormValueRequired("checkout")]
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> StartCheckout(IFormCollection form)
         {
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            StringValues vendorIdForCheckoutFromForm = "";
+            string vendorIdForCheckout = null;
+            if (form.ContainsKey("VendorIdForCheckout"))
+            {
+                form.TryGetValue("VendorIdForCheckout", out vendorIdForCheckoutFromForm);
+                vendorIdForCheckout = vendorIdForCheckoutFromForm.ToString();
+                HttpContext.Session.SetString("VendorIdForCheckout", vendorIdForCheckout);
+            }
+
+            //UPDATED FOR VENDOR SUBDIV
+
+            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id, vendorId: vendorIdForCheckout);
+            if (vendorIdForCheckout != null)
+            {
+                cart = cart.Where(i => i.VendorId.ToString() == vendorIdForCheckout).ToList();
+            }
 
             //parse and save checkout attributes
             await ParseAndSaveCheckoutAttributesAsync(cart, form);
@@ -1257,6 +1273,7 @@ namespace Nop.Web.Controllers
             //validate attributes
             var checkoutAttributes = await _genericAttributeService.GetAttributeAsync<string>(await _workContext.GetCurrentCustomerAsync(),
                 NopCustomerDefaults.CheckoutAttributes, (await _storeContext.GetCurrentStoreAsync()).Id);
+
             var checkoutAttributeWarnings = await _shoppingCartService.GetShoppingCartWarningsAsync(cart, checkoutAttributes, true);
             if (checkoutAttributeWarnings.Any())
             {

@@ -1142,7 +1142,7 @@ namespace Nop.Services.Media
                 return;
 
             //save the new setting value
-            await _settingService.SetSettingAsync("Media.Images.StoreInDB", isStoreInDb);
+            await _settingService.SetSettingAsync("Media.Images.StoreInDB", isStoreInDb,0,0);
 
             var pageIndex = 0;
             const int pageSize = 400;

@@ -145,7 +145,8 @@ var Billing = {
   },
 
   save: function() {
-    if (Checkout.loadWaiting !== false) return;
+      if (Checkout.loadWaiting !== false) return;
+      console.log("CALL Billing.Save()")
 
     Checkout.setLoadWaiting('billing');
 

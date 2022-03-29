@@ -63,12 +63,13 @@ namespace Nop.Services.Orders
         /// <param name="productId">Product identifier; pass null to load all records</param>
         /// <param name="createdFromUtc">Created date from (UTC); pass null to load all records</param>
         /// <param name="createdToUtc">Created date to (UTC); pass null to load all records</param>
+        /// <param name="vendorId">Vendor id selected for checkout</param>
         /// <returns>
         /// A task that represents the asynchronous operation
         /// The task result contains the shopping Cart
         /// </returns>
         Task<IList<ShoppingCartItem>> GetShoppingCartAsync(Customer customer, ShoppingCartType? shoppingCartType = null,
-            int storeId = 0, int? productId = null, DateTime? createdFromUtc = null, DateTime? createdToUtc = null);
+            int storeId = 0, int? productId = null, DateTime? createdFromUtc = null, DateTime? createdToUtc = null, string? vendorId = null);
 
         /// <summary>
         /// Validates shopping cart item attributes

@@ -996,8 +996,10 @@ namespace Nop.Services.Messages
 
             var paymentMethod = await _paymentPluginManager.LoadPluginBySystemNameAsync(order.PaymentMethodSystemName);
             var paymentMethodName = paymentMethod != null ? await _localizationService.GetLocalizedFriendlyNameAsync(paymentMethod, (await _workContext.GetWorkingLanguageAsync()).Id) : order.PaymentMethodSystemName;
+            
             tokens.Add(new Token("Order.PaymentMethod", paymentMethodName));
             tokens.Add(new Token("Order.VatNumber", order.VatNumber));
+
             var sbCustomValues = new StringBuilder();
             var customValues = _paymentService.DeserializeCustomValues(order);
             if (customValues != null)

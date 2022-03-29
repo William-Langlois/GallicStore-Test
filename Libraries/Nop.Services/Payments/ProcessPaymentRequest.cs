@@ -20,6 +20,11 @@ namespace Nop.Services.Payments
         /// Gets or sets a store identifier
         /// </summary>
         public int StoreId { get; set; }
+        
+        /// <summary>
+        /// Gets or sets a vendor identifier
+        /// </summary>
+        public string VendorIdForCheckout { get; set; }
 
         /// <summary>
         /// Gets or sets a customer identifier

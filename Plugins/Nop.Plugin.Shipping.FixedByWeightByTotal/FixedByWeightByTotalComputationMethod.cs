@@ -314,7 +314,7 @@ namespace Nop.Plugin.Shipping.FixedByWeightByTotal
             //fixed rates
             var fixedRates = await (await _shippingService.GetAllShippingMethodsAsync())
                 .SelectAwait(async shippingMethod => await _settingService.GetSettingAsync(
-                    string.Format(FixedByWeightByTotalDefaults.FixedRateSettingsKey, shippingMethod.Id)))
+                    string.Format(FixedByWeightByTotalDefaults.FixedRateSettingsKey, shippingMethod.Id),storeId:0,vendorId:0))
                 .Where(setting => setting != null).ToListAsync();
             await _settingService.DeleteSettingsAsync(fixedRates);
 

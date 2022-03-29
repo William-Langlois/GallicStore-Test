@@ -562,7 +562,7 @@ namespace Nop.Services.Localization
             var key = _settingService.GetSettingKey(settings, keySelector);
 
             //we do not support localized settings per store (overridden store settings)
-            var setting = await _settingService.GetSettingAsync(key);
+            var setting = await _settingService.GetSettingAsync(key,0,0);
             if (setting == null)
                 return;
 

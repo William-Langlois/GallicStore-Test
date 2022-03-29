@@ -60,6 +60,8 @@ namespace Nop.Web.Areas.Admin.Models.Customers
         [NopResourceDisplayName("Admin.Customers.Customers.Fields.Vendor")]
         public int VendorId { get; set; }
 
+        [NopResourceDisplayName("Admin.Customers.Customers.Fields.DistributorOfVendor")]
+        public int DistributorOfVendorId { get; set; }
         public IList<SelectListItem> AvailableVendors { get; set; }
 
         //form fields & properties

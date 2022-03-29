@@ -246,7 +246,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> Blog(BlogSettingsModel model)
+        public virtual async Task<IActionResult> Blog(BlogSettingsModel model,int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -255,20 +255,20 @@ namespace Nop.Web.Areas.Admin.Controllers
             { 
                 //load settings for a chosen store scope
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var blogSettings = await _settingService.LoadSettingAsync<BlogSettings>(storeScope);
+                var blogSettings = await _settingService.LoadSettingAsync<BlogSettings>(storeScope,vendorId);
                 blogSettings = model.ToSettings(blogSettings);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.Enabled, model.Enabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.PostsPageSize, model.PostsPageSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.AllowNotRegisteredUsersToLeaveComments, model.AllowNotRegisteredUsersToLeaveComments_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.NotifyAboutNewBlogComments, model.NotifyAboutNewBlogComments_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.NumberOfTags, model.NumberOfTags_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.ShowHeaderRssUrl, model.ShowHeaderRssUrl_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.BlogCommentsMustBeApproved, model.BlogCommentsMustBeApproved_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingAsync(blogSettings, x => x.ShowBlogCommentsPerStore, clearCache: false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.Enabled, model.Enabled_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.PostsPageSize, model.PostsPageSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.AllowNotRegisteredUsersToLeaveComments, model.AllowNotRegisteredUsersToLeaveComments_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.NotifyAboutNewBlogComments, model.NotifyAboutNewBlogComments_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.NumberOfTags, model.NumberOfTags_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.ShowHeaderRssUrl, model.ShowHeaderRssUrl_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(blogSettings, x => x.BlogCommentsMustBeApproved, model.BlogCommentsMustBeApproved_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingAsync(blogSettings, x => x.ShowBlogCommentsPerStore, storeScope,vendorId,  clearCache: false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -302,7 +302,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> Vendor(VendorSettingsModel model)
+        public virtual async Task<IActionResult> Vendor(VendorSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -321,8 +321,8 @@ namespace Nop.Web.Areas.Admin.Controllers
                 await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.ShowVendorOnProductDetailsPage, model.ShowVendorOnProductDetailsPage_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.ShowVendorOnOrderDetailsPage, model.ShowVendorOnOrderDetailsPage_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.AllowCustomersToContactVendors, model.AllowCustomersToContactVendors_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.AllowCustomersToApplyForVendorAccount, model.AllowCustomersToApplyForVendorAccount_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.TermsOfServiceEnabled, model.TermsOfServiceEnabled_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.AllowCustomersToApplyForVendorAccount, model.AllowCustomersToApplyForVendorAccount_OverrideForStore, storeScope,  false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.TermsOfServiceEnabled, model.TermsOfServiceEnabled_OverrideForStore, storeScope,false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.AllowSearchByVendor, model.AllowSearchByVendor_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.AllowVendorsToEditInfo, model.AllowVendorsToEditInfo_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(vendorSettings, x => x.NotifyStoreOwnerAboutVendorInformationChange, model.NotifyStoreOwnerAboutVendorInformationChange_OverrideForStore, storeScope, false);
@@ -361,7 +361,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> Forum(ForumSettingsModel model)
+        public virtual async Task<IActionResult> Forum(ForumSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -377,7 +377,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
                 await _settingService.SaveSettingOverridablePerStoreAsync(forumSettings, x => x.ForumsEnabled, model.ForumsEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(forumSettings, x => x.RelativeDateTimeFormattingEnabled, model.RelativeDateTimeFormattingEnabled_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(forumSettings, x => x.RelativeDateTimeFormattingEnabled, model.RelativeDateTimeFormattingEnabled_OverrideForStore, storeScope,false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(forumSettings, x => x.ShowCustomersPostCount, model.ShowCustomersPostCount_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(forumSettings, x => x.AllowGuestsToCreatePosts, model.AllowGuestsToCreatePosts_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(forumSettings, x => x.AllowGuestsToCreateTopics, model.AllowGuestsToCreateTopics_OverrideForStore, storeScope, false);
@@ -432,7 +432,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> News(NewsSettingsModel model)
+        public virtual async Task<IActionResult> News(NewsSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -447,7 +447,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(newsSettings, x => x.Enabled, model.Enabled_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(newsSettings, x => x.Enabled, model.Enabled_OverrideForStore, storeScope,  false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(newsSettings, x => x.AllowNotRegisteredUsersToLeaveComments, model.AllowNotRegisteredUsersToLeaveComments_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(newsSettings, x => x.NotifyAboutNewNewsComments, model.NotifyAboutNewNewsComments_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(newsSettings, x => x.ShowNewsOnMainPage, model.ShowNewsOnMainPage_OverrideForStore, storeScope, false);
@@ -455,7 +455,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 await _settingService.SaveSettingOverridablePerStoreAsync(newsSettings, x => x.NewsArchivePageSize, model.NewsArchivePageSize_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(newsSettings, x => x.ShowHeaderRssUrl, model.ShowHeaderRssUrl_OverrideForStore, storeScope, false);
                 await _settingService.SaveSettingOverridablePerStoreAsync(newsSettings, x => x.NewsCommentsMustBeApproved, model.NewsCommentsMustBeApproved_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingAsync(newsSettings, x => x.ShowNewsCommentsPerStore, clearCache: false);
+                await _settingService.SaveSettingAsync(newsSettings, x => x.ShowNewsCommentsPerStore, storeScope, clearCache: false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -489,7 +489,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> Shipping(ShippingSettingsModel model)
+        public virtual async Task<IActionResult> Shipping(ShippingSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -498,35 +498,35 @@ namespace Nop.Web.Areas.Admin.Controllers
             { 
                 //load settings for a chosen store scope
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var shippingSettings = await _settingService.LoadSettingAsync<ShippingSettings>(storeScope);
+                var shippingSettings = await _settingService.LoadSettingAsync<ShippingSettings>(storeScope, vendorId);
                 shippingSettings = model.ToSettings(shippingSettings);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.ShipToSameAddress, model.ShipToSameAddress_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.AllowPickupInStore, model.AllowPickupInStore_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.DisplayPickupPointsOnMap, model.DisplayPickupPointsOnMap_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.IgnoreAdditionalShippingChargeForPickupInStore, model.IgnoreAdditionalShippingChargeForPickupInStore_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.GoogleMapsApiKey, model.GoogleMapsApiKey_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.UseWarehouseLocation, model.UseWarehouseLocation_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.NotifyCustomerAboutShippingFromMultipleLocations, model.NotifyCustomerAboutShippingFromMultipleLocations_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.FreeShippingOverXEnabled, model.FreeShippingOverXEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.FreeShippingOverXValue, model.FreeShippingOverXValue_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.FreeShippingOverXIncludingTax, model.FreeShippingOverXIncludingTax_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.EstimateShippingCartPageEnabled, model.EstimateShippingCartPageEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.EstimateShippingProductPageEnabled, model.EstimateShippingProductPageEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.EstimateShippingCityNameEnabled, model.EstimateShippingCityNameEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.DisplayShipmentEventsToCustomers, model.DisplayShipmentEventsToCustomers_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.DisplayShipmentEventsToStoreOwner, model.DisplayShipmentEventsToStoreOwner_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.HideShippingTotal, model.HideShippingTotal_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.BypassShippingMethodSelectionIfOnlyOne, model.BypassShippingMethodSelectionIfOnlyOne_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.ConsiderAssociatedProductsDimensions, model.ConsiderAssociatedProductsDimensions_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.ShipToSameAddress, model.ShipToSameAddress_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.AllowPickupInStore, model.AllowPickupInStore_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.DisplayPickupPointsOnMap, model.DisplayPickupPointsOnMap_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.IgnoreAdditionalShippingChargeForPickupInStore, model.IgnoreAdditionalShippingChargeForPickupInStore_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.GoogleMapsApiKey, model.GoogleMapsApiKey_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.UseWarehouseLocation, model.UseWarehouseLocation_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.NotifyCustomerAboutShippingFromMultipleLocations, model.NotifyCustomerAboutShippingFromMultipleLocations_OverrideForStore, storeScope, vendorId,false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.FreeShippingOverXEnabled, model.FreeShippingOverXEnabled_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.FreeShippingOverXValue, model.FreeShippingOverXValue_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.FreeShippingOverXIncludingTax, model.FreeShippingOverXIncludingTax_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.EstimateShippingCartPageEnabled, model.EstimateShippingCartPageEnabled_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.EstimateShippingProductPageEnabled, model.EstimateShippingProductPageEnabled_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.EstimateShippingCityNameEnabled, model.EstimateShippingCityNameEnabled_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.DisplayShipmentEventsToCustomers, model.DisplayShipmentEventsToCustomers_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.DisplayShipmentEventsToStoreOwner, model.DisplayShipmentEventsToStoreOwner_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.HideShippingTotal, model.HideShippingTotal_OverrideForStore, storeScope, vendorId,false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.BypassShippingMethodSelectionIfOnlyOne, model.BypassShippingMethodSelectionIfOnlyOne_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shippingSettings, x => x.ConsiderAssociatedProductsDimensions, model.ConsiderAssociatedProductsDimensions_OverrideForStore, storeScope,vendorId, false);
 
-                if (model.ShippingOriginAddress_OverrideForStore || storeScope == 0)
+                if (model.ShippingOriginAddress_OverrideForStore || (storeScope == 0 && vendorId == 0))
                 {
                     //update address
-                    var addressId = await _settingService.SettingExistsAsync(shippingSettings, x => x.ShippingOriginAddressId, storeScope) ?
+                    var addressId = await _settingService.SettingExistsAsync(shippingSettings, x => x.ShippingOriginAddressId, storeScope, vendorId) ?
                         shippingSettings.ShippingOriginAddressId : 0;
                     var originAddress = await _addressService.GetAddressByIdAsync(addressId) ??
                         new Address
@@ -542,10 +542,10 @@ namespace Nop.Web.Areas.Admin.Controllers
                         await _addressService.InsertAddressAsync(originAddress);
                     shippingSettings.ShippingOriginAddressId = originAddress.Id;
 
-                    await _settingService.SaveSettingAsync(shippingSettings, x => x.ShippingOriginAddressId, storeScope, false);
+                    await _settingService.SaveSettingAsync(shippingSettings, x => x.ShippingOriginAddressId, storeScope,vendorId, false);
                 }
-                else if (storeScope > 0)
-                    await _settingService.DeleteSettingAsync(shippingSettings, x => x.ShippingOriginAddressId, storeScope);
+                else if (storeScope > 0 || vendorId > 0 )
+                    await _settingService.DeleteSettingAsync(shippingSettings, x => x.ShippingOriginAddressId, storeScope, vendorId);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -579,7 +579,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> Tax(TaxSettingsModel model)
+        public virtual async Task<IActionResult> Tax(TaxSettingsModel model, int vendorId =0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -588,28 +588,28 @@ namespace Nop.Web.Areas.Admin.Controllers
             { 
                 //load settings for a chosen store scope
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var taxSettings = await _settingService.LoadSettingAsync<TaxSettings>(storeScope);
+                var taxSettings = await _settingService.LoadSettingAsync<TaxSettings>(storeScope, vendorId);
                 taxSettings = model.ToSettings(taxSettings);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.PricesIncludeTax, model.PricesIncludeTax_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.AllowCustomersToSelectTaxDisplayType, model.AllowCustomersToSelectTaxDisplayType_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.TaxDisplayType, model.TaxDisplayType_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.DisplayTaxSuffix, model.DisplayTaxSuffix_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.DisplayTaxRates, model.DisplayTaxRates_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.HideZeroTax, model.HideZeroTax_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.HideTaxInOrderSummary, model.HideTaxInOrderSummary_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.ForceTaxExclusionFromOrderSubtotal, model.ForceTaxExclusionFromOrderSubtotal_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.DefaultTaxCategoryId, model.DefaultTaxCategoryId_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.TaxBasedOn, model.TaxBasedOn_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.TaxBasedOnPickupPointAddress, model.TaxBasedOnPickupPointAddress_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.PricesIncludeTax, model.PricesIncludeTax_OverrideForStore, storeScope,vendorId ,false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.AllowCustomersToSelectTaxDisplayType, model.AllowCustomersToSelectTaxDisplayType_OverrideForStore, storeScope,vendorId ,false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.TaxDisplayType, model.TaxDisplayType_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.DisplayTaxSuffix, model.DisplayTaxSuffix_OverrideForStore, storeScope,vendorId ,false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.DisplayTaxRates, model.DisplayTaxRates_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.HideZeroTax, model.HideZeroTax_OverrideForStore, storeScope,vendorId ,false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.HideTaxInOrderSummary, model.HideTaxInOrderSummary_OverrideForStore, storeScope,vendorId ,false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.ForceTaxExclusionFromOrderSubtotal, model.ForceTaxExclusionFromOrderSubtotal_OverrideForStore, storeScope,vendorId ,false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.DefaultTaxCategoryId, model.DefaultTaxCategoryId_OverrideForStore, storeScope,vendorId ,false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.TaxBasedOn, model.TaxBasedOn_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.TaxBasedOnPickupPointAddress, model.TaxBasedOnPickupPointAddress_OverrideForStore, storeScope,vendorId, false);
 
-                if (model.DefaultTaxAddress_OverrideForStore || storeScope == 0)
+                if (model.DefaultTaxAddress_OverrideForStore || (storeScope == 0 && vendorId == 0))
                 {
                     //update address
-                    var addressId = await _settingService.SettingExistsAsync(taxSettings, x => x.DefaultTaxAddressId, storeScope) ?
+                    var addressId = await _settingService.SettingExistsAsync(taxSettings, x => x.DefaultTaxAddressId, storeScope,vendorId) ?
                         taxSettings.DefaultTaxAddressId : 0;
                     var originAddress = await _addressService.GetAddressByIdAsync(addressId) ??
                         new Address
@@ -625,23 +625,23 @@ namespace Nop.Web.Areas.Admin.Controllers
                         await _addressService.InsertAddressAsync(originAddress);
                     taxSettings.DefaultTaxAddressId = originAddress.Id;
 
-                    await _settingService.SaveSettingAsync(taxSettings, x => x.DefaultTaxAddressId, storeScope, false);
+                    await _settingService.SaveSettingAsync(taxSettings, x => x.DefaultTaxAddressId, storeScope, vendorId,false);
                 }
-                else if (storeScope > 0)
-                    await _settingService.DeleteSettingAsync(taxSettings, x => x.DefaultTaxAddressId, storeScope);
+                else if (storeScope > 0 || vendorId > 0)
+                    await _settingService.DeleteSettingAsync(taxSettings, x => x.DefaultTaxAddressId, storeScope, vendorId);
 
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.ShippingIsTaxable, model.ShippingIsTaxable_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.ShippingPriceIncludesTax, model.ShippingPriceIncludesTax_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.ShippingTaxClassId, model.ShippingTaxClassId_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.PaymentMethodAdditionalFeeIsTaxable, model.PaymentMethodAdditionalFeeIsTaxable_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.PaymentMethodAdditionalFeeIncludesTax, model.PaymentMethodAdditionalFeeIncludesTax_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.PaymentMethodAdditionalFeeTaxClassId, model.PaymentMethodAdditionalFeeTaxClassId_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatEnabled, model.EuVatEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatShopCountryId, model.EuVatShopCountryId_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatAllowVatExemption, model.EuVatAllowVatExemption_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatUseWebService, model.EuVatUseWebService_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatAssumeValid, model.EuVatAssumeValid_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatEmailAdminWhenNewVatSubmitted, model.EuVatEmailAdminWhenNewVatSubmitted_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.ShippingIsTaxable, model.ShippingIsTaxable_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.ShippingPriceIncludesTax, model.ShippingPriceIncludesTax_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.ShippingTaxClassId, model.ShippingTaxClassId_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.PaymentMethodAdditionalFeeIsTaxable, model.PaymentMethodAdditionalFeeIsTaxable_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.PaymentMethodAdditionalFeeIncludesTax, model.PaymentMethodAdditionalFeeIncludesTax_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.PaymentMethodAdditionalFeeTaxClassId, model.PaymentMethodAdditionalFeeTaxClassId_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatEnabled, model.EuVatEnabled_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatShopCountryId, model.EuVatShopCountryId_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatAllowVatExemption, model.EuVatAllowVatExemption_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatUseWebService, model.EuVatUseWebService_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatAssumeValid, model.EuVatAssumeValid_OverrideForStore, storeScope,vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(taxSettings, x => x.EuVatEmailAdminWhenNewVatSubmitted, model.EuVatEmailAdminWhenNewVatSubmitted_OverrideForStore, storeScope,vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -675,7 +675,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> Catalog(CatalogSettingsModel model)
+        public virtual async Task<IActionResult> Catalog(CatalogSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -684,100 +684,101 @@ namespace Nop.Web.Areas.Admin.Controllers
             {
                 //load settings for a chosen store scope
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var catalogSettings = await _settingService.LoadSettingAsync<CatalogSettings>(storeScope);
+                var catalogSettings = await _settingService.LoadSettingAsync<CatalogSettings>(storeScope,vendorId);
                 catalogSettings = model.ToSettings(catalogSettings);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowViewUnpublishedProductPage, model.AllowViewUnpublishedProductPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayDiscontinuedMessageForUnpublishedProducts, model.DisplayDiscontinuedMessageForUnpublishedProducts_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowSkuOnProductDetailsPage, model.ShowSkuOnProductDetailsPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowSkuOnCatalogPages, model.ShowSkuOnCatalogPages_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowManufacturerPartNumber, model.ShowManufacturerPartNumber_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowGtin, model.ShowGtin_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowFreeShippingNotification, model.ShowFreeShippingNotification_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowProductSorting, model.AllowProductSorting_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowProductViewModeChanging, model.AllowProductViewModeChanging_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DefaultViewMode, model.DefaultViewMode_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowProductsFromSubcategories, model.ShowProductsFromSubcategories_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowCategoryProductNumber, model.ShowCategoryProductNumber_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowCategoryProductNumberIncludingSubcategories, model.ShowCategoryProductNumberIncludingSubcategories_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.CategoryBreadcrumbEnabled, model.CategoryBreadcrumbEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowShareButton, model.ShowShareButton_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.PageShareCode, model.PageShareCode_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductReviewsMustBeApproved, model.ProductReviewsMustBeApproved_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.OneReviewPerProductFromCustomer, model.OneReviewPerProductFromCustomer, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowAnonymousUsersToReviewProduct, model.AllowAnonymousUsersToReviewProduct_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductReviewPossibleOnlyAfterPurchasing, model.ProductReviewPossibleOnlyAfterPurchasing_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NotifyStoreOwnerAboutNewProductReviews, model.NotifyStoreOwnerAboutNewProductReviews_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NotifyCustomerAboutProductReviewReply, model.NotifyCustomerAboutProductReviewReply_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.EmailAFriendEnabled, model.EmailAFriendEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowAnonymousUsersToEmailAFriend, model.AllowAnonymousUsersToEmailAFriend_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.RecentlyViewedProductsNumber, model.RecentlyViewedProductsNumber_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.RecentlyViewedProductsEnabled, model.RecentlyViewedProductsEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NewProductsNumber, model.NewProductsNumber_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NewProductsEnabled, model.NewProductsEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.CompareProductsEnabled, model.CompareProductsEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowBestsellersOnHomepage, model.ShowBestsellersOnHomepage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NumberOfBestsellersOnHomepage, model.NumberOfBestsellersOnHomepage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPageProductsPerPage, model.SearchPageProductsPerPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPageAllowCustomersToSelectPageSize, model.SearchPageAllowCustomersToSelectPageSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPagePageSizeOptions, model.SearchPagePageSizeOptions_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPagePriceRangeFiltering, model.SearchPagePriceRangeFiltering_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPagePriceFrom, model.SearchPagePriceFrom_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPagePriceTo, model.SearchPagePriceTo_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPageManuallyPriceRange, model.SearchPageManuallyPriceRange_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductSearchAutoCompleteEnabled, model.ProductSearchAutoCompleteEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductSearchEnabled, model.ProductSearchEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductSearchAutoCompleteNumberOfProducts, model.ProductSearchAutoCompleteNumberOfProducts_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowProductImagesInSearchAutoComplete, model.ShowProductImagesInSearchAutoComplete_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowLinkToAllResultInSearchAutoComplete, model.ShowLinkToAllResultInSearchAutoComplete_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductSearchTermMinimumLength, model.ProductSearchTermMinimumLength_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsAlsoPurchasedEnabled, model.ProductsAlsoPurchasedEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsAlsoPurchasedNumber, model.ProductsAlsoPurchasedNumber_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NumberOfProductTags, model.NumberOfProductTags_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPageSize, model.ProductsByTagPageSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagAllowCustomersToSelectPageSize, model.ProductsByTagAllowCustomersToSelectPageSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPageSizeOptions, model.ProductsByTagPageSizeOptions_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPriceRangeFiltering, model.ProductsByTagPriceRangeFiltering_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPriceFrom, model.ProductsByTagPriceFrom_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPriceTo, model.ProductsByTagPriceTo_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagManuallyPriceRange, model.ProductsByTagManuallyPriceRange_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.IncludeShortDescriptionInCompareProducts, model.IncludeShortDescriptionInCompareProducts_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.IncludeFullDescriptionInCompareProducts, model.IncludeFullDescriptionInCompareProducts_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ManufacturersBlockItemsToDisplay, model.ManufacturersBlockItemsToDisplay_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoFooter, model.DisplayTaxShippingInfoFooter_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoProductDetailsPage, model.DisplayTaxShippingInfoProductDetailsPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoProductBoxes, model.DisplayTaxShippingInfoProductBoxes_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoShoppingCart, model.DisplayTaxShippingInfoShoppingCart_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoWishlist, model.DisplayTaxShippingInfoWishlist_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoOrderDetailsPage, model.DisplayTaxShippingInfoOrderDetailsPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowProductReviewsPerStore, model.ShowProductReviewsPerStore_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowProductReviewsTabOnAccountPage, model.ShowProductReviewsOnAccountPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductReviewsPageSizeOnAccountPage, model.ProductReviewsPageSizeOnAccountPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductReviewsSortByCreatedDateAscending, model.ProductReviewsSortByCreatedDateAscending_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportProductAttributes, model.ExportImportProductAttributes_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportProductSpecificationAttributes, model.ExportImportProductSpecificationAttributes_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportProductCategoryBreadcrumb, model.ExportImportProductCategoryBreadcrumb_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportCategoriesUsingCategoryName, model.ExportImportCategoriesUsingCategoryName_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportAllowDownloadImages, model.ExportImportAllowDownloadImages_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportSplitProductsFile, model.ExportImportSplitProductsFile_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.RemoveRequiredProducts, model.RemoveRequiredProducts_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportRelatedEntitiesByName, model.ExportImportRelatedEntitiesByName_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportProductUseLimitedToStores, model.ExportImportProductUseLimitedToStores_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayDatePreOrderAvailability, model.DisplayDatePreOrderAvailability_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.UseAjaxCatalogProductsLoading, model.UseAjaxCatalogProductsLoading_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.EnableManufacturerFiltering, model.EnableManufacturerFiltering_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.EnablePriceRangeFiltering, model.EnablePriceRangeFiltering_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AttributeValueOutOfStockDisplayType, model.AttributeValueOutOfStockDisplayType_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowViewUnpublishedProductPage, model.AllowViewUnpublishedProductPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayDiscontinuedMessageForUnpublishedProducts, model.DisplayDiscontinuedMessageForUnpublishedProducts_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowSkuOnProductDetailsPage, model.ShowSkuOnProductDetailsPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowSkuOnCatalogPages, model.ShowSkuOnCatalogPages_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowManufacturerPartNumber, model.ShowManufacturerPartNumber_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowGtin, model.ShowGtin_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowFreeShippingNotification, model.ShowFreeShippingNotification_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowProductSorting, model.AllowProductSorting_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowProductViewModeChanging, model.AllowProductViewModeChanging_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DefaultViewMode, model.DefaultViewMode_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowProductsFromSubcategories, model.ShowProductsFromSubcategories_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowCategoryProductNumber, model.ShowCategoryProductNumber_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowCategoryProductNumberIncludingSubcategories, model.ShowCategoryProductNumberIncludingSubcategories_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.CategoryBreadcrumbEnabled, model.CategoryBreadcrumbEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowShareButton, model.ShowShareButton_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.PageShareCode, model.PageShareCode_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductReviewsMustBeApproved, model.ProductReviewsMustBeApproved_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.OneReviewPerProductFromCustomer, model.OneReviewPerProductFromCustomer, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowAnonymousUsersToReviewProduct, model.AllowAnonymousUsersToReviewProduct_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductReviewPossibleOnlyAfterPurchasing, model.ProductReviewPossibleOnlyAfterPurchasing_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NotifyStoreOwnerAboutNewProductReviews, model.NotifyStoreOwnerAboutNewProductReviews_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NotifyCustomerAboutProductReviewReply, model.NotifyCustomerAboutProductReviewReply_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.EmailAFriendEnabled, model.EmailAFriendEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AllowAnonymousUsersToEmailAFriend, model.AllowAnonymousUsersToEmailAFriend_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.RecentlyViewedProductsNumber, model.RecentlyViewedProductsNumber_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.RecentlyViewedProductsEnabled, model.RecentlyViewedProductsEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NewProductsNumber, model.NewProductsNumber_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NewProductsEnabled, model.NewProductsEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.CompareProductsEnabled, model.CompareProductsEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowBestsellersOnHomepage, model.ShowBestsellersOnHomepage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NumberOfBestsellersOnHomepage, model.NumberOfBestsellersOnHomepage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPageProductsPerPage, model.SearchPageProductsPerPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPageAllowCustomersToSelectPageSize, model.SearchPageAllowCustomersToSelectPageSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPagePageSizeOptions, model.SearchPagePageSizeOptions_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPagePriceRangeFiltering, model.SearchPagePriceRangeFiltering_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPagePriceFrom, model.SearchPagePriceFrom_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPagePriceTo, model.SearchPagePriceTo_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.SearchPageManuallyPriceRange, model.SearchPageManuallyPriceRange_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductSearchAutoCompleteEnabled, model.ProductSearchAutoCompleteEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductSearchEnabled, model.ProductSearchEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductSearchAutoCompleteNumberOfProducts, model.ProductSearchAutoCompleteNumberOfProducts_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowProductImagesInSearchAutoComplete, model.ShowProductImagesInSearchAutoComplete_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowLinkToAllResultInSearchAutoComplete, model.ShowLinkToAllResultInSearchAutoComplete_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductSearchTermMinimumLength, model.ProductSearchTermMinimumLength_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsAlsoPurchasedEnabled, model.ProductsAlsoPurchasedEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsAlsoPurchasedNumber, model.ProductsAlsoPurchasedNumber_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.NumberOfProductTags, model.NumberOfProductTags_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPageSize, model.ProductsByTagPageSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagAllowCustomersToSelectPageSize, model.ProductsByTagAllowCustomersToSelectPageSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPageSizeOptions, model.ProductsByTagPageSizeOptions_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPriceRangeFiltering, model.ProductsByTagPriceRangeFiltering_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPriceFrom, model.ProductsByTagPriceFrom_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagPriceTo, model.ProductsByTagPriceTo_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductsByTagManuallyPriceRange, model.ProductsByTagManuallyPriceRange_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.IncludeShortDescriptionInCompareProducts, model.IncludeShortDescriptionInCompareProducts_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.IncludeFullDescriptionInCompareProducts, model.IncludeFullDescriptionInCompareProducts_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ManufacturersBlockItemsToDisplay, model.ManufacturersBlockItemsToDisplay_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoFooter, model.DisplayTaxShippingInfoFooter_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoProductDetailsPage, model.DisplayTaxShippingInfoProductDetailsPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoProductBoxes, model.DisplayTaxShippingInfoProductBoxes_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoShoppingCart, model.DisplayTaxShippingInfoShoppingCart_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoWishlist, model.DisplayTaxShippingInfoWishlist_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayTaxShippingInfoOrderDetailsPage, model.DisplayTaxShippingInfoOrderDetailsPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowProductReviewsPerStore, model.ShowProductReviewsPerStore_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ShowProductReviewsTabOnAccountPage, model.ShowProductReviewsOnAccountPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductReviewsPageSizeOnAccountPage, model.ProductReviewsPageSizeOnAccountPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ProductReviewsSortByCreatedDateAscending, model.ProductReviewsSortByCreatedDateAscending_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportProductAttributes, model.ExportImportProductAttributes_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportProductSpecificationAttributes, model.ExportImportProductSpecificationAttributes_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportProductCategoryBreadcrumb, model.ExportImportProductCategoryBreadcrumb_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportCategoriesUsingCategoryName, model.ExportImportCategoriesUsingCategoryName_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportAllowDownloadImages, model.ExportImportAllowDownloadImages_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportSplitProductsFile, model.ExportImportSplitProductsFile_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.RemoveRequiredProducts, model.RemoveRequiredProducts_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportRelatedEntitiesByName, model.ExportImportRelatedEntitiesByName_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.ExportImportProductUseLimitedToStores, model.ExportImportProductUseLimitedToStores_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.DisplayDatePreOrderAvailability, model.DisplayDatePreOrderAvailability_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.UseAjaxCatalogProductsLoading, model.UseAjaxCatalogProductsLoading_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.EnableManufacturerFiltering, model.EnableManufacturerFiltering_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.EnablePriceRangeFiltering, model.EnablePriceRangeFiltering_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(catalogSettings, x => x.AttributeValueOutOfStockDisplayType, model.AttributeValueOutOfStockDisplayType_OverrideForStore, storeScope, vendorId, false);
 
                 //now settings not overridable per store
-                await _settingService.SaveSettingAsync(catalogSettings, x => x.IgnoreDiscounts, 0, false);
-                await _settingService.SaveSettingAsync(catalogSettings, x => x.IgnoreFeaturedProducts, 0, false);
-                await _settingService.SaveSettingAsync(catalogSettings, x => x.IgnoreAcl, 0, false);
-                await _settingService.SaveSettingAsync(catalogSettings, x => x.IgnoreStoreLimitations, 0, false);
-                await _settingService.SaveSettingAsync(catalogSettings, x => x.CacheProductPrices, 0, false);
+                //mais toujours overridable par vendeur
+                await _settingService.SaveSettingAsync(catalogSettings, x => x.IgnoreDiscounts, 0, vendorId, false);
+                await _settingService.SaveSettingAsync(catalogSettings, x => x.IgnoreFeaturedProducts, 0, vendorId, false);
+                await _settingService.SaveSettingAsync(catalogSettings, x => x.IgnoreAcl, 0, vendorId, false);
+                await _settingService.SaveSettingAsync(catalogSettings, x => x.IgnoreStoreLimitations, 0, vendorId, false);
+                await _settingService.SaveSettingAsync(catalogSettings, x => x.CacheProductPrices, 0, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -812,13 +813,13 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> SortOptionUpdate(SortOptionModel model)
+        public virtual async Task<IActionResult> SortOptionUpdate(SortOptionModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
 
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-            var catalogSettings = await _settingService.LoadSettingAsync<CatalogSettings>(storeScope);
+            var catalogSettings = await _settingService.LoadSettingAsync<CatalogSettings>(storeScope, vendorId);
 
             catalogSettings.ProductSortingEnumDisplayOrder[model.Id] = model.DisplayOrder;
             if (model.IsActive && catalogSettings.ProductSortingEnumDisabled.Contains(model.Id))
@@ -826,8 +827,8 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!model.IsActive && !catalogSettings.ProductSortingEnumDisabled.Contains(model.Id))
                 catalogSettings.ProductSortingEnumDisabled.Add(model.Id);
 
-            await _settingService.SaveSettingAsync(catalogSettings, x => x.ProductSortingEnumDisplayOrder, storeScope, false);
-            await _settingService.SaveSettingAsync(catalogSettings, x => x.ProductSortingEnumDisabled, storeScope, false);
+            await _settingService.SaveSettingAsync(catalogSettings, x => x.ProductSortingEnumDisplayOrder, storeScope, vendorId, false);
+            await _settingService.SaveSettingAsync(catalogSettings, x => x.ProductSortingEnumDisabled, storeScope, vendorId, false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
@@ -849,7 +850,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> RewardPoints(RewardPointsSettingsModel model)
+        public virtual async Task<IActionResult> RewardPoints(RewardPointsSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -858,7 +859,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             {
                 //load settings for a chosen store scope
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var rewardPointsSettings = await _settingService.LoadSettingAsync<RewardPointsSettings>(storeScope);
+                var rewardPointsSettings = await _settingService.LoadSettingAsync<RewardPointsSettings>(storeScope, vendorId);
                 rewardPointsSettings = model.ToSettings(rewardPointsSettings);
 
                 if (model.ActivatePointsImmediately)
@@ -867,21 +868,21 @@ namespace Nop.Web.Areas.Admin.Controllers
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.Enabled, model.Enabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.ExchangeRate, model.ExchangeRate_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.MinimumRewardPointsToUse, model.MinimumRewardPointsToUse_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.MaximumRewardPointsToUsePerOrder, model.MaximumRewardPointsToUsePerOrder_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PointsForRegistration, model.PointsForRegistration_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.RegistrationPointsValidity, model.RegistrationPointsValidity_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PointsForPurchases_Amount, model.PointsForPurchases_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PointsForPurchases_Points, model.PointsForPurchases_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.MinOrderTotalToAwardPoints, model.MinOrderTotalToAwardPoints_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PurchasesPointsValidity, model.PurchasesPointsValidity_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.ActivationDelay, model.ActivationDelay_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.ActivationDelayPeriodId, model.ActivationDelay_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.DisplayHowMuchWillBeEarned, model.DisplayHowMuchWillBeEarned_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PageSize, model.PageSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingAsync(rewardPointsSettings, x => x.PointsAccumulatedForAllStores, 0, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.Enabled, model.Enabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.ExchangeRate, model.ExchangeRate_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.MinimumRewardPointsToUse, model.MinimumRewardPointsToUse_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.MaximumRewardPointsToUsePerOrder, model.MaximumRewardPointsToUsePerOrder_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PointsForRegistration, model.PointsForRegistration_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.RegistrationPointsValidity, model.RegistrationPointsValidity_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PointsForPurchases_Amount, model.PointsForPurchases_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PointsForPurchases_Points, model.PointsForPurchases_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.MinOrderTotalToAwardPoints, model.MinOrderTotalToAwardPoints_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PurchasesPointsValidity, model.PurchasesPointsValidity_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.ActivationDelay, model.ActivationDelay_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.ActivationDelayPeriodId, model.ActivationDelay_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.DisplayHowMuchWillBeEarned, model.DisplayHowMuchWillBeEarned_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(rewardPointsSettings, x => x.PageSize, model.PageSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingAsync(rewardPointsSettings, x => x.PointsAccumulatedForAllStores, 0, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -915,7 +916,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> Order(OrderSettingsModel model)
+        public virtual async Task<IActionResult> Order(OrderSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -924,41 +925,41 @@ namespace Nop.Web.Areas.Admin.Controllers
             {
                 //load settings for a chosen store scope
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var orderSettings = await _settingService.LoadSettingAsync<OrderSettings>(storeScope);
+                var orderSettings = await _settingService.LoadSettingAsync<OrderSettings>(storeScope, vendorId);
                 orderSettings = model.ToSettings(orderSettings);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.IsReOrderAllowed, model.IsReOrderAllowed_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.MinOrderSubtotalAmount, model.MinOrderSubtotalAmount_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.MinOrderSubtotalAmountIncludingTax, model.MinOrderSubtotalAmountIncludingTax_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.MinOrderTotalAmount, model.MinOrderTotalAmount_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AutoUpdateOrderTotalsOnEditingOrder, model.AutoUpdateOrderTotalsOnEditingOrder_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AnonymousCheckoutAllowed, model.AnonymousCheckoutAllowed_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.CheckoutDisabled, model.CheckoutDisabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.TermsOfServiceOnShoppingCartPage, model.TermsOfServiceOnShoppingCartPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.TermsOfServiceOnOrderConfirmPage, model.TermsOfServiceOnOrderConfirmPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.OnePageCheckoutEnabled, model.OnePageCheckoutEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.OnePageCheckoutDisplayOrderTotalsOnPaymentInfoTab, model.OnePageCheckoutDisplayOrderTotalsOnPaymentInfoTab_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.DisableBillingAddressCheckoutStep, model.DisableBillingAddressCheckoutStep_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.DisableOrderCompletedPage, model.DisableOrderCompletedPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.DisplayPickupInStoreOnShippingMethodPage, model.DisplayPickupInStoreOnShippingMethodPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AttachPdfInvoiceToOrderPlacedEmail, model.AttachPdfInvoiceToOrderPlacedEmail_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AttachPdfInvoiceToOrderPaidEmail, model.AttachPdfInvoiceToOrderPaidEmail_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AttachPdfInvoiceToOrderCompletedEmail, model.AttachPdfInvoiceToOrderCompletedEmail_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.ReturnRequestsEnabled, model.ReturnRequestsEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.ReturnRequestsAllowFiles, model.ReturnRequestsAllowFiles_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.ReturnRequestNumberMask, model.ReturnRequestNumberMask_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.NumberOfDaysReturnRequestAvailable, model.NumberOfDaysReturnRequestAvailable_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.CustomOrderNumberMask, model.CustomOrderNumberMask_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.ExportWithProducts, model.ExportWithProducts_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AllowAdminsToBuyCallForPriceProducts, model.AllowAdminsToBuyCallForPriceProducts_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.DeleteGiftCardUsageHistory, model.DeleteGiftCardUsageHistory_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingAsync(orderSettings, x => x.ActivateGiftCardsAfterCompletingOrder, 0, false);
-                await _settingService.SaveSettingAsync(orderSettings, x => x.DeactivateGiftCardsAfterCancellingOrder, 0, false);
-                await _settingService.SaveSettingAsync(orderSettings, x => x.DeactivateGiftCardsAfterDeletingOrder, 0, false);
-                await _settingService.SaveSettingAsync(orderSettings, x => x.CompleteOrderWhenDelivered, 0, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.IsReOrderAllowed, model.IsReOrderAllowed_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.MinOrderSubtotalAmount, model.MinOrderSubtotalAmount_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.MinOrderSubtotalAmountIncludingTax, model.MinOrderSubtotalAmountIncludingTax_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.MinOrderTotalAmount, model.MinOrderTotalAmount_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AutoUpdateOrderTotalsOnEditingOrder, model.AutoUpdateOrderTotalsOnEditingOrder_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AnonymousCheckoutAllowed, model.AnonymousCheckoutAllowed_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.CheckoutDisabled, model.CheckoutDisabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.TermsOfServiceOnShoppingCartPage, model.TermsOfServiceOnShoppingCartPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.TermsOfServiceOnOrderConfirmPage, model.TermsOfServiceOnOrderConfirmPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.OnePageCheckoutEnabled, model.OnePageCheckoutEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.OnePageCheckoutDisplayOrderTotalsOnPaymentInfoTab, model.OnePageCheckoutDisplayOrderTotalsOnPaymentInfoTab_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.DisableBillingAddressCheckoutStep, model.DisableBillingAddressCheckoutStep_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.DisableOrderCompletedPage, model.DisableOrderCompletedPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.DisplayPickupInStoreOnShippingMethodPage, model.DisplayPickupInStoreOnShippingMethodPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AttachPdfInvoiceToOrderPlacedEmail, model.AttachPdfInvoiceToOrderPlacedEmail_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AttachPdfInvoiceToOrderPaidEmail, model.AttachPdfInvoiceToOrderPaidEmail_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AttachPdfInvoiceToOrderCompletedEmail, model.AttachPdfInvoiceToOrderCompletedEmail_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.ReturnRequestsEnabled, model.ReturnRequestsEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.ReturnRequestsAllowFiles, model.ReturnRequestsAllowFiles_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.ReturnRequestNumberMask, model.ReturnRequestNumberMask_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.NumberOfDaysReturnRequestAvailable, model.NumberOfDaysReturnRequestAvailable_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.CustomOrderNumberMask, model.CustomOrderNumberMask_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.ExportWithProducts, model.ExportWithProducts_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.AllowAdminsToBuyCallForPriceProducts, model.AllowAdminsToBuyCallForPriceProducts_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(orderSettings, x => x.DeleteGiftCardUsageHistory, model.DeleteGiftCardUsageHistory_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingAsync(orderSettings, x => x.ActivateGiftCardsAfterCompletingOrder, 0, vendorId, false);
+                await _settingService.SaveSettingAsync(orderSettings, x => x.DeactivateGiftCardsAfterCancellingOrder, 0, vendorId, false);
+                await _settingService.SaveSettingAsync(orderSettings, x => x.DeactivateGiftCardsAfterDeletingOrder, 0, vendorId, false);
+                await _settingService.SaveSettingAsync(orderSettings, x => x.CompleteOrderWhenDelivered, 0, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -1005,7 +1006,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> ShoppingCart(ShoppingCartSettingsModel model)
+        public virtual async Task<IActionResult> ShoppingCart(ShoppingCartSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -1014,31 +1015,31 @@ namespace Nop.Web.Areas.Admin.Controllers
             { 
                 //load settings for a chosen store scope
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var shoppingCartSettings = await _settingService.LoadSettingAsync<ShoppingCartSettings>(storeScope);
+                var shoppingCartSettings = await _settingService.LoadSettingAsync<ShoppingCartSettings>(storeScope, vendorId);
                 shoppingCartSettings = model.ToSettings(shoppingCartSettings);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.DisplayCartAfterAddingProduct, model.DisplayCartAfterAddingProduct_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.DisplayWishlistAfterAddingProduct, model.DisplayWishlistAfterAddingProduct_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MaximumShoppingCartItems, model.MaximumShoppingCartItems_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MaximumWishlistItems, model.MaximumWishlistItems_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.AllowOutOfStockItemsToBeAddedToWishlist, model.AllowOutOfStockItemsToBeAddedToWishlist_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MoveItemsFromWishlistToCart, model.MoveItemsFromWishlistToCart_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.CartsSharedBetweenStores, model.CartsSharedBetweenStores_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowProductImagesOnShoppingCart, model.ShowProductImagesOnShoppingCart_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowProductImagesOnWishList, model.ShowProductImagesOnWishList_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowDiscountBox, model.ShowDiscountBox_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowGiftCardBox, model.ShowGiftCardBox_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.CrossSellsNumber, model.CrossSellsNumber_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.EmailWishlistEnabled, model.EmailWishlistEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.AllowAnonymousUsersToEmailWishlist, model.AllowAnonymousUsersToEmailWishlist_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MiniShoppingCartEnabled, model.MiniShoppingCartEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowProductImagesInMiniShoppingCart, model.ShowProductImagesInMiniShoppingCart_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MiniShoppingCartProductNumber, model.MiniShoppingCartProductNumber_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.AllowCartItemEditing, model.AllowCartItemEditing_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.GroupTierPricesForDistinctShoppingCartItems, model.GroupTierPricesForDistinctShoppingCartItems_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.DisplayCartAfterAddingProduct, model.DisplayCartAfterAddingProduct_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.DisplayWishlistAfterAddingProduct, model.DisplayWishlistAfterAddingProduct_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MaximumShoppingCartItems, model.MaximumShoppingCartItems_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MaximumWishlistItems, model.MaximumWishlistItems_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.AllowOutOfStockItemsToBeAddedToWishlist, model.AllowOutOfStockItemsToBeAddedToWishlist_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MoveItemsFromWishlistToCart, model.MoveItemsFromWishlistToCart_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.CartsSharedBetweenStores, model.CartsSharedBetweenStores_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowProductImagesOnShoppingCart, model.ShowProductImagesOnShoppingCart_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowProductImagesOnWishList, model.ShowProductImagesOnWishList_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowDiscountBox, model.ShowDiscountBox_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowGiftCardBox, model.ShowGiftCardBox_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.CrossSellsNumber, model.CrossSellsNumber_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.EmailWishlistEnabled, model.EmailWishlistEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.AllowAnonymousUsersToEmailWishlist, model.AllowAnonymousUsersToEmailWishlist_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MiniShoppingCartEnabled, model.MiniShoppingCartEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.ShowProductImagesInMiniShoppingCart, model.ShowProductImagesInMiniShoppingCart_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.MiniShoppingCartProductNumber, model.MiniShoppingCartProductNumber_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.AllowCartItemEditing, model.AllowCartItemEditing_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(shoppingCartSettings, x => x.GroupTierPricesForDistinctShoppingCartItems, model.GroupTierPricesForDistinctShoppingCartItems_OverrideForStore, storeScope, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -1073,7 +1074,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         [HttpPost]
         [FormValueRequired("save")]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> Media(MediaSettingsModel model)
+        public virtual async Task<IActionResult> Media(MediaSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -1082,27 +1083,27 @@ namespace Nop.Web.Areas.Admin.Controllers
             { 
                 //load settings for a chosen store scope
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var mediaSettings = await _settingService.LoadSettingAsync<MediaSettings>(storeScope);
+                var mediaSettings = await _settingService.LoadSettingAsync<MediaSettings>(storeScope, vendorId);
                 mediaSettings = model.ToSettings(mediaSettings);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.AvatarPictureSize, model.AvatarPictureSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ProductThumbPictureSize, model.ProductThumbPictureSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ProductDetailsPictureSize, model.ProductDetailsPictureSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ProductThumbPictureSizeOnProductDetailsPage, model.ProductThumbPictureSizeOnProductDetailsPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.AssociatedProductPictureSize, model.AssociatedProductPictureSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.CategoryThumbPictureSize, model.CategoryThumbPictureSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ManufacturerThumbPictureSize, model.ManufacturerThumbPictureSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.VendorThumbPictureSize, model.VendorThumbPictureSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.CartThumbPictureSize, model.CartThumbPictureSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.MiniCartThumbPictureSize, model.MiniCartThumbPictureSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.MaximumImageSize, model.MaximumImageSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.MultipleThumbDirectories, model.MultipleThumbDirectories_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.DefaultImageQuality, model.DefaultImageQuality_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ImportProductImagesUsingHash, model.ImportProductImagesUsingHash_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.DefaultPictureZoomEnabled, model.DefaultPictureZoomEnabled_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.AvatarPictureSize, model.AvatarPictureSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ProductThumbPictureSize, model.ProductThumbPictureSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ProductDetailsPictureSize, model.ProductDetailsPictureSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ProductThumbPictureSizeOnProductDetailsPage, model.ProductThumbPictureSizeOnProductDetailsPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.AssociatedProductPictureSize, model.AssociatedProductPictureSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.CategoryThumbPictureSize, model.CategoryThumbPictureSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ManufacturerThumbPictureSize, model.ManufacturerThumbPictureSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.VendorThumbPictureSize, model.VendorThumbPictureSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.CartThumbPictureSize, model.CartThumbPictureSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.MiniCartThumbPictureSize, model.MiniCartThumbPictureSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.MaximumImageSize, model.MaximumImageSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.MultipleThumbDirectories, model.MultipleThumbDirectories_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.DefaultImageQuality, model.DefaultImageQuality_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.ImportProductImagesUsingHash, model.ImportProductImagesUsingHash_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(mediaSettings, x => x.DefaultPictureZoomEnabled, model.DefaultPictureZoomEnabled_OverrideForStore, storeScope, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -1165,7 +1166,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> CustomerUser(CustomerUserSettingsModel model)
+        public virtual async Task<IActionResult> CustomerUser(CustomerUserSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -1173,7 +1174,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (ModelState.IsValid)
             { 
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var customerSettings = await _settingService.LoadSettingAsync<CustomerSettings>(storeScope);
+                var customerSettings = await _settingService.LoadSettingAsync<CustomerSettings>(storeScope, vendorId);
 
                 var lastUsernameValidationRule = customerSettings.UsernameValidationRule;
                 var lastUsernameValidationEnabledValue = customerSettings.UsernameValidationEnabled;
@@ -1184,10 +1185,10 @@ namespace Nop.Web.Areas.Admin.Controllers
                 var lastPhoneNumberValidationEnabledValue = customerSettings.PhoneNumberValidationEnabled;
                 var lastPhoneNumberValidationUseRegexValue = customerSettings.PhoneNumberValidationUseRegex;
 
-                var addressSettings = await _settingService.LoadSettingAsync<AddressSettings>(storeScope);
-                var dateTimeSettings = await _settingService.LoadSettingAsync<DateTimeSettings>(storeScope);
-                var externalAuthenticationSettings = await _settingService.LoadSettingAsync<ExternalAuthenticationSettings>(storeScope);
-                var multiFactorAuthenticationSettings = await _settingService.LoadSettingAsync<MultiFactorAuthenticationSettings>(storeScope);
+                var addressSettings = await _settingService.LoadSettingAsync<AddressSettings>(storeScope, vendorId);
+                var dateTimeSettings = await _settingService.LoadSettingAsync<DateTimeSettings>(storeScope, vendorId);
+                var externalAuthenticationSettings = await _settingService.LoadSettingAsync<ExternalAuthenticationSettings>(storeScope, vendorId);
+                var multiFactorAuthenticationSettings = await _settingService.LoadSettingAsync<MultiFactorAuthenticationSettings>(storeScope, vendorId);
 
                 customerSettings = model.CustomerSettings.ToSettings(customerSettings);
 
@@ -1227,20 +1228,20 @@ namespace Nop.Web.Areas.Admin.Controllers
                     }
                 }
 
-                await _settingService.SaveSettingAsync(customerSettings);
+                await _settingService.SaveSettingAsync(customerSettings,storeScope,vendorId);
 
                 addressSettings = model.AddressSettings.ToSettings(addressSettings);
-                await _settingService.SaveSettingAsync(addressSettings);
+                await _settingService.SaveSettingAsync(addressSettings, storeScope, vendorId);
 
                 dateTimeSettings.DefaultStoreTimeZoneId = model.DateTimeSettings.DefaultStoreTimeZoneId;
                 dateTimeSettings.AllowCustomersToSetTimeZone = model.DateTimeSettings.AllowCustomersToSetTimeZone;
-                await _settingService.SaveSettingAsync(dateTimeSettings);
+                await _settingService.SaveSettingAsync(dateTimeSettings,storeScope,vendorId);
 
                 externalAuthenticationSettings.AllowCustomersToRemoveAssociations = model.ExternalAuthenticationSettings.AllowCustomersToRemoveAssociations;
-                await _settingService.SaveSettingAsync(externalAuthenticationSettings);
+                await _settingService.SaveSettingAsync(externalAuthenticationSettings,storeScope,vendorId);
 
                 multiFactorAuthenticationSettings = model.MultiFactorAuthenticationSettings.ToSettings(multiFactorAuthenticationSettings);
-                await _settingService.SaveSettingAsync(multiFactorAuthenticationSettings);
+                await _settingService.SaveSettingAsync(multiFactorAuthenticationSettings, storeScope, vendorId);
 
                 //activity log
                 await _customerActivityService.InsertActivityAsync("EditSettings", await _localizationService.GetResourceAsync("ActivityLog.EditSettings"));
@@ -1273,7 +1274,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> Gdpr(GdprSettingsModel model)
+        public virtual async Task<IActionResult> Gdpr(GdprSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -1282,16 +1283,16 @@ namespace Nop.Web.Areas.Admin.Controllers
             { 
                 //load settings for a chosen store scope
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-                var gdprSettings = await _settingService.LoadSettingAsync<GdprSettings>(storeScope);
+                var gdprSettings = await _settingService.LoadSettingAsync<GdprSettings>(storeScope, vendorId);
                 gdprSettings = model.ToSettings(gdprSettings);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(gdprSettings, x => x.GdprEnabled, model.GdprEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(gdprSettings, x => x.LogPrivacyPolicyConsent, model.LogPrivacyPolicyConsent_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(gdprSettings, x => x.LogNewsletterConsent, model.LogNewsletterConsent_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(gdprSettings, x => x.LogUserProfileChanges, model.LogUserProfileChanges_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(gdprSettings, x => x.GdprEnabled, model.GdprEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(gdprSettings, x => x.LogPrivacyPolicyConsent, model.LogPrivacyPolicyConsent_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(gdprSettings, x => x.LogNewsletterConsent, model.LogNewsletterConsent_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(gdprSettings, x => x.LogUserProfileChanges, model.LogUserProfileChanges_OverrideForStore, storeScope, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -1463,7 +1464,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         [HttpPost]
         [FormValueRequired("save")]
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IActionResult> GeneralCommon(GeneralCommonSettingsModel model)
+        public virtual async Task<IActionResult> GeneralCommon(GeneralCommonSettingsModel model, int vendorId = 0)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
                 return AccessDeniedView();
@@ -1474,9 +1475,9 @@ namespace Nop.Web.Areas.Admin.Controllers
                 var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
 
                 //store information settings
-                var storeInformationSettings = await _settingService.LoadSettingAsync<StoreInformationSettings>(storeScope);
-                var commonSettings = await _settingService.LoadSettingAsync<CommonSettings>(storeScope);
-                var sitemapSettings = await _settingService.LoadSettingAsync<SitemapSettings>(storeScope);
+                var storeInformationSettings = await _settingService.LoadSettingAsync<StoreInformationSettings>(storeScope, vendorId);
+                var commonSettings = await _settingService.LoadSettingAsync<CommonSettings>(storeScope, vendorId);
+                var sitemapSettings = await _settingService.LoadSettingAsync<SitemapSettings>(storeScope, vendorId);
 
                 storeInformationSettings.StoreClosed = model.StoreInformationSettings.StoreClosed;
                 storeInformationSettings.DefaultStoreTheme = model.StoreInformationSettings.DefaultStoreTheme;
@@ -1514,36 +1515,36 @@ namespace Nop.Web.Areas.Admin.Controllers
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.StoreClosed, model.StoreInformationSettings.StoreClosed_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.DefaultStoreTheme, model.StoreInformationSettings.DefaultStoreTheme_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.AllowCustomerToSelectTheme, model.StoreInformationSettings.AllowCustomerToSelectTheme_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.LogoPictureId, model.StoreInformationSettings.LogoPictureId_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.DisplayEuCookieLawWarning, model.StoreInformationSettings.DisplayEuCookieLawWarning_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.FacebookLink, model.StoreInformationSettings.FacebookLink_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.TwitterLink, model.StoreInformationSettings.TwitterLink_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.YoutubeLink, model.StoreInformationSettings.YoutubeLink_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.SubjectFieldOnContactUsForm, model.StoreInformationSettings.SubjectFieldOnContactUsForm_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.UseSystemEmailForContactUsForm, model.StoreInformationSettings.UseSystemEmailForContactUsForm_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.PopupForTermsOfServiceLinks, model.StoreInformationSettings.PopupForTermsOfServiceLinks_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapEnabled, model.SitemapSettings.SitemapEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapPageSize, model.SitemapSettings.SitemapPageSize_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeCategories, model.SitemapSettings.SitemapIncludeCategories_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeManufacturers, model.SitemapSettings.SitemapIncludeManufacturers_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeProducts, model.SitemapSettings.SitemapIncludeProducts_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeProductTags, model.SitemapSettings.SitemapIncludeProductTags_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeBlogPosts, model.SitemapSettings.SitemapIncludeBlogPosts_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeNews, model.SitemapSettings.SitemapIncludeNews_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeTopics, model.SitemapSettings.SitemapIncludeTopics_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.EnableHtmlMinification, model.MinificationSettings.EnableHtmlMinification_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.EnableJsBundling, model.MinificationSettings.EnableJsBundling_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.EnableCssBundling, model.MinificationSettings.EnableCssBundling_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.UseResponseCompression, model.MinificationSettings.UseResponseCompression_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.StoreClosed, model.StoreInformationSettings.StoreClosed_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.DefaultStoreTheme, model.StoreInformationSettings.DefaultStoreTheme_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.AllowCustomerToSelectTheme, model.StoreInformationSettings.AllowCustomerToSelectTheme_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.LogoPictureId, model.StoreInformationSettings.LogoPictureId_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.DisplayEuCookieLawWarning, model.StoreInformationSettings.DisplayEuCookieLawWarning_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.FacebookLink, model.StoreInformationSettings.FacebookLink_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.TwitterLink, model.StoreInformationSettings.TwitterLink_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(storeInformationSettings, x => x.YoutubeLink, model.StoreInformationSettings.YoutubeLink_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.SubjectFieldOnContactUsForm, model.StoreInformationSettings.SubjectFieldOnContactUsForm_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.UseSystemEmailForContactUsForm, model.StoreInformationSettings.UseSystemEmailForContactUsForm_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.PopupForTermsOfServiceLinks, model.StoreInformationSettings.PopupForTermsOfServiceLinks_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapEnabled, model.SitemapSettings.SitemapEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapPageSize, model.SitemapSettings.SitemapPageSize_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeCategories, model.SitemapSettings.SitemapIncludeCategories_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeManufacturers, model.SitemapSettings.SitemapIncludeManufacturers_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeProducts, model.SitemapSettings.SitemapIncludeProducts_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeProductTags, model.SitemapSettings.SitemapIncludeProductTags_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeBlogPosts, model.SitemapSettings.SitemapIncludeBlogPosts_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeNews, model.SitemapSettings.SitemapIncludeNews_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(sitemapSettings, x => x.SitemapIncludeTopics, model.SitemapSettings.SitemapIncludeTopics_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.EnableHtmlMinification, model.MinificationSettings.EnableHtmlMinification_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.EnableJsBundling, model.MinificationSettings.EnableJsBundling_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.EnableCssBundling, model.MinificationSettings.EnableCssBundling_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.UseResponseCompression, model.MinificationSettings.UseResponseCompression_OverrideForStore, storeScope, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
 
                 //seo settings
-                var seoSettings = await _settingService.LoadSettingAsync<SeoSettings>(storeScope);
+                var seoSettings = await _settingService.LoadSettingAsync<SeoSettings>(storeScope, vendorId);
                 seoSettings.PageTitleSeparator = model.SeoSettings.PageTitleSeparator;
                 seoSettings.PageTitleSeoAdjustment = (PageTitleSeoAdjustment)model.SeoSettings.PageTitleSeoAdjustment;
                 seoSettings.HomepageTitle = model.SeoSettings.HomepageTitle;
@@ -1563,21 +1564,21 @@ namespace Nop.Web.Areas.Admin.Controllers
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.PageTitleSeparator, model.SeoSettings.PageTitleSeparator_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.PageTitleSeoAdjustment, model.SeoSettings.PageTitleSeoAdjustment_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.HomepageTitle, model.SeoSettings.HomepageTitle_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.HomepageDescription, model.SeoSettings.HomepageDescription_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.DefaultTitle, model.SeoSettings.DefaultTitle_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.DefaultMetaKeywords, model.SeoSettings.DefaultMetaKeywords_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.DefaultMetaDescription, model.SeoSettings.DefaultMetaDescription_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.GenerateProductMetaDescription, model.SeoSettings.GenerateProductMetaDescription_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.ConvertNonWesternChars, model.SeoSettings.ConvertNonWesternChars_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.CanonicalUrlsEnabled, model.SeoSettings.CanonicalUrlsEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.WwwRequirement, model.SeoSettings.WwwRequirement_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.TwitterMetaTags, model.SeoSettings.TwitterMetaTags_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.OpenGraphMetaTags, model.SeoSettings.OpenGraphMetaTags_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.CustomHeadTags, model.SeoSettings.CustomHeadTags_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.MicrodataEnabled, model.SeoSettings.MicrodataEnabled_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.PageTitleSeparator, model.SeoSettings.PageTitleSeparator_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.PageTitleSeoAdjustment, model.SeoSettings.PageTitleSeoAdjustment_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.HomepageTitle, model.SeoSettings.HomepageTitle_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.HomepageDescription, model.SeoSettings.HomepageDescription_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.DefaultTitle, model.SeoSettings.DefaultTitle_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.DefaultMetaKeywords, model.SeoSettings.DefaultMetaKeywords_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.DefaultMetaDescription, model.SeoSettings.DefaultMetaDescription_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.GenerateProductMetaDescription, model.SeoSettings.GenerateProductMetaDescription_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.ConvertNonWesternChars, model.SeoSettings.ConvertNonWesternChars_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.CanonicalUrlsEnabled, model.SeoSettings.CanonicalUrlsEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.WwwRequirement, model.SeoSettings.WwwRequirement_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.TwitterMetaTags, model.SeoSettings.TwitterMetaTags_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.OpenGraphMetaTags, model.SeoSettings.OpenGraphMetaTags_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.CustomHeadTags, model.SeoSettings.CustomHeadTags_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(seoSettings, x => x.MicrodataEnabled, model.SeoSettings.MicrodataEnabled_OverrideForStore, storeScope, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -1592,10 +1593,10 @@ namespace Nop.Web.Areas.Admin.Controllers
                         if (!string.IsNullOrWhiteSpace(s))
                             securitySettings.AdminAreaAllowedIpAddresses.Add(s.Trim());
                 securitySettings.HoneypotEnabled = model.SecuritySettings.HoneypotEnabled;
-                await _settingService.SaveSettingAsync(securitySettings);
+                await _settingService.SaveSettingAsync(securitySettings,storeScope,0);
 
                 //captcha settings
-                var captchaSettings = await _settingService.LoadSettingAsync<CaptchaSettings>(storeScope);
+                var captchaSettings = await _settingService.LoadSettingAsync<CaptchaSettings>(storeScope,vendorId);
                 captchaSettings.Enabled = model.CaptchaSettings.Enabled;
                 captchaSettings.ShowOnLoginPage = model.CaptchaSettings.ShowOnLoginPage;
                 captchaSettings.ShowOnRegistrationPage = model.CaptchaSettings.ShowOnRegistrationPage;
@@ -1616,22 +1617,22 @@ namespace Nop.Web.Areas.Admin.Controllers
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.Enabled, model.CaptchaSettings.Enabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnLoginPage, model.CaptchaSettings.ShowOnLoginPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnRegistrationPage, model.CaptchaSettings.ShowOnRegistrationPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnContactUsPage, model.CaptchaSettings.ShowOnContactUsPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnEmailWishlistToFriendPage, model.CaptchaSettings.ShowOnEmailWishlistToFriendPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnEmailProductToFriendPage, model.CaptchaSettings.ShowOnEmailProductToFriendPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnBlogCommentPage, model.CaptchaSettings.ShowOnBlogCommentPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnNewsCommentPage, model.CaptchaSettings.ShowOnNewsCommentPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnProductReviewPage, model.CaptchaSettings.ShowOnProductReviewPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnApplyVendorPage, model.CaptchaSettings.ShowOnApplyVendorPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnForgotPasswordPage, model.CaptchaSettings.ShowOnForgotPasswordPage_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnForum, model.CaptchaSettings.ShowOnForum_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ReCaptchaPublicKey, model.CaptchaSettings.ReCaptchaPublicKey_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ReCaptchaPrivateKey, model.CaptchaSettings.ReCaptchaPrivateKey_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ReCaptchaV3ScoreThreshold, model.CaptchaSettings.ReCaptchaV3ScoreThreshold_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.CaptchaType, model.CaptchaSettings.CaptchaType_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.Enabled, model.CaptchaSettings.Enabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnLoginPage, model.CaptchaSettings.ShowOnLoginPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnRegistrationPage, model.CaptchaSettings.ShowOnRegistrationPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnContactUsPage, model.CaptchaSettings.ShowOnContactUsPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnEmailWishlistToFriendPage, model.CaptchaSettings.ShowOnEmailWishlistToFriendPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnEmailProductToFriendPage, model.CaptchaSettings.ShowOnEmailProductToFriendPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnBlogCommentPage, model.CaptchaSettings.ShowOnBlogCommentPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnNewsCommentPage, model.CaptchaSettings.ShowOnNewsCommentPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnProductReviewPage, model.CaptchaSettings.ShowOnProductReviewPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnApplyVendorPage, model.CaptchaSettings.ShowOnApplyVendorPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnForgotPasswordPage, model.CaptchaSettings.ShowOnForgotPasswordPage_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ShowOnForum, model.CaptchaSettings.ShowOnForum_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ReCaptchaPublicKey, model.CaptchaSettings.ReCaptchaPublicKey_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ReCaptchaPrivateKey, model.CaptchaSettings.ReCaptchaPrivateKey_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.ReCaptchaV3ScoreThreshold, model.CaptchaSettings.ReCaptchaV3ScoreThreshold_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(captchaSettings, x => x.CaptchaType, model.CaptchaSettings.CaptchaType_OverrideForStore, storeScope, vendorId, false);
 
                 // now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -1644,7 +1645,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 }
 
                 //PDF settings
-                var pdfSettings = await _settingService.LoadSettingAsync<PdfSettings>(storeScope);
+                var pdfSettings = await _settingService.LoadSettingAsync<PdfSettings>(storeScope,vendorId);
                 pdfSettings.LetterPageSizeEnabled = model.PdfSettings.LetterPageSizeEnabled;
                 pdfSettings.LogoPictureId = model.PdfSettings.LogoPictureId;
                 pdfSettings.DisablePdfInvoicesForPendingOrders = model.PdfSettings.DisablePdfInvoicesForPendingOrders;
@@ -1654,11 +1655,11 @@ namespace Nop.Web.Areas.Admin.Controllers
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
-                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.LetterPageSizeEnabled, model.PdfSettings.LetterPageSizeEnabled_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.LogoPictureId, model.PdfSettings.LogoPictureId_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.DisablePdfInvoicesForPendingOrders, model.PdfSettings.DisablePdfInvoicesForPendingOrders_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.InvoiceFooterTextColumn1, model.PdfSettings.InvoiceFooterTextColumn1_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.InvoiceFooterTextColumn2, model.PdfSettings.InvoiceFooterTextColumn2_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.LetterPageSizeEnabled, model.PdfSettings.LetterPageSizeEnabled_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.LogoPictureId, model.PdfSettings.LogoPictureId_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.DisablePdfInvoicesForPendingOrders, model.PdfSettings.DisablePdfInvoicesForPendingOrders_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.InvoiceFooterTextColumn1, model.PdfSettings.InvoiceFooterTextColumn1_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(pdfSettings, x => x.InvoiceFooterTextColumn2, model.PdfSettings.InvoiceFooterTextColumn2_OverrideForStore, storeScope, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -1675,10 +1676,10 @@ namespace Nop.Web.Areas.Admin.Controllers
                 localizationSettings.LoadAllLocaleRecordsOnStartup = model.LocalizationSettings.LoadAllLocaleRecordsOnStartup;
                 localizationSettings.LoadAllLocalizedPropertiesOnStartup = model.LocalizationSettings.LoadAllLocalizedPropertiesOnStartup;
                 localizationSettings.LoadAllUrlRecordsOnStartup = model.LocalizationSettings.LoadAllUrlRecordsOnStartup;
-                await _settingService.SaveSettingAsync(localizationSettings);
+                await _settingService.SaveSettingAsync(localizationSettings,storeScope,0);
 
                 //display default menu item
-                var displayDefaultMenuItemSettings = await _settingService.LoadSettingAsync<DisplayDefaultMenuItemSettings>(storeScope);
+                var displayDefaultMenuItemSettings = await _settingService.LoadSettingAsync<DisplayDefaultMenuItemSettings>(storeScope, vendorId);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
@@ -1691,19 +1692,19 @@ namespace Nop.Web.Areas.Admin.Controllers
                 displayDefaultMenuItemSettings.DisplayForumsMenuItem = model.DisplayDefaultMenuItemSettings.DisplayForumsMenuItem;
                 displayDefaultMenuItemSettings.DisplayContactUsMenuItem = model.DisplayDefaultMenuItemSettings.DisplayContactUsMenuItem;
 
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayHomepageMenuItem, model.DisplayDefaultMenuItemSettings.DisplayHomepageMenuItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayNewProductsMenuItem, model.DisplayDefaultMenuItemSettings.DisplayNewProductsMenuItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayProductSearchMenuItem, model.DisplayDefaultMenuItemSettings.DisplayProductSearchMenuItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayCustomerInfoMenuItem, model.DisplayDefaultMenuItemSettings.DisplayCustomerInfoMenuItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayBlogMenuItem, model.DisplayDefaultMenuItemSettings.DisplayBlogMenuItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayForumsMenuItem, model.DisplayDefaultMenuItemSettings.DisplayForumsMenuItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayContactUsMenuItem, model.DisplayDefaultMenuItemSettings.DisplayContactUsMenuItem_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayHomepageMenuItem, model.DisplayDefaultMenuItemSettings.DisplayHomepageMenuItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayNewProductsMenuItem, model.DisplayDefaultMenuItemSettings.DisplayNewProductsMenuItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayProductSearchMenuItem, model.DisplayDefaultMenuItemSettings.DisplayProductSearchMenuItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayCustomerInfoMenuItem, model.DisplayDefaultMenuItemSettings.DisplayCustomerInfoMenuItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayBlogMenuItem, model.DisplayDefaultMenuItemSettings.DisplayBlogMenuItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayForumsMenuItem, model.DisplayDefaultMenuItemSettings.DisplayForumsMenuItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultMenuItemSettings, x => x.DisplayContactUsMenuItem, model.DisplayDefaultMenuItemSettings.DisplayContactUsMenuItem_OverrideForStore, storeScope, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
 
                 //display default footer item
-                var displayDefaultFooterItemSettings = await _settingService.LoadSettingAsync<DisplayDefaultFooterItemSettings>(storeScope);
+                var displayDefaultFooterItemSettings = await _settingService.LoadSettingAsync<DisplayDefaultFooterItemSettings>(storeScope, vendorId);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
@@ -1724,34 +1725,34 @@ namespace Nop.Web.Areas.Admin.Controllers
                 displayDefaultFooterItemSettings.DisplayWishlistFooterItem = model.DisplayDefaultFooterItemSettings.DisplayWishlistFooterItem;
                 displayDefaultFooterItemSettings.DisplayApplyVendorAccountFooterItem = model.DisplayDefaultFooterItemSettings.DisplayApplyVendorAccountFooterItem;
 
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplaySitemapFooterItem, model.DisplayDefaultFooterItemSettings.DisplaySitemapFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayContactUsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayContactUsFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayProductSearchFooterItem, model.DisplayDefaultFooterItemSettings.DisplayProductSearchFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayNewsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayNewsFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayBlogFooterItem, model.DisplayDefaultFooterItemSettings.DisplayBlogFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayForumsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayForumsFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayRecentlyViewedProductsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayRecentlyViewedProductsFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayCompareProductsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayCompareProductsFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayNewProductsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayNewProductsFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayCustomerInfoFooterItem, model.DisplayDefaultFooterItemSettings.DisplayCustomerInfoFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayCustomerOrdersFooterItem, model.DisplayDefaultFooterItemSettings.DisplayCustomerOrdersFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayCustomerAddressesFooterItem, model.DisplayDefaultFooterItemSettings.DisplayCustomerAddressesFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayShoppingCartFooterItem, model.DisplayDefaultFooterItemSettings.DisplayShoppingCartFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayWishlistFooterItem, model.DisplayDefaultFooterItemSettings.DisplayWishlistFooterItem_OverrideForStore, storeScope, false);
-                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayApplyVendorAccountFooterItem, model.DisplayDefaultFooterItemSettings.DisplayApplyVendorAccountFooterItem_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplaySitemapFooterItem, model.DisplayDefaultFooterItemSettings.DisplaySitemapFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayContactUsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayContactUsFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayProductSearchFooterItem, model.DisplayDefaultFooterItemSettings.DisplayProductSearchFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayNewsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayNewsFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayBlogFooterItem, model.DisplayDefaultFooterItemSettings.DisplayBlogFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayForumsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayForumsFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayRecentlyViewedProductsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayRecentlyViewedProductsFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayCompareProductsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayCompareProductsFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayNewProductsFooterItem, model.DisplayDefaultFooterItemSettings.DisplayNewProductsFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayCustomerInfoFooterItem, model.DisplayDefaultFooterItemSettings.DisplayCustomerInfoFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayCustomerOrdersFooterItem, model.DisplayDefaultFooterItemSettings.DisplayCustomerOrdersFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayCustomerAddressesFooterItem, model.DisplayDefaultFooterItemSettings.DisplayCustomerAddressesFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayShoppingCartFooterItem, model.DisplayDefaultFooterItemSettings.DisplayShoppingCartFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayWishlistFooterItem, model.DisplayDefaultFooterItemSettings.DisplayWishlistFooterItem_OverrideForStore, storeScope, vendorId, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(displayDefaultFooterItemSettings, x => x.DisplayApplyVendorAccountFooterItem, model.DisplayDefaultFooterItemSettings.DisplayApplyVendorAccountFooterItem_OverrideForStore, storeScope, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
 
                 //admin area
-                var adminAreaSettings = await _settingService.LoadSettingAsync<AdminAreaSettings>(storeScope);
+                var adminAreaSettings = await _settingService.LoadSettingAsync<AdminAreaSettings>(storeScope, vendorId);
 
                 //we do not clear cache after each setting update.
                 //this behavior can increase performance because cached settings will not be cleared 
                 //and loaded from database after each update
                 adminAreaSettings.UseRichEditorInMessageTemplates = model.AdminAreaSettings.UseRichEditorInMessageTemplates;
 
-                await _settingService.SaveSettingOverridablePerStoreAsync(adminAreaSettings, x => x.UseRichEditorInMessageTemplates, model.AdminAreaSettings.UseRichEditorInMessageTemplates_OverrideForStore, storeScope, false);
+                await _settingService.SaveSettingOverridablePerStoreAsync(adminAreaSettings, x => x.UseRichEditorInMessageTemplates, model.AdminAreaSettings.UseRichEditorInMessageTemplates_OverrideForStore, storeScope, vendorId, false);
 
                 //now clear settings cache
                 await _settingService.ClearCacheAsync();
@@ -1840,7 +1841,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 }
 
                 securitySettings.EncryptionKey = newEncryptionPrivateKey;
-                await _settingService.SaveSettingAsync(securitySettings);
+                await _settingService.SaveSettingAsync(securitySettings, storeScope, 0);
 
                 _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Settings.GeneralCommon.EncryptionKey.Changed"));
             }
@@ -1915,7 +1916,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         throw new InvalidOperationException("File is not supported.");
                 }
 
-                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.FaviconAndAppIconsHeadCode, true, storeScope);
+                await _settingService.SaveSettingOverridablePerStoreAsync(commonSettings, x => x.FaviconAndAppIconsHeadCode, true, storeScope,0);
 
                 //delete old favicon icon if exist
                 var oldFaviconIconPath = _fileProvider.GetAbsolutePath(string.Format(NopCommonDefaults.OldFaviconIconName, storeScope));
@@ -1987,7 +1988,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 await _settingService.DeleteSettingAsync(setting);
             }
 
-            await _settingService.SetSettingAsync(model.Name, model.Value, setting.StoreId);
+            await _settingService.SetSettingAsync(model.Name, model.Value, setting.StoreId,setting.VendorId);
 
             //activity log
             await _customerActivityService.InsertActivityAsync("EditSettings", await _localizationService.GetResourceAsync("ActivityLog.EditSettings"), setting);
@@ -2012,12 +2013,12 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return ErrorJson(ModelState.SerializeErrors());
 
             var storeId = model.StoreId;
-            await _settingService.SetSettingAsync(model.Name, model.Value, storeId);
+            await _settingService.SetSettingAsync(model.Name, model.Value, storeId,model.VendorId);
 
             //activity log
             await _customerActivityService.InsertActivityAsync("AddNewSetting",
                 string.Format(await _localizationService.GetResourceAsync("ActivityLog.AddNewSetting"), model.Name),
-                await _settingService.GetSettingAsync(model.Name, storeId));
+                await _settingService.GetSettingAsync(model.Name, storeId,model.VendorId));
 
             return Json(new { Result = true });
         }

@@ -97,7 +97,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as disabled
                     _externalAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Remove(method.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_externalAuthenticationSettings);
+                    await _settingService.SaveSettingAsync(_externalAuthenticationSettings, 0);
                 }
             }
             else
@@ -106,7 +106,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as active
                     _externalAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Add(method.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_externalAuthenticationSettings);
+                    await _settingService.SaveSettingAsync(_externalAuthenticationSettings,0);
                 }
             }
 
@@ -166,7 +166,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as disabled
                     _multiFactorAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Remove(method.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings);
+                    await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings, 0);
                 }
             }
             else
@@ -175,7 +175,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 {
                     //mark as active
                     _multiFactorAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Add(method.PluginDescriptor.SystemName);
-                    await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings);
+                    await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings,0);
                 }
             }
 

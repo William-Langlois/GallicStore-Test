@@ -546,7 +546,7 @@ namespace Nop.Web.Areas.Admin.Factories
         /// A task that represents the asynchronous operation
         /// The task result contains the customer search model
         /// </returns>
-        public virtual async Task<CustomerSearchModel> PrepareCustomerSearchModelAsync(CustomerSearchModel searchModel)
+        public virtual async Task<CustomerSearchModel> PrepareCustomerSearchModelAsync(CustomerSearchModel searchModel,int distributorOfVendor = 0)
         {
             if (searchModel == null)
                 throw new ArgumentNullException(nameof(searchModel));
@@ -564,6 +564,12 @@ namespace Nop.Web.Areas.Admin.Factories
             var registeredRole = await _customerService.GetCustomerRoleBySystemNameAsync(NopCustomerDefaults.RegisteredRoleName);
             if (registeredRole != null)
                 searchModel.SelectedCustomerRoleIds.Add(registeredRole.Id);
+
+            //On mets en place l'élément de recherche permettant de filtrer la liste des clients en fonction de l'id du déposant dont ils sont le distributeur
+            if(distributorOfVendor > 0)
+            {
+                searchModel.SearchDistributorOf = distributorOfVendor;
+            }
 
             //prepare available customer roles
             await _aclSupportedModelFactory.PrepareModelCustomerRolesAsync(searchModel);
@@ -594,6 +600,7 @@ namespace Nop.Web.Areas.Admin.Factories
             //get customers
             var customers = await _customerService.GetAllCustomersAsync(customerRoleIds: searchModel.SelectedCustomerRoleIds.ToArray(),
                 email: searchModel.SearchEmail,
+                distributorForVendorId:searchModel.SearchDistributorOf,
                 username: searchModel.SearchUsername,
                 firstName: searchModel.SearchFirstName,
                 lastName: searchModel.SearchLastName,

@@ -108,7 +108,7 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Infrastructure.Cache
             }
 
             //delete saved fixed rate if exists
-            var setting = await _settingService.GetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, taxCategory.Id));
+            var setting = await _settingService.GetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, taxCategory.Id),storeId:0,vendorId:0);
             if (setting != null)
                 await _settingService.DeleteSettingAsync(setting);
         }

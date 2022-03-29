@@ -63,7 +63,7 @@ namespace Nop.Services.Localization
                         continue;
 
                     _localizationSettings.DefaultAdminLanguageId = activeLanguage.Id;
-                    await _settingService.SaveSettingAsync(_localizationSettings);
+                    await _settingService.SaveSettingAsync(_localizationSettings,0);
                     break;
                 }
 
