@@ -104,7 +104,7 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
                         //failed payment
                         var failedPaymentResult = new ProcessPaymentResult
                         {
-                            Errors = new[] { $"PayPal IPN. Recurring payment is {nameof(PaymentStatus.Voided).ToLower()} ." },
+                            Errors = new[] { $"PayPal IPN. Recurring payment is {nameof(PaymentStatus.Voided).ToLowerInvariant()} ." },
                             RecurringPaymentFailed = true
                         };
                         await _orderProcessingService.ProcessNextRecurringPaymentAsync(rp, failedPaymentResult);
@@ -209,7 +209,6 @@ namespace Nop.Plugin.Payments.PayPalStandard.Controllers
 
         #region Methods
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> IPNHandler()
         {
             await using var stream = new MemoryStream();

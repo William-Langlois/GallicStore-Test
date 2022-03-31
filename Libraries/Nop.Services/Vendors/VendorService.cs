@@ -6,9 +6,8 @@ using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Vendors;
-using Nop.Core.Html;
 using Nop.Data;
-using Nop.Data.Extensions;
+using Nop.Services.Html;
 
 namespace Nop.Services.Vendors
 {
@@ -19,6 +18,7 @@ namespace Nop.Services.Vendors
     {
         #region Fields
 
+        private readonly IHtmlFormatter _htmlFormatter;
         private readonly IRepository<Customer> _customerRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Vendor> _vendorRepository;
@@ -28,11 +28,13 @@ namespace Nop.Services.Vendors
 
         #region Ctor
 
-        public VendorService(IRepository<Customer> customerRepository,
+        public VendorService(IHtmlFormatter htmlFormatter,
+            IRepository<Customer> customerRepository,
             IRepository<Product> productRepository,
             IRepository<Vendor> vendorRepository,
             IRepository<VendorNote> vendorNoteRepository)
         {
+            _htmlFormatter = htmlFormatter;
             _customerRepository = customerRepository;
             _productRepository = productRepository;
             _vendorRepository = vendorRepository;
@@ -121,39 +123,6 @@ namespace Nop.Services.Vendors
         public virtual async Task DeleteVendorAsync(Vendor vendor)
         {
             await _vendorRepository.DeleteAsync(vendor);
-        }
-
-        /// <summary>
-        /// Gets all vendors
-        /// </summary>
-        /// <param name="name">Vendor name</param>
-        /// <param name="email">Vendor email</param>
-        /// <param name="pageIndex">Page index</param>
-        /// <param name="pageSize">Page size</param>
-        /// <param name="showHidden">A value indicating whether to show hidden records</param>
-        /// <returns>
-        /// A task that represents the asynchronous operation
-        /// The task result contains the vendors
-        /// </returns>
-        public virtual async Task<IList<Vendor>> GetAllVendorsListAsync(string name = "", string email = "", bool showHidden = false)
-        {
-            var query = _vendorRepository.GetAll();
-
-                if (!string.IsNullOrWhiteSpace(name))
-                    query = query.Where(v => v.Name.Contains(name)).ToList();
-
-                if (!string.IsNullOrWhiteSpace(email))
-                    query = query.Where(v => v.Email.Contains(email)).ToList();
-
-                if (!showHidden)
-                    query = query.Where(v => v.Active).ToList();
-
-                query = query.Where(v => !v.Deleted).ToList();
-                query = query.OrderBy(v => v.DisplayOrder).ThenBy(v => v.Name).ThenBy(v => v.Email).ToList();
-
-            IList<Vendor> vendors = await query.ToListAsync();
-
-            return vendors;
         }
 
         /// <summary>
@@ -277,7 +246,7 @@ namespace Nop.Services.Vendors
             if (string.IsNullOrEmpty(text))
                 return string.Empty;
 
-            text = HtmlHelper.FormatText(text, false, true, false, false, false, false);
+            text = _htmlFormatter.FormatText(text, false, true, false, false, false, false);
 
             return text;
         }

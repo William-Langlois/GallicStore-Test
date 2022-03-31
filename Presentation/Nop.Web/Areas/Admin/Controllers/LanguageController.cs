@@ -72,7 +72,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveStoreMappingsAsync(Language language, LanguageModel model)
         {
             language.LimitedToStores = model.SelectedStoreIds.Any();
@@ -85,7 +84,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedStoreIds.Contains(store.Id))
                 {
                     //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(language, store.Id);
                 }
                 else
@@ -107,7 +106,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("List");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -120,7 +118,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(LanguageSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -132,7 +129,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -145,7 +141,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create(LanguageModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -164,6 +159,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 await SaveStoreMappingsAsync(language, model);
 
                 _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.Added"));
+                _notificationService.WarningNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.NeedRestart"));
 
                 if (!continueEditing)
                     return RedirectToAction("List");
@@ -178,7 +174,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -196,7 +191,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(LanguageModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -245,7 +239,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -273,12 +266,12 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             //notification
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.Deleted"));
-
+            _notificationService.WarningNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.NeedRestart"));
+        
             return RedirectToAction("List");
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<JsonResult> GetAvailableFlagFileNames()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -298,12 +291,26 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(availableFlagFileNames);
         }
 
+        //action displaying notification (warning) to a store owner that changed culture
+        public virtual async Task<IActionResult> LanguageCultureWarning(string currentCulture, string changedCulture)
+        {
+            if (currentCulture != changedCulture)
+            {
+                return Json(new
+                {
+                    Result = string.Format(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.CLDR.Warning"), 
+                        Url.Action("GeneralCommon", "Setting"))
+                });
+            }
+
+            return Json(new { Result = string.Empty });
+        }
+
         #endregion
 
         #region Resources
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Resources(LocaleResourceSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -322,7 +329,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         //ValidateAttribute is used to force model validation
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ResourceUpdate([Validate] LocaleResourceModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -359,7 +365,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         //ValidateAttribute is used to force model validation
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ResourceAdd(int languageId, [Validate] LocaleResourceModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -394,7 +399,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ResourceDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -413,7 +417,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Export / Import
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ExportXml(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -437,7 +440,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ImportXml(int id, IFormFile importxmlfile)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))

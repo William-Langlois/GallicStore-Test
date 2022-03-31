@@ -18,7 +18,6 @@ namespace Nop.Services.Plugins
         /// </summary>
         PluginDescriptor PluginDescriptor { get; set; }
 
-
         /// <summary>
         /// Install plugin
         /// </summary>

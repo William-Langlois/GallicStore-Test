@@ -181,9 +181,11 @@ namespace Nop.Web.Areas.Admin.Factories
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
 
+            var store = await _storeContext.GetCurrentStoreAsync();
+
             model.Message = string.Empty;
             model.ActivatePointsImmediately = true;
-            model.StoreId = (await _storeContext.GetCurrentStoreAsync()).Id;
+            model.StoreId = store.Id;
 
             //prepare available stores
             await _baseAdminModelFactory.PrepareStoresAsync(model.AvailableStores, false);
@@ -546,7 +548,7 @@ namespace Nop.Web.Areas.Admin.Factories
         /// A task that represents the asynchronous operation
         /// The task result contains the customer search model
         /// </returns>
-        public virtual async Task<CustomerSearchModel> PrepareCustomerSearchModelAsync(CustomerSearchModel searchModel,int distributorOfVendor = 0)
+        public virtual async Task<CustomerSearchModel> PrepareCustomerSearchModelAsync(CustomerSearchModel searchModel)
         {
             if (searchModel == null)
                 throw new ArgumentNullException(nameof(searchModel));
@@ -564,12 +566,6 @@ namespace Nop.Web.Areas.Admin.Factories
             var registeredRole = await _customerService.GetCustomerRoleBySystemNameAsync(NopCustomerDefaults.RegisteredRoleName);
             if (registeredRole != null)
                 searchModel.SelectedCustomerRoleIds.Add(registeredRole.Id);
-
-            //On mets en place l'élément de recherche permettant de filtrer la liste des clients en fonction de l'id du déposant dont ils sont le distributeur
-            if(distributorOfVendor > 0)
-            {
-                searchModel.SearchDistributorOf = distributorOfVendor;
-            }
 
             //prepare available customer roles
             await _aclSupportedModelFactory.PrepareModelCustomerRolesAsync(searchModel);
@@ -594,13 +590,12 @@ namespace Nop.Web.Areas.Admin.Factories
                 throw new ArgumentNullException(nameof(searchModel));
 
             //get parameters to filter customers
-            int.TryParse(searchModel.SearchDayOfBirth, out var dayOfBirth);
-            int.TryParse(searchModel.SearchMonthOfBirth, out var monthOfBirth);
+            _ = int.TryParse(searchModel.SearchDayOfBirth, out var dayOfBirth);
+            _ = int.TryParse(searchModel.SearchMonthOfBirth, out var monthOfBirth);
 
             //get customers
             var customers = await _customerService.GetAllCustomersAsync(customerRoleIds: searchModel.SelectedCustomerRoleIds.ToArray(),
                 email: searchModel.SearchEmail,
-                distributorForVendorId:searchModel.SearchDistributorOf,
                 username: searchModel.SearchUsername,
                 firstName: searchModel.SearchFirstName,
                 lastName: searchModel.SearchLastName,
@@ -1039,8 +1034,10 @@ namespace Nop.Web.Areas.Admin.Factories
                     shoppingCartItemModel.AttributeInfo = await _productAttributeFormatter.FormatAttributesAsync(product, item.AttributesXml);
                     var (unitPrice, _, _) = await _shoppingCartService.GetUnitPriceAsync(item, true);
                     shoppingCartItemModel.UnitPrice = await _priceFormatter.FormatPriceAsync((await _taxService.GetProductPriceAsync(product, unitPrice)).price);
+                    shoppingCartItemModel.UnitPriceValue = (await _taxService.GetProductPriceAsync(product, unitPrice)).price;
                     var (subTotal, _, _, _) = await _shoppingCartService.GetSubTotalAsync(item, true);
                     shoppingCartItemModel.Total = await _priceFormatter.FormatPriceAsync((await _taxService.GetProductPriceAsync(product, subTotal)).price);
+                    shoppingCartItemModel.TotalValue = (await _taxService.GetProductPriceAsync(product, subTotal)).price;
 
                     //convert dates to the user time
                     shoppingCartItemModel.UpdatedOn = await _dateTimeHelper.ConvertToUserTimeAsync(item.UpdatedOnUtc, DateTimeKind.Utc);

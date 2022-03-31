@@ -18,6 +18,7 @@ using Nop.Web.Framework.Mvc.Filters;
 
 namespace Nop.Plugin.ExternalAuth.Facebook.Controllers
 {
+    [AutoValidateAntiforgeryToken]
     public class FacebookAuthenticationController : BasePluginController
     {
         #region Fields
@@ -66,7 +67,6 @@ namespace Nop.Plugin.ExternalAuth.Facebook.Controllers
 
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> Configure()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageExternalAuthenticationMethods))
@@ -81,11 +81,9 @@ namespace Nop.Plugin.ExternalAuth.Facebook.Controllers
             return View("~/Plugins/ExternalAuth.Facebook/Views/Configure.cshtml", model);
         }
 
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
+        [HttpPost]        
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> Configure(ConfigurationModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageExternalAuthenticationMethods))
@@ -107,11 +105,11 @@ namespace Nop.Plugin.ExternalAuth.Facebook.Controllers
             return await Configure();
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> Login(string returnUrl)
         {
+            var store = await _storeContext.GetCurrentStoreAsync();
             var methodIsAvailable = await _authenticationPluginManager
-                .IsPluginActiveAsync(FacebookAuthenticationDefaults.SystemName, await _workContext.GetCurrentCustomerAsync(), (await _storeContext.GetCurrentStoreAsync()).Id);
+                .IsPluginActiveAsync(FacebookAuthenticationDefaults.SystemName, await _workContext.GetCurrentCustomerAsync(), store.Id);
             if (!methodIsAvailable)
                 throw new NopException("Facebook authentication module cannot be loaded");
 
@@ -131,7 +129,6 @@ namespace Nop.Plugin.ExternalAuth.Facebook.Controllers
             return Challenge(authenticationProperties, FacebookDefaults.AuthenticationScheme);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> LoginCallback(string returnUrl)
         {
             //authenticate Facebook user

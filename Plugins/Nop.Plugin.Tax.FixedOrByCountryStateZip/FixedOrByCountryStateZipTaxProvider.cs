@@ -280,7 +280,7 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip
             await _settingService.SaveSettingAsync(new FixedOrByCountryStateZipTaxSettings());
 
             //locales
-            await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
+            await _localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
             {
                 ["Plugins.Tax.FixedOrByCountryStateZip.Fixed"] = "Fixed rate",
                 ["Plugins.Tax.FixedOrByCountryStateZip.Tax.Categories.Manage"] = "Manage tax categories",
@@ -318,7 +318,7 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip
 
             //fixed rates
             var fixedRates = await (await _taxCategoryService.GetAllTaxCategoriesAsync())
-                .SelectAwait(async taxCategory => await _settingService.GetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, taxCategory.Id),storeId:0,vendorId:0))
+                .SelectAwait(async taxCategory => await _settingService.GetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, taxCategory.Id)))
                 .Where(setting => setting != null).ToListAsync();
             await _settingService.DeleteSettingsAsync(fixedRates);
 

@@ -11,6 +11,7 @@ using Nop.Core.Domain.Tax;
 using Nop.Core.Domain.Vendors;
 using Nop.Services.Common;
 using Nop.Services.Directory;
+using Nop.Services.Html;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Messages;
@@ -33,6 +34,7 @@ namespace Nop.Web.Controllers
         private readonly ICurrencyService _currencyService;
         private readonly ICustomerActivityService _customerActivityService;
         private readonly IGenericAttributeService _genericAttributeService;
+        private readonly IHtmlFormatter _htmlFormatter;
         private readonly ILanguageService _languageService;
         private readonly ILocalizationService _localizationService;
         private readonly IStoreContext _storeContext;
@@ -56,6 +58,7 @@ namespace Nop.Web.Controllers
             ICurrencyService currencyService,
             ICustomerActivityService customerActivityService,
             IGenericAttributeService genericAttributeService,
+            IHtmlFormatter htmlFormatter,
             ILanguageService languageService,
             ILocalizationService localizationService,
             IStoreContext storeContext,
@@ -75,6 +78,7 @@ namespace Nop.Web.Controllers
             _currencyService = currencyService;
             _customerActivityService = customerActivityService;
             _genericAttributeService = genericAttributeService;
+            _htmlFormatter = htmlFormatter;
             _languageService = languageService;
             _localizationService = localizationService;
             _storeContext = storeContext;
@@ -106,7 +110,6 @@ namespace Nop.Web.Controllers
         [CheckAccessClosedStore(true)]
         //available even when navigation is not allowed
         [CheckAccessPublicStore(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetLanguage(int langid, string returnUrl = "")
         {
             var language = await _languageService.GetLanguageByIdAsync(langid);
@@ -121,7 +124,7 @@ namespace Nop.Web.Controllers
             if (_localizationSettings.SeoFriendlyUrlsForLanguagesEnabled)
             {
                 //remove current language code if it's already localized URL
-                if ((await returnUrl.IsLocalizedUrlAsync(Request.PathBase, true)).Item1)
+                if ((await returnUrl.IsLocalizedUrlAsync(Request.PathBase, true)).IsLocalized)
                     returnUrl = returnUrl.RemoveLanguageSeoCodeFromUrl(Request.PathBase, true);
 
                 //and add code of passed language
@@ -139,7 +142,6 @@ namespace Nop.Web.Controllers
 
         //available even when navigation is not allowed
         [CheckAccessPublicStore(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetCurrency(int customerCurrency, string returnUrl = "")
         {
             var currency = await _currencyService.GetCurrencyByIdAsync(customerCurrency);
@@ -159,7 +161,6 @@ namespace Nop.Web.Controllers
 
         //available even when navigation is not allowed
         [CheckAccessPublicStore(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetTaxType(int customerTaxType, string returnUrl = "")
         {
             var taxDisplayType = (TaxDisplayType)Enum.ToObject(typeof(TaxDisplayType), customerTaxType);
@@ -179,7 +180,6 @@ namespace Nop.Web.Controllers
         //contact us page
         //available even when a store is closed
         [CheckAccessClosedStore(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ContactUs()
         {
             var model = new ContactUsModel();
@@ -192,7 +192,6 @@ namespace Nop.Web.Controllers
         [ValidateCaptcha]
         //available even when a store is closed
         [CheckAccessClosedStore(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ContactUsSend(ContactUsModel model, bool captchaValid)
         {
             //validate CAPTCHA
@@ -206,7 +205,7 @@ namespace Nop.Web.Controllers
             if (ModelState.IsValid)
             {
                 var subject = _commonSettings.SubjectFieldOnContactUsForm ? model.Subject : null;
-                var body = Core.Html.HtmlHelper.FormatText(model.Enquiry, false, true, false, false, false, false);
+                var body = _htmlFormatter.FormatText(model.Enquiry, false, true, false, false, false, false);
 
                 await _workflowMessageService.SendContactUsMessageAsync((await _workContext.GetWorkingLanguageAsync()).Id,
                     model.Email.Trim(), model.FullName, subject, body);
@@ -225,7 +224,6 @@ namespace Nop.Web.Controllers
         }
 
         //contact vendor page
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ContactVendor(int vendorId)
         {
             if (!_vendorSettings.AllowCustomersToContactVendors)
@@ -243,7 +241,6 @@ namespace Nop.Web.Controllers
 
         [HttpPost, ActionName("ContactVendor")]        
         [ValidateCaptcha]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ContactVendorSend(ContactVendorModel model, bool captchaValid)
         {
             if (!_vendorSettings.AllowCustomersToContactVendors)
@@ -264,7 +261,7 @@ namespace Nop.Web.Controllers
             if (ModelState.IsValid)
             {
                 var subject = _commonSettings.SubjectFieldOnContactUsForm ? model.Subject : null;
-                var body = Core.Html.HtmlHelper.FormatText(model.Enquiry, false, true, false, false, false, false);
+                var body = _htmlFormatter.FormatText(model.Enquiry, false, true, false, false, false, false);
 
                 await _workflowMessageService.SendContactVendorMessageAsync(vendor, (await _workContext.GetWorkingLanguageAsync()).Id,
                     model.Email.Trim(), model.FullName, subject, body);
@@ -279,7 +276,6 @@ namespace Nop.Web.Controllers
         }
 
         //sitemap page
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Sitemap(SitemapPageModel pageModel)
         {
             if (!_sitemapSettings.SitemapEnabled)
@@ -295,7 +291,6 @@ namespace Nop.Web.Controllers
         [CheckAccessClosedStore(true)]
         //ignore SEO friendly URLs checks
         [CheckLanguageSeoCode(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SitemapXml(int? id)
         {
             var siteMap = _sitemapXmlSettings.SitemapXmlEnabled
@@ -304,7 +299,6 @@ namespace Nop.Web.Controllers
             return Content(siteMap, "text/xml");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetStoreTheme(string themeName, string returnUrl = "")
         {
             await _themeContext.SetWorkingThemeNameAsync(themeName);
@@ -321,12 +315,10 @@ namespace Nop.Web.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
         //available even when a store is closed
         [CheckAccessClosedStore(true)]
         //available even when navigation is not allowed
         [CheckAccessPublicStore(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EuCookieLawAccept()
         {
             if (!_storeInformationSettings.DisplayEuCookieLawWarning)
@@ -334,7 +326,8 @@ namespace Nop.Web.Controllers
                 return Json(new { stored = false });
 
             //save setting
-            await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.EuCookieLawAcceptedAttribute, true, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.EuCookieLawAcceptedAttribute, true, store.Id);
             return Json(new { stored = true });
         }
 
@@ -345,7 +338,6 @@ namespace Nop.Web.Controllers
         [CheckAccessPublicStore(true)]
         //ignore SEO friendly URLs checks
         [CheckLanguageSeoCode(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> RobotsTextFile()
         {
             var robotsFileContent = await _commonModelFactory.PrepareRobotsTextFileAsync();

@@ -140,7 +140,7 @@ namespace Nop.Services.Customers
             string email = null, string username = null, string firstName = null, string lastName = null,
             int dayOfBirth = 0, int monthOfBirth = 0,
             string company = null, string phone = null, string zipPostalCode = null, string ipAddress = null,
-            int pageIndex = 0, int pageSize = int.MaxValue, bool getOnlyTotalCount = false, int distributorForVendorId = 0)
+            int pageIndex = 0, int pageSize = int.MaxValue, bool getOnlyTotalCount = false)
         {
             var customers = await _customerRepository.GetAllPagedAsync(query =>
             {
@@ -152,8 +152,6 @@ namespace Nop.Services.Customers
                     query = query.Where(c => affiliateId == c.AffiliateId);
                 if (vendorId > 0)
                     query = query.Where(c => vendorId == c.VendorId);
-                if (distributorForVendorId > 0)
-                    query = query.Where(c => distributorForVendorId == c.DistributorOfVendorId);
 
                 query = query.Where(c => !c.Deleted);
 
@@ -528,6 +526,7 @@ namespace Nop.Services.Customers
 
             if (backgroundTaskUser is null)
             {
+                var store = await _storeContext.GetCurrentStoreAsync();
                 //If for any reason the system user isn't in the database, then we add it
                 backgroundTaskUser = new Customer
                 {
@@ -539,7 +538,7 @@ namespace Nop.Services.Customers
                     SystemName = NopCustomerDefaults.BackgroundTaskCustomerName,
                     CreatedOnUtc = DateTime.UtcNow,
                     LastActivityDateUtc = DateTime.UtcNow,
-                    RegisteredInStoreId = (await _storeContext.GetCurrentStoreAsync()).Id
+                    RegisteredInStoreId = store.Id
                 };
 
                 await InsertCustomerAsync(backgroundTaskUser);
@@ -568,6 +567,7 @@ namespace Nop.Services.Customers
 
             if (searchEngineUser is null)
             {
+                var store = await _storeContext.GetCurrentStoreAsync();
                 //If for any reason the system user isn't in the database, then we add it
                 searchEngineUser = new Customer
                 {
@@ -579,7 +579,7 @@ namespace Nop.Services.Customers
                     SystemName = NopCustomerDefaults.SearchEngineCustomerName,
                     CreatedOnUtc = DateTime.UtcNow,
                     LastActivityDateUtc = DateTime.UtcNow,
-                    RegisteredInStoreId = (await _storeContext.GetCurrentStoreAsync()).Id
+                    RegisteredInStoreId = store.Id
                 };
 
                 await InsertCustomerAsync(searchEngineUser);
@@ -837,8 +837,8 @@ namespace Nop.Services.Customers
             if (customer == null)
                 return string.Empty;
 
-            //TODO: try to use DI
             if (await IsGuestAsync(customer))
+                //do not inject ILocalizationService via constructor because it'll cause circular references
                 return await EngineContext.Current.Resolve<ILocalizationService>().GetResourceAsync("Customer.Guest");
 
             var result = string.Empty;
@@ -926,7 +926,7 @@ namespace Nop.Services.Customers
             {
                 var existingCouponCodes = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.DiscountCouponCodeAttribute);
 
-                couponCode = couponCode.Trim().ToLower();
+                couponCode = couponCode.Trim().ToLowerInvariant();
 
                 var xmlDoc = new XmlDocument();
                 if (string.IsNullOrEmpty(existingCouponCodes))
@@ -949,7 +949,7 @@ namespace Nop.Services.Customers
 
                     var couponCodeAttribute = node1.Attributes["Code"].InnerText.Trim();
 
-                    if (couponCodeAttribute.ToLower() != couponCode.ToLower())
+                    if (couponCodeAttribute.ToLowerInvariant() != couponCode.ToLowerInvariant())
                         continue;
 
                     gcElement = (XmlElement)node1;
@@ -1062,7 +1062,7 @@ namespace Nop.Services.Customers
             {
                 var existingCouponCodes = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.GiftCardCouponCodesAttribute);
 
-                couponCode = couponCode.Trim().ToLower();
+                couponCode = couponCode.Trim().ToLowerInvariant();
 
                 var xmlDoc = new XmlDocument();
                 if (string.IsNullOrEmpty(existingCouponCodes))
@@ -1084,7 +1084,7 @@ namespace Nop.Services.Customers
                         continue;
 
                     var couponCodeAttribute = node1.Attributes["Code"].InnerText.Trim();
-                    if (couponCodeAttribute.ToLower() != couponCode.ToLower())
+                    if (couponCodeAttribute.ToLowerInvariant() != couponCode.ToLowerInvariant())
                         continue;
 
                     gcElement = (XmlElement)node1;
@@ -1541,7 +1541,7 @@ namespace Nop.Services.Customers
         /// A task that represents the asynchronous operation
         /// The task result contains the rue if password is expired; otherwise false
         /// </returns>
-        public virtual async Task<bool> PasswordIsExpiredAsync(Customer customer)
+        public virtual async Task<bool> IsPasswordExpiredAsync(Customer customer)
         {
             if (customer == null)
                 throw new ArgumentNullException(nameof(customer));

@@ -40,7 +40,7 @@ namespace Nop.Plugin.DiscountRules.CustomerRoles.Infrastructure.Cache
                 return;
 
             //delete saved restricted customer role identifier if exists
-            var setting = await _settingService.GetSettingAsync(string.Format(DiscountRequirementDefaults.SettingsKey, discountRequirement.Id),storeId:0,vendorId:0);
+            var setting = await _settingService.GetSettingAsync(string.Format(DiscountRequirementDefaults.SettingsKey, discountRequirement.Id));
             if (setting != null)
                 await _settingService.DeleteSettingAsync(setting);
         }

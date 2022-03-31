@@ -5,79 +5,139 @@
   "InstalledPlugins": [
     {
       "SystemName": "Payments.PayPalCommerce",
-      "Version": "1.00"
+      "Version": "1.10"
     },
     {
       "SystemName": "Payments.PayPalStandard",
-      "Version": "1.66"
+      "Version": "1.71"
     },
     {
       "SystemName": "DiscountRequirement.MustBeAssignedToCustomerRole",
-      "Version": "1.36"
-    },
-    {
-      "SystemName": "CurrencyExchange.ECB",
-      "Version": "1.28"
-    },
-    {
-      "SystemName": "Misc.Sendinblue",
-      "Version": "3.32"
-    },
-    {
-      "SystemName": "MultiFactorAuth.GoogleAuthenticator",
-      "Version": "1.04"
-    },
-    {
-      "SystemName": "Payments.CheckMoneyOrder",
-      "Version": "1.46"
-    },
-    {
-      "SystemName": "Payments.Manual",
-      "Version": "1.55"
-    },
-    {
-      "SystemName": "Pickup.PickupInStore",
       "Version": "1.39"
     },
     {
+      "SystemName": "CurrencyExchange.ECB",
+      "Version": "1.32"
+    },
+    {
+      "SystemName": "Misc.Sendinblue",
+      "Version": "3.38"
+    },
+    {
+      "SystemName": "MultiFactorAuth.GoogleAuthenticator",
+      "Version": "1.11"
+    },
+    {
+      "SystemName": "Payments.CheckMoneyOrder",
+      "Version": "1.49"
+    },
+    {
+      "SystemName": "Payments.Manual",
+      "Version": "1.58"
+    },
+    {
+      "SystemName": "Pickup.PickupInStore",
+      "Version": "1.45"
+    },
+    {
       "SystemName": "Shipping.FixedByWeightByTotal",
-      "Version": "2.28"
+      "Version": "2.35"
     },
     {
       "SystemName": "Shipping.ShipStation",
-      "Version": "1.16"
+      "Version": "1.24"
     },
     {
       "SystemName": "Shipping.UPS",
-      "Version": "1.65"
+      "Version": "1.70"
     },
     {
       "SystemName": "Tax.Avalara",
-      "Version": "2.41"
+      "Version": "2.62"
     },
     {
       "SystemName": "Tax.FixedOrByCountryStateZip",
-      "Version": "1.38"
+      "Version": "1.43"
     },
     {
       "SystemName": "Widgets.AccessiBe",
-      "Version": "1.12"
+      "Version": "1.17"
     },
     {
       "SystemName": "Widgets.FacebookPixel",
-      "Version": "1.06"
+      "Version": "1.13"
     },
     {
       "SystemName": "Widgets.GoogleAnalytics",
-      "Version": "1.67"
+      "Version": "1.72"
     },
     {
       "SystemName": "Widgets.NivoSlider",
-      "Version": "1.41"
+      "Version": "1.45"
     },
     {
       "SystemName": "ExternalAuth.Facebook",
-      "Version": "1.68"
+      "Version": "1.73"
+    },
+    {
+      "SystemName": "SevenSpikes.Core",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.AjaxCart",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.AjaxFilters",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.AnywhereSliders",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.CloudZoom",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.InstantSearch",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.JCarousel",
+      "Version": "4.50"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.MegaMenu",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.NopQuickTabs",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.ProductRibbons",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.QuickView",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.RichBlog",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.SaleOfTheDay",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Nop.Plugins.SmartProductCollections",
+      "Version": "4.5"
+    },
+    {
+      "SystemName": "SevenSpikes.Theme.Emporium",
+      "Version": "4.5"
     }
   ],
   "PluginNamesToUninstall": [],

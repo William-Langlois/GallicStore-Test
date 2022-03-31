@@ -52,7 +52,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateAttributeLocalesAsync(VendorAttribute vendorAttribute, VendorAttributeModel model)
         {
             foreach (var localized in model.Locales)
@@ -64,7 +63,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateValueLocalesAsync(VendorAttributeValue vendorAttributeValue, VendorAttributeValueModel model)
         {
             foreach (var localized in model.Locales)
@@ -85,7 +83,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("List");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -96,7 +93,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(VendorAttributeSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -108,7 +104,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -121,7 +116,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create(VendorAttributeModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -154,7 +148,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -172,7 +165,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(VendorAttributeModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -210,7 +202,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -237,7 +228,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Vendor attribute values
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueList(VendorAttributeValueSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -253,7 +243,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueCreatePopup(int vendorAttributeId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -271,7 +260,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueCreatePopup(VendorAttributeValueModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -307,7 +295,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         //edit
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueEditPopup(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -330,7 +317,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueEditPopup(VendorAttributeValueModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -371,7 +357,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))

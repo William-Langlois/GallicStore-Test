@@ -115,11 +115,12 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
             model.UseMarketingAutomation = sendinblueSettings.UseMarketingAutomation;
             model.TrackingScript = sendinblueSettings.TrackingScript;
 
-            model.HideGeneralBlock = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), SendinblueDefaults.HideGeneralBlock);
-            model.HideSynchronizationBlock = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), SendinblueDefaults.HideSynchronizationBlock);
-            model.HideTransactionalBlock = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), SendinblueDefaults.HideTransactionalBlock);
-            model.HideSmsBlock = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), SendinblueDefaults.HideSmsBlock);
-            model.HideMarketingAutomationBlock = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), SendinblueDefaults.HideMarketingAutomationBlock);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            model.HideGeneralBlock = await _genericAttributeService.GetAttributeAsync<bool>(customer, SendinblueDefaults.HideGeneralBlock);
+            model.HideSynchronizationBlock = await _genericAttributeService.GetAttributeAsync<bool>(customer, SendinblueDefaults.HideSynchronizationBlock);
+            model.HideTransactionalBlock = await _genericAttributeService.GetAttributeAsync<bool>(customer, SendinblueDefaults.HideTransactionalBlock);
+            model.HideSmsBlock = await _genericAttributeService.GetAttributeAsync<bool>(customer, SendinblueDefaults.HideSmsBlock);
+            model.HideMarketingAutomationBlock = await _genericAttributeService.GetAttributeAsync<bool>(customer, SendinblueDefaults.HideMarketingAutomationBlock);
 
             //prepare nested search models
             model.MessageTemplateSearchModel.SetGridPageSize();
@@ -205,7 +206,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
 
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> Configure()
         {
             var model = new ConfigurationModel();
@@ -218,7 +218,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [Area(AreaNames.Admin)]
         [HttpPost, ActionName("Configure")]
         [FormValueRequired("save")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> Configure(ConfigurationModel model)
         {
             if (!ModelState.IsValid)
@@ -229,7 +228,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
 
             //set API key
             sendinblueSettings.ApiKey = model.ApiKey;
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.ApiKey, storeId: storeId,vendorId:0, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.ApiKey, clearCache: false);
             await _settingService.ClearCacheAsync();
 
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Plugins.Saved"));
@@ -241,7 +240,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [Area(AreaNames.Admin)]
         [HttpPost, ActionName("Configure")]
         [FormValueRequired("saveSync")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> SaveSynchronization(ConfigurationModel model)
         {
             if (!ModelState.IsValid)
@@ -252,7 +250,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
 
             //create webhook for the unsubscribe event
             sendinblueSettings.UnsubscribeWebhookId = await _sendinblueEmailManager.GetUnsubscribeWebHookIdAsync();
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.UnsubscribeWebhookId,storeId: storeId,vendorId:0, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.UnsubscribeWebhookId, clearCache: false);
 
             //set list of contacts to synchronize
             sendinblueSettings.ListId = model.ListId;
@@ -270,7 +268,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [Area(AreaNames.Admin)]
         [HttpPost, ActionName("Configure")]
         [FormValueRequired("sync")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> Synchronization(ConfigurationModel model)
         {
             if (!ModelState.IsValid)
@@ -306,7 +303,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [Area(AreaNames.Admin)]
         [HttpPost, ActionName("Configure")]
         [FormValueRequired("saveSMTP")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> ConfigureSMTP(ConfigurationModel model)
         {
             if (!ModelState.IsValid)
@@ -319,7 +315,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
             {
                 //set case invariant for true because tokens are used in uppercase format in Sendinblue's transactional emails
                 _messageTemplatesSettings.CaseInvariantReplacement = true;
-                await _settingService.SaveSettingAsync(_messageTemplatesSettings, settings => settings.CaseInvariantReplacement, storeId,vendorId:0, clearCache: false);
+                await _settingService.SaveSettingAsync(_messageTemplatesSettings, settings => settings.CaseInvariantReplacement, clearCache: false);
 
                 //check whether SMTP enabled on account
                 var (smtpIsEnabled, smtpErrors) = await _sendinblueEmailManager.SmtpIsEnabledAsync();
@@ -352,7 +348,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
 
             //set SMTP key
             sendinblueSettings.SmtpKey = model.SmtpKey;
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.SmtpKey,storeId,vendorId:0, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.SmtpKey, clearCache: false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
@@ -365,7 +361,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [HttpPost]
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> MessageList(SendinblueMessageTemplateSearchModel searchModel)
         {
             var storeId = await _storeContext.GetActiveStoreScopeConfigurationAsync();
@@ -404,7 +399,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [HttpPost]
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> MessageUpdate(SendinblueMessageTemplateModel model)
         {
             if (!ModelState.IsValid)
@@ -446,7 +440,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [Area(AreaNames.Admin)]
         [HttpPost, ActionName("Configure")]
         [FormValueRequired("saveSMS")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> ConfigureSMS(ConfigurationModel model)
         {
             if (!ModelState.IsValid)
@@ -460,7 +453,7 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
             sendinblueSettings.SmsSenderName = model.SmsSenderName;
             await _settingService.SaveSettingOverridablePerStoreAsync(sendinblueSettings, settings => settings.SmsSenderName, model.SmsSenderName_OverrideForStore, storeId, false);
             sendinblueSettings.StoreOwnerPhoneNumber = model.StoreOwnerPhoneNumber;
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.StoreOwnerPhoneNumber,storeId,vendorId:0, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.StoreOwnerPhoneNumber, clearCache: false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
@@ -473,7 +466,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [HttpPost]
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> SMSList(SmsSearchModel searchModel)
         {
             var storeId = await _storeContext.GetActiveStoreScopeConfigurationAsync();
@@ -540,7 +532,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [HttpPost]
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> SMSAdd(SmsModel model)
         {
             if (!ModelState.IsValid)
@@ -560,7 +551,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [HttpPost]
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> SMSDelete(SmsModel model)
         {
             if (!ModelState.IsValid)
@@ -582,7 +572,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [Area(AreaNames.Admin)]
         [HttpPost, ActionName("Configure")]
         [FormValueRequired("submitCampaign")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> SubmitCampaign(ConfigurationModel model)
         {
             if (!ModelState.IsValid)
@@ -601,7 +590,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         [Area(AreaNames.Admin)]
         [HttpPost, ActionName("Configure")]
         [FormValueRequired("saveMA")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> ConfigureMA(ConfigurationModel model)
         {
             if (!ModelState.IsValid)
@@ -618,9 +606,9 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
             if (!string.IsNullOrEmpty(accountErrors))
                 _notificationService.ErrorNotification($"{SendinblueDefaults.NotificationMessage} {accountErrors}");
 
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.MarketingAutomationKey,storeId,vendorId:0, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.MarketingAutomationKey, clearCache: false);
             sendinblueSettings.TrackingScript = model.TrackingScript;
-            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.TrackingScript, storeId, vendorId: 0, clearCache: false);
+            await _settingService.SaveSettingAsync(sendinblueSettings, settings => settings.TrackingScript, clearCache: false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
@@ -630,7 +618,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
             return await Configure();
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> ImportContacts(BaseNopModel model, IFormCollection form)
         {
             try
@@ -653,7 +640,6 @@ namespace Nop.Plugin.Misc.Sendinblue.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> UnsubscribeWebHook()
         {
             try

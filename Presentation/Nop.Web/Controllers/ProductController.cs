@@ -14,6 +14,7 @@ using Nop.Core.Events;
 using Nop.Core.Rss;
 using Nop.Services.Catalog;
 using Nop.Services.Customers;
+using Nop.Services.Html;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Messages;
@@ -42,6 +43,7 @@ namespace Nop.Web.Controllers
         private readonly ICustomerActivityService _customerActivityService;
         private readonly ICustomerService _customerService;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IHtmlFormatter _htmlFormatter;
         private readonly ILocalizationService _localizationService;
         private readonly IOrderService _orderService;
         private readonly IPermissionService _permissionService;
@@ -73,6 +75,7 @@ namespace Nop.Web.Controllers
             ICustomerActivityService customerActivityService,
             ICustomerService customerService,
             IEventPublisher eventPublisher,
+            IHtmlFormatter htmlFormatter,
             ILocalizationService localizationService,
             IOrderService orderService,
             IPermissionService permissionService,
@@ -100,6 +103,7 @@ namespace Nop.Web.Controllers
             _customerActivityService = customerActivityService;
             _customerService = customerService;
             _eventPublisher = eventPublisher;
+            _htmlFormatter = htmlFormatter;
             _localizationService = localizationService;
             _orderService = orderService;
             _permissionService = permissionService;
@@ -125,7 +129,6 @@ namespace Nop.Web.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task ValidateProductReviewAvailabilityAsync(Product product)
         {
             var customer = await _workContext.GetCurrentCustomerAsync();
@@ -156,7 +159,6 @@ namespace Nop.Web.Controllers
 
         #region Product details page
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductDetails(int productId, int updatecartitemid = 0)
         {
             var product = await _productService.GetProductByIdAsync(productId);
@@ -193,7 +195,8 @@ namespace Nop.Web.Controllers
             ShoppingCartItem updatecartitem = null;
             if (_shoppingCartSettings.AllowCartItemEditing && updatecartitemid > 0)
             {
-                var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), storeId: (await _storeContext.GetCurrentStoreAsync()).Id);
+                var store = await _storeContext.GetCurrentStoreAsync();
+                var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), storeId: store.Id);
                 updatecartitem = cart.FirstOrDefault(x => x.Id == updatecartitemid);
                 //not found?
                 if (updatecartitem == null)
@@ -215,7 +218,8 @@ namespace Nop.Web.Controllers
                 await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageProducts))
             {
                 //a vendor should have access only to his products
-                if (await _workContext.GetCurrentVendorAsync() == null || (await _workContext.GetCurrentVendorAsync()).Id == product.VendorId)
+                var currentVendor = await _workContext.GetCurrentVendorAsync();
+                if (currentVendor == null || currentVendor.Id == product.VendorId)
                 {
                     DisplayEditLink(Url.Action("Edit", "Product", new { id = product.Id, area = AreaNames.Admin }));
                 }
@@ -234,7 +238,6 @@ namespace Nop.Web.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EstimateShipping([FromQuery] ProductDetailsModel.ProductEstimateShippingModel model, IFormCollection form)
         {
             if (model == null)
@@ -268,12 +271,15 @@ namespace Nop.Web.Controllers
                     Errors = errors
                 });
             }
+            
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var customer = await _workContext.GetCurrentCustomerAsync();
 
             var wrappedProduct = new ShoppingCartItem()
             {
-                StoreId = (await _storeContext.GetCurrentStoreAsync()).Id,
+                StoreId = store.Id,
                 ShoppingCartTypeId = (int)ShoppingCartType.ShoppingCart,
-                CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                CustomerId = customer.Id,
                 ProductId = product.Id,
                 CreatedOnUtc = DateTime.UtcNow
             };
@@ -300,7 +306,6 @@ namespace Nop.Web.Controllers
 
         //ignore SEO friendly URLs checks
         [CheckLanguageSeoCode(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> GetProductCombinations(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
@@ -315,7 +320,6 @@ namespace Nop.Web.Controllers
 
         #region Recently viewed products
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> RecentlyViewedProducts()
         {
             if (!_catalogSettings.RecentlyViewedProductsEnabled)
@@ -333,13 +337,13 @@ namespace Nop.Web.Controllers
 
         #region New (recently added) products page
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> NewProducts()
         {
             if (!_catalogSettings.NewProductsEnabled)
                 return Content("");
 
-            var storeId = (await _storeContext.GetCurrentStoreAsync()).Id;
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var storeId = store.Id;
             var products = await _productService.GetProductsMarkedAsNewAsync(storeId);
             var model = (await _productModelFactory.PrepareProductOverviewModelsAsync(products)).ToList();
 
@@ -347,11 +351,11 @@ namespace Nop.Web.Controllers
         }
 
         [CheckLanguageSeoCode(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> NewProductsRss()
         {
+            var store = await _storeContext.GetCurrentStoreAsync();
             var feed = new RssFeed(
-                $"{await _localizationService.GetLocalizedAsync(await _storeContext.GetCurrentStoreAsync(), x => x.Name)}: New products",
+                $"{await _localizationService.GetLocalizedAsync(store, x => x.Name)}: New products",
                 "Information about products",
                 new Uri(_webHelper.GetStoreLocation()),
                 DateTime.UtcNow);
@@ -361,7 +365,7 @@ namespace Nop.Web.Controllers
 
             var items = new List<RssItem>();
 
-            var storeId = (await _storeContext.GetCurrentStoreAsync()).Id;
+            var storeId = store.Id;
             var products = await _productService.GetProductsMarkedAsNewAsync(storeId);
 
             foreach (var product in products)
@@ -369,7 +373,7 @@ namespace Nop.Web.Controllers
                 var productUrl = Url.RouteUrl("Product", new { SeName = await _urlRecordService.GetSeNameAsync(product) }, _webHelper.GetCurrentRequestProtocol());
                 var productName = await _localizationService.GetLocalizedAsync(product, x => x.Name);
                 var productDescription = await _localizationService.GetLocalizedAsync(product, x => x.ShortDescription);
-                var item = new RssItem(productName, productDescription, new Uri(productUrl), $"urn:store:{(await _storeContext.GetCurrentStoreAsync()).Id}:newProducts:product:{product.Id}", product.CreatedOnUtc);
+                var item = new RssItem(productName, productDescription, new Uri(productUrl), $"urn:store:{store.Id}:newProducts:product:{product.Id}", product.CreatedOnUtc);
                 items.Add(item);
                 //uncomment below if you want to add RSS enclosure for pictures
                 //var picture = _pictureService.GetPicturesByProductId(product.Id, 1).FirstOrDefault();
@@ -388,7 +392,6 @@ namespace Nop.Web.Controllers
 
         #region Product reviews
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductReviews(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
@@ -416,13 +419,13 @@ namespace Nop.Web.Controllers
         [HttpPost, ActionName("ProductReviews")]
         [FormValueRequired("add-review")]
         [ValidateCaptcha]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductReviewsAdd(int productId, ProductReviewsModel model, bool captchaValid)
         {
             var product = await _productService.GetProductByIdAsync(productId);
+            var currentStore = await _storeContext.GetCurrentStoreAsync();
 
             if (product == null || product.Deleted || !product.Published || !product.AllowCustomerReviews ||
-                !await _productService.CanAddReviewAsync(product.Id, (await _storeContext.GetCurrentStoreAsync()).Id))
+                !await _productService.CanAddReviewAsync(product.Id, _catalogSettings.ShowProductReviewsPerStore ? currentStore.Id : 0))
                 return RedirectToRoute("Homepage");
 
             //validate CAPTCHA
@@ -440,11 +443,12 @@ namespace Nop.Web.Controllers
                 if (rating < 1 || rating > 5)
                     rating = _catalogSettings.DefaultProductRatingValue;
                 var isApproved = !_catalogSettings.ProductReviewsMustBeApproved;
+                var customer = await _workContext.GetCurrentCustomerAsync();
 
                 var productReview = new ProductReview
                 {
                     ProductId = product.Id,
-                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                    CustomerId = customer.Id,
                     Title = model.AddProductReview.Title,
                     ReviewText = model.AddProductReview.ReviewText,
                     Rating = rating,
@@ -452,7 +456,7 @@ namespace Nop.Web.Controllers
                     HelpfulNoTotal = 0,
                     IsApproved = isApproved,
                     CreatedOnUtc = DateTime.UtcNow,
-                    StoreId = (await _storeContext.GetCurrentStoreAsync()).Id,
+                    StoreId = currentStore.Id,
                 };
 
                 await _productService.InsertProductReviewAsync(productReview);
@@ -504,15 +508,14 @@ namespace Nop.Web.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetProductReviewHelpfulness(int productReviewId, bool washelpful)
         {
             var productReview = await _productService.GetProductReviewByIdAsync(productReviewId);
             if (productReview == null)
                 throw new ArgumentException("No product review found with the specified id");
 
-            if (await _customerService.IsGuestAsync(await _workContext.GetCurrentCustomerAsync()) && !_catalogSettings.AllowAnonymousUsersToReviewProduct)
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (await _customerService.IsGuestAsync(customer) && !_catalogSettings.AllowAnonymousUsersToReviewProduct)
             {
                 return Json(new
                 {
@@ -523,7 +526,7 @@ namespace Nop.Web.Controllers
             }
 
             //customers aren't allowed to vote for their own reviews
-            if (productReview.CustomerId == (await _workContext.GetCurrentCustomerAsync()).Id)
+            if (productReview.CustomerId == customer.Id)
             {
                 return Json(new
                 {
@@ -546,7 +549,6 @@ namespace Nop.Web.Controllers
             });
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CustomerProductReviews(int? pageNumber)
         {
             if (await _customerService.IsGuestAsync(await _workContext.GetCurrentCustomerAsync()))
@@ -566,7 +568,6 @@ namespace Nop.Web.Controllers
 
         #region Email a friend
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductEmailAFriend(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
@@ -581,7 +582,6 @@ namespace Nop.Web.Controllers
         [HttpPost, ActionName("ProductEmailAFriend")]
         [FormValueRequired("send-email")]
         [ValidateCaptcha]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductEmailAFriendSend(ProductEmailAFriendModel model, bool captchaValid)
         {
             var product = await _productService.GetProductByIdAsync(model.ProductId);
@@ -595,7 +595,8 @@ namespace Nop.Web.Controllers
             }
 
             //check whether the current customer is guest and ia allowed to email a friend
-            if (await _customerService.IsGuestAsync(await _workContext.GetCurrentCustomerAsync()) && !_catalogSettings.AllowAnonymousUsersToEmailAFriend)
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (await _customerService.IsGuestAsync(customer) && !_catalogSettings.AllowAnonymousUsersToEmailAFriend)
             {
                 ModelState.AddModelError("", await _localizationService.GetResourceAsync("Products.EmailAFriend.OnlyRegisteredUsers"));
             }
@@ -603,10 +604,10 @@ namespace Nop.Web.Controllers
             if (ModelState.IsValid)
             {
                 //email
-                await _workflowMessageService.SendProductEmailAFriendMessageAsync(await _workContext.GetCurrentCustomerAsync(),
+                await _workflowMessageService.SendProductEmailAFriendMessageAsync(customer,
                         (await _workContext.GetWorkingLanguageAsync()).Id, product,
                         model.YourEmailAddress, model.FriendEmail,
-                        Core.Html.HtmlHelper.FormatText(model.PersonalMessage, false, true, false, false, false, false));
+                        _htmlFormatter.FormatText(model.PersonalMessage, false, true, false, false, false, false));
 
                 model = await _productModelFactory.PrepareProductEmailAFriendModelAsync(model, product, true);
                 model.SuccessfullySent = true;
@@ -625,8 +626,6 @@ namespace Nop.Web.Controllers
         #region Comparing products
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddProductToCompareList(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
@@ -659,7 +658,6 @@ namespace Nop.Web.Controllers
             });
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> RemoveProductFromCompareList(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
@@ -674,7 +672,6 @@ namespace Nop.Web.Controllers
             return RedirectToRoute("CompareProducts");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CompareProducts()
         {
             if (!_catalogSettings.CompareProductsEnabled)

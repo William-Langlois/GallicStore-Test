@@ -117,7 +117,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Methods
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -129,7 +128,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ListSelect(PluginSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -141,7 +139,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AdminNavigationPlugins()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -161,7 +158,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> UploadPluginsAndThemes(IFormFile archivefile)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -211,7 +207,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("List")]
         [FormValueRequired(FormValueRequirement.StartsWith, "install-plugin-link-")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Install(IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -248,7 +243,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("List")]
         [FormValueRequired(FormValueRequirement.StartsWith, "uninstall-plugin-link-")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Uninstall(IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -285,7 +279,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("List")]
         [FormValueRequired(FormValueRequirement.StartsWith, "delete-plugin-link-")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -319,7 +312,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("List")]
         [FormValueRequired("plugin-reload-grid")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReloadList()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -331,7 +323,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View("RestartApplication", Url.Action("List", "Plugin"));
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> UninstallAndDeleteUnusedPlugins(string[] names)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -352,7 +343,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("List")]
         [FormValueRequired("plugin-apply-changes")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ApplyChanges()
         {
             return await ReloadList();
@@ -360,7 +350,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("List")]
         [FormValueRequired("plugin-discard-changes")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> DiscardChanges()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -371,7 +360,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("List");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EditPopup(string systemName)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -389,7 +377,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EditPopup(PluginModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -431,7 +418,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (!pluginDescriptor.Installed)
                     return View(model);
 
-                var pluginIsActive = false;
+                bool pluginIsActive;
                 switch (pluginInstance)
                 {
                     case IPaymentMethod paymentMethod:
@@ -440,7 +427,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _paymentSettings.ActivePaymentMethodSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_paymentSettings,0);
+                            await _settingService.SaveSettingAsync(_paymentSettings);
                             break;
                         }
 
@@ -448,7 +435,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _paymentSettings.ActivePaymentMethodSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_paymentSettings, 0);
+                            await _settingService.SaveSettingAsync(_paymentSettings);
                         }
 
                         break;
@@ -458,7 +445,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _shippingSettings.ActiveShippingRateComputationMethodSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_shippingSettings, 0);
+                            await _settingService.SaveSettingAsync(_shippingSettings);
                             break;
                         }
 
@@ -466,7 +453,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _shippingSettings.ActiveShippingRateComputationMethodSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_shippingSettings,0);
+                            await _settingService.SaveSettingAsync(_shippingSettings);
                         }
 
                         break;
@@ -476,7 +463,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _shippingSettings.ActivePickupPointProviderSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_shippingSettings, 0);
+                            await _settingService.SaveSettingAsync(_shippingSettings);
                             break;
                         }
 
@@ -484,7 +471,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _shippingSettings.ActivePickupPointProviderSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_shippingSettings,0);
+                            await _settingService.SaveSettingAsync(_shippingSettings);
                         }
 
                         break;
@@ -493,13 +480,13 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _taxSettings.ActiveTaxProviderSystemName = string.Empty;
-                            await _settingService.SaveSettingAsync(_taxSettings,0);
+                            await _settingService.SaveSettingAsync(_taxSettings);
                             break;
                         }
 
                         //mark as enabled
                         _taxSettings.ActiveTaxProviderSystemName = model.SystemName;
-                        await _settingService.SaveSettingAsync(_taxSettings,0);
+                        await _settingService.SaveSettingAsync(_taxSettings);
                         break;
                     case IExternalAuthenticationMethod externalAuthenticationMethod:
                         pluginIsActive = _authenticationPluginManager.IsPluginActive(externalAuthenticationMethod);
@@ -507,7 +494,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _externalAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_externalAuthenticationSettings,0);
+                            await _settingService.SaveSettingAsync(_externalAuthenticationSettings);
                             break;
                         }
 
@@ -515,7 +502,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _externalAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_externalAuthenticationSettings,0);
+                            await _settingService.SaveSettingAsync(_externalAuthenticationSettings);
                         }
 
                         break;
@@ -525,7 +512,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _multiFactorAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings,0);
+                            await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings);
                             break;
                         }
 
@@ -533,7 +520,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _multiFactorAuthenticationSettings.ActiveAuthenticationMethodSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings,0);
+                            await _settingService.SaveSettingAsync(_multiFactorAuthenticationSettings);
                         }
 
                         break;
@@ -543,7 +530,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as disabled
                             _widgetSettings.ActiveWidgetSystemNames.Remove(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_widgetSettings,0);
+                            await _settingService.SaveSettingAsync(_widgetSettings);
                             break;
                         }
 
@@ -551,7 +538,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             //mark as enabled
                             _widgetSettings.ActiveWidgetSystemNames.Add(pluginDescriptor.SystemName);
-                            await _settingService.SaveSettingAsync(_widgetSettings,0);
+                            await _settingService.SaveSettingAsync(_widgetSettings);
                         }
 
                         break;
@@ -571,7 +558,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OfficialFeed()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))
@@ -584,7 +570,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OfficialFeedSelect(OfficialFeedPluginSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePlugins))

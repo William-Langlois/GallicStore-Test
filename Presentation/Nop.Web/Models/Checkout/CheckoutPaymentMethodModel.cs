@@ -14,10 +14,10 @@ namespace Nop.Web.Models.Checkout
 
         public bool DisplayRewardPoints { get; set; }
         public int RewardPointsBalance { get; set; }
-        public string RewardPointsAmount { get; set; }
+        public int RewardPointsToUse { get; set; }
+        public string RewardPointsToUseAmount { get; set; }
         public bool RewardPointsEnoughToPayForOrder { get; set; }
         public bool UseRewardPoints { get; set; }
-        public bool RestrictedForDistributor { get; set; }
 
         #region Nested classes
 

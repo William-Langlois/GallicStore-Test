@@ -77,7 +77,6 @@ namespace Nop.Web.Controllers
 
         #region Methods
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CustomerReturnRequests()
         {
             if (!await _customerService.IsRegisteredAsync(await _workContext.GetCurrentCustomerAsync()))
@@ -87,11 +86,11 @@ namespace Nop.Web.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequest(int orderId)
         {
             var order = await _orderService.GetOrderByIdAsync(orderId);
-            if (order == null || order.Deleted || (await _workContext.GetCurrentCustomerAsync()).Id != order.CustomerId)
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (order == null || order.Deleted || customer.Id != order.CustomerId)
                 return Challenge();
 
             if (!await _orderProcessingService.IsReturnRequestAllowedAsync(order))
@@ -103,11 +102,11 @@ namespace Nop.Web.Controllers
         }
 
         [HttpPost, ActionName("ReturnRequest")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestSubmit(int orderId, SubmitReturnRequestModel model, IFormCollection form)
         {
             var order = await _orderService.GetOrderByIdAsync(orderId);
-            if (order == null || order.Deleted || (await _workContext.GetCurrentCustomerAsync()).Id != order.CustomerId)
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (order == null || order.Deleted || customer.Id != order.CustomerId)
                 return Challenge();
 
             if (!await _orderProcessingService.IsReturnRequestAllowedAsync(order))
@@ -131,21 +130,22 @@ namespace Nop.Web.Controllers
                 foreach (var formKey in form.Keys)
                     if (formKey.Equals($"quantity{orderItem.Id}", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        int.TryParse(form[formKey], out quantity);
+                        _ = int.TryParse(form[formKey], out quantity);
                         break;
                     }
                 if (quantity > 0)
                 {
                     var rrr = await _returnRequestService.GetReturnRequestReasonByIdAsync(model.ReturnRequestReasonId);
                     var rra = await _returnRequestService.GetReturnRequestActionByIdAsync(model.ReturnRequestActionId);
+                    var store = await _storeContext.GetCurrentStoreAsync();
 
                     var rr = new ReturnRequest
                     {
                         CustomNumber = "",
-                        StoreId = (await _storeContext.GetCurrentStoreAsync()).Id,
+                        StoreId = store.Id,
                         OrderItemId = orderItem.Id,
                         Quantity = quantity,
-                        CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                        CustomerId = customer.Id,
                         ReasonForReturn = rrr != null ? await _localizationService.GetLocalizedAsync(rrr, x => x.Name) : "not available",
                         RequestedAction = rra != null ? await _localizationService.GetLocalizedAsync(rra, x => x.Name) : "not available",
                         CustomerComments = model.Comments,
@@ -160,7 +160,7 @@ namespace Nop.Web.Controllers
 
                     //set return request custom number
                     rr.CustomNumber = _customNumberFormatter.GenerateReturnRequestCustomNumber(rr);
-                    await _customerService.UpdateCustomerAsync(await _workContext.GetCurrentCustomerAsync());
+                    await _customerService.UpdateCustomerAsync(customer);
                     await _returnRequestService.UpdateReturnRequestAsync(rr);
 
                     //notify store owner
@@ -183,7 +183,6 @@ namespace Nop.Web.Controllers
 
         [HttpPost]
         [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> UploadFileReturnRequest()
         {
             if (!_orderSettings.ReturnRequestsEnabled || !_orderSettings.ReturnRequestsAllowFiles)

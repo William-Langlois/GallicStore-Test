@@ -14,8 +14,6 @@ namespace Nop.Web.Models.Checkout
         public bool TermsOfServicePopup { get; set; }
         public string MinOrderTotalWarning { get; set; }
 
-        public string VendorIdForCheckout { get; set; }
-
         public IList<string> Warnings { get; set; }
     }
 }

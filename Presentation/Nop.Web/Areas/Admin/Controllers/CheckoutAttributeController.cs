@@ -79,7 +79,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateAttributeLocalesAsync(CheckoutAttribute checkoutAttribute, CheckoutAttributeModel model)
         {
             foreach (var localized in model.Locales)
@@ -101,7 +100,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateValueLocalesAsync(CheckoutAttributeValue checkoutAttributeValue, CheckoutAttributeValueModel model)
         {
             foreach (var localized in model.Locales)
@@ -113,7 +111,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveStoreMappingsAsync(CheckoutAttribute checkoutAttribute, CheckoutAttributeModel model)
         {
             checkoutAttribute.LimitedToStores = model.SelectedStoreIds.Any();
@@ -126,7 +123,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedStoreIds.Contains(store.Id))
                 {
                     //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(checkoutAttribute, store.Id);
                 }
                 else
@@ -139,7 +136,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveConditionAttributesAsync(CheckoutAttribute checkoutAttribute, CheckoutAttributeModel model)
         {
             string attributesXml = null;
@@ -206,7 +202,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("List");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -219,7 +214,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(CheckoutAttributeSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -231,7 +225,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -244,7 +237,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create(CheckoutAttributeModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -280,7 +272,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -298,7 +289,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(CheckoutAttributeModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -341,7 +331,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -364,23 +353,22 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> DeleteSelected(ICollection<int> selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
                 return AccessDeniedView();
 
-            if (selectedIds != null)
-            {
-                var checkoutAttributes = await _checkoutAttributeService.GetCheckoutAttributeByIdsAsync(selectedIds.ToArray());
-                await _checkoutAttributeService.DeleteCheckoutAttributesAsync(checkoutAttributes);
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
 
-                foreach (var checkoutAttribute in checkoutAttributes)
-                {
-                    //activity log
-                    await _customerActivityService.InsertActivityAsync("DeleteCheckoutAttribute",
-                        string.Format(await _localizationService.GetResourceAsync("ActivityLog.DeleteCheckoutAttribute"), checkoutAttribute.Name), checkoutAttribute);
-                }
+            var checkoutAttributes = await _checkoutAttributeService.GetCheckoutAttributeByIdsAsync(selectedIds.ToArray());
+            await _checkoutAttributeService.DeleteCheckoutAttributesAsync(checkoutAttributes);
+
+            foreach (var checkoutAttribute in checkoutAttributes)
+            {
+                //activity log
+                await _customerActivityService.InsertActivityAsync("DeleteCheckoutAttribute",
+                    string.Format(await _localizationService.GetResourceAsync("ActivityLog.DeleteCheckoutAttribute"), checkoutAttribute.Name), checkoutAttribute);
             }
 
             return Json(new { Result = true });
@@ -391,7 +379,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Checkout attribute values
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueList(CheckoutAttributeValueSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -407,7 +394,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueCreatePopup(int checkoutAttributeId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -426,7 +412,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueCreatePopup(CheckoutAttributeValueModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -476,7 +461,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueEditPopup(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -499,7 +483,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueEditPopup(CheckoutAttributeValueModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
@@ -555,7 +538,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ValueDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
