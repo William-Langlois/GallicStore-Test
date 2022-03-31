@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
@@ -27,14 +26,10 @@ namespace Nop.Web.Components
             _workContext = workContext;
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
-        public async Task<IViewComponentResult> InvokeAsync(bool isEditable,string vendorId = null)
+        public async Task<IViewComponentResult> InvokeAsync(bool isEditable)
         {
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id,vendorId: vendorId);
-            if(vendorId != null)
-            {
-                cart = cart.Where(i => i.VendorId.ToString() == vendorId).ToList();
-            }
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
 
             var model = await _shoppingCartModelFactory.PrepareOrderTotalsModelAsync(cart, isEditable);
             return View(model);

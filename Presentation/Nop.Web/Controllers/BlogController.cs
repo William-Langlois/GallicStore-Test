@@ -90,7 +90,6 @@ namespace Nop.Web.Controllers
 
         #region Methods
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(BlogPagingFilteringModel command)
         {
             if (!_blogSettings.Enabled)
@@ -100,7 +99,6 @@ namespace Nop.Web.Controllers
             return View("List", model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> BlogByTag(BlogPagingFilteringModel command)
         {
             if (!_blogSettings.Enabled)
@@ -110,7 +108,6 @@ namespace Nop.Web.Controllers
             return View("List", model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> BlogByMonth(BlogPagingFilteringModel command)
         {
             if (!_blogSettings.Enabled)
@@ -121,11 +118,11 @@ namespace Nop.Web.Controllers
         }
 
         [CheckLanguageSeoCode(true)]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ListRss(int languageId)
         {
+            var store = await _storeContext.GetCurrentStoreAsync();
             var feed = new RssFeed(
-                $"{await _localizationService.GetLocalizedAsync(await _storeContext.GetCurrentStoreAsync(), x => x.Name)}: Blog",
+                $"{await _localizationService.GetLocalizedAsync(store, x => x.Name)}: Blog",
                 "Blog",
                 new Uri(_webHelper.GetStoreLocation()),
                 DateTime.UtcNow);
@@ -134,18 +131,17 @@ namespace Nop.Web.Controllers
                 return new RssActionResult(feed, _webHelper.GetThisPageUrl(false));
 
             var items = new List<RssItem>();
-            var blogPosts = await _blogService.GetAllBlogPostsAsync((await _storeContext.GetCurrentStoreAsync()).Id, languageId);
+            var blogPosts = await _blogService.GetAllBlogPostsAsync(store.Id, languageId);
             foreach (var blogPost in blogPosts)
             {
                 var blogPostUrl = Url.RouteUrl("BlogPost", new { SeName = await _urlRecordService.GetSeNameAsync(blogPost, blogPost.LanguageId, ensureTwoPublishedLanguages: false) }, _webHelper.GetCurrentRequestProtocol());
                 items.Add(new RssItem(blogPost.Title, blogPost.Body, new Uri(blogPostUrl),
-                    $"urn:store:{(await _storeContext.GetCurrentStoreAsync()).Id}:blog:post:{blogPost.Id}", blogPost.CreatedOnUtc));
+                    $"urn:store:{store.Id}:blog:post:{blogPost.Id}", blogPost.CreatedOnUtc));
             }
             feed.Items = items;
             return new RssActionResult(feed, _webHelper.GetThisPageUrl(false));
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> BlogPost(int blogPostId)
         {
             if (!_blogSettings.Enabled)
@@ -179,7 +175,6 @@ namespace Nop.Web.Controllers
         [HttpPost, ActionName("BlogPost")]        
         [FormValueRequired("add-comment")]
         [ValidateCaptcha]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> BlogCommentAdd(int blogPostId, BlogPostModel model, bool captchaValid)
         {
             if (!_blogSettings.Enabled)
@@ -189,7 +184,8 @@ namespace Nop.Web.Controllers
             if (blogPost == null || !blogPost.AllowComments)
                 return RedirectToRoute("Homepage");
 
-            if (await _customerService.IsGuestAsync(await _workContext.GetCurrentCustomerAsync()) && !_blogSettings.AllowNotRegisteredUsersToLeaveComments)
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (await _customerService.IsGuestAsync(customer) && !_blogSettings.AllowNotRegisteredUsersToLeaveComments)
             {
                 ModelState.AddModelError("", await _localizationService.GetResourceAsync("Blog.Comments.OnlyRegisteredUsersLeaveComments"));
             }
@@ -202,13 +198,14 @@ namespace Nop.Web.Controllers
 
             if (ModelState.IsValid)
             {
+                var store = await _storeContext.GetCurrentStoreAsync();
                 var comment = new BlogComment
                 {
                     BlogPostId = blogPost.Id,
-                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                    CustomerId = customer.Id,
                     CommentText = model.AddNewComment.CommentText,
                     IsApproved = !_blogSettings.BlogCommentsMustBeApproved,
-                    StoreId = (await _storeContext.GetCurrentStoreAsync()).Id,
+                    StoreId = store.Id,
                     CreatedOnUtc = DateTime.UtcNow,
                 };
 

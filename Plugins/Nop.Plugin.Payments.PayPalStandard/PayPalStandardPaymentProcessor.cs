@@ -41,7 +41,7 @@ namespace Nop.Plugin.Payments.PayPalStandard
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILocalizationService _localizationService;
         private readonly IOrderService _orderService;
-        private readonly IPaymentService _paymentService;
+        private readonly IOrderTotalCalculationService _orderTotalCalculationService;
         private readonly IProductService _productService;
         private readonly ISettingService _settingService;
         private readonly IStateProvinceService _stateProvinceService;
@@ -64,15 +64,14 @@ namespace Nop.Plugin.Payments.PayPalStandard
             IHttpContextAccessor httpContextAccessor,
             ILocalizationService localizationService,
             IOrderService orderService,
-            IPaymentService paymentService,
+            IOrderTotalCalculationService orderTotalCalculationService,
             IProductService productService,
             ISettingService settingService,
             IStateProvinceService stateProvinceService,
             ITaxService taxService,
             IWebHelper webHelper,
             PayPalStandardHttpClient payPalStandardHttpClient,
-            PayPalStandardPaymentSettings payPalStandardPaymentSettings
-            )
+            PayPalStandardPaymentSettings payPalStandardPaymentSettings)
         {
             _currencySettings = currencySettings;
             _addressService = addressService;
@@ -84,19 +83,14 @@ namespace Nop.Plugin.Payments.PayPalStandard
             _httpContextAccessor = httpContextAccessor;
             _localizationService = localizationService;
             _orderService = orderService;
-            _paymentService = paymentService;
+            _orderTotalCalculationService = orderTotalCalculationService;
             _productService = productService;
             _settingService = settingService;
             _stateProvinceService = stateProvinceService;
             _taxService = taxService;
             _webHelper = webHelper;
             _payPalStandardHttpClient = payPalStandardHttpClient;
-
-            //Chargement des settings payPayStandard
-            int VendorIdForCheckout = 0; //Initialisation du scope à 0 (global)
-            Int32.TryParse(httpContextAccessor.HttpContext.Session.GetString("VendorIdForCheckout"), out VendorIdForCheckout); //Parse de la valeur
-
-            _payPalStandardPaymentSettings = settingService.LoadSettingAsync<PayPalStandardPaymentSettings>(0, vendorId: VendorIdForCheckout).Result;
+            _payPalStandardPaymentSettings = payPalStandardPaymentSettings;
         }
 
         #endregion
@@ -371,7 +365,7 @@ namespace Nop.Plugin.Payments.PayPalStandard
         /// <returns>A task that represents the asynchronous operation</returns>
         public async Task PostProcessPaymentAsync(PostProcessPaymentRequest postProcessPaymentRequest)
         {
-            var baseUrl = _payPalStandardPaymentSettings.UseSandbox ? //AJOUT_NINE
+            var baseUrl = _payPalStandardPaymentSettings.UseSandbox ?
                 "https://www.sandbox.paypal.com/us/cgi-bin/webscr" :
                 "https://www.paypal.com/us/cgi-bin/webscr";
 
@@ -379,7 +373,7 @@ namespace Nop.Plugin.Payments.PayPalStandard
             var queryParameters = await CreateQueryParametersAsync(postProcessPaymentRequest);
 
             //whether to include order items in a transaction
-            if (_payPalStandardPaymentSettings.PassProductNamesAndTotals) //AJOUT_NINE
+            if (_payPalStandardPaymentSettings.PassProductNamesAndTotals)
             {
                 //add order items query parameters to the request
                 var parameters = new Dictionary<string, string>(queryParameters);
@@ -434,8 +428,8 @@ namespace Nop.Plugin.Payments.PayPalStandard
         /// The task result contains the additional handling fee
         /// </returns>
         public async Task<decimal> GetAdditionalHandlingFeeAsync(IList<ShoppingCartItem> cart)
-        { //ERROR object reference not set to an instance of object
-            return await _paymentService.CalculateAdditionalFeeAsync(cart,
+        {
+            return await _orderTotalCalculationService.CalculatePaymentAdditionalFeeAsync(cart,
                 _payPalStandardPaymentSettings.AdditionalFee, _payPalStandardPaymentSettings.AdditionalFeePercentage);
         }
 
@@ -581,7 +575,7 @@ namespace Nop.Plugin.Payments.PayPalStandard
             });
 
             //locales
-            await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
+            await _localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
             {
                 ["Plugins.Payments.PayPalStandard.Fields.AdditionalFee"] = "Additional fee",
                 ["Plugins.Payments.PayPalStandard.Fields.AdditionalFee.Hint"] = "Enter additional fee to charge your customers.",

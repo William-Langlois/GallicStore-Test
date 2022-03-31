@@ -70,7 +70,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Methods
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(bool showtour = false)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))
@@ -82,9 +81,9 @@ namespace Nop.Web.Areas.Admin.Controllers
             //show configuration tour
             if (showtour)
             {
-                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.HideConfigurationStepsAttribute);
-
-                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.CloseConfigurationStepsAttribute);
+                var customer = await _workContext.GetCurrentCustomerAsync();
+                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.HideConfigurationStepsAttribute);
+                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.CloseConfigurationStepsAttribute);
 
                 if (!hideCard && !closeCard)
                     ViewBag.ShowTour = true;
@@ -94,7 +93,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(EmailAccountSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))
@@ -106,7 +104,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> MarkAsDefaultEmail(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))
@@ -117,12 +114,11 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return RedirectToAction("List");
 
             _emailAccountSettings.DefaultEmailAccountId = defaultEmailAccount.Id;
-            await _settingService.SaveSettingAsync(_emailAccountSettings, 0);
+            await _settingService.SaveSettingAsync(_emailAccountSettings);
 
             return RedirectToAction("List");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))
@@ -135,7 +131,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create(EmailAccountModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))
@@ -165,7 +160,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(int id, bool showtour = false)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))
@@ -182,9 +176,9 @@ namespace Nop.Web.Areas.Admin.Controllers
             //show configuration tour
             if (showtour)
             {
-                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.HideConfigurationStepsAttribute);
-
-                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.CloseConfigurationStepsAttribute);
+                var customer = await _workContext.GetCurrentCustomerAsync();
+                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.HideConfigurationStepsAttribute);
+                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.CloseConfigurationStepsAttribute);
 
                 if (!hideCard && !closeCard)
                     ViewBag.ShowTour = true;
@@ -195,7 +189,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
         [FormValueRequired("save", "save-continue")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(EmailAccountModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))
@@ -229,7 +222,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("changepassword")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ChangePassword(EmailAccountModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))
@@ -251,7 +243,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("sendtestemail")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SendTestEmail(EmailAccountModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))
@@ -272,8 +263,8 @@ namespace Nop.Web.Areas.Admin.Controllers
             {
                 if (string.IsNullOrWhiteSpace(model.SendTestEmailTo))
                     throw new NopException("Enter test email address");
-
-                var subject = (await _storeContext.GetCurrentStoreAsync()).Name + ". Testing email functionality.";
+                var store = await _storeContext.GetCurrentStoreAsync();
+                var subject = store.Name + ". Testing email functionality.";
                 var body = "Email works fine.";
                 await _emailSender.SendEmailAsync(emailAccount, subject, body, emailAccount.Email, emailAccount.DisplayName, model.SendTestEmailTo, null);
 
@@ -292,7 +283,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageEmailAccounts))

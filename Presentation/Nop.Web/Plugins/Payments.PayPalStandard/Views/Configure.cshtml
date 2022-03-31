@@ -18,51 +18,11 @@
     }
 </script>
 
-<form name="VendorScope" asp-controller="PaymentPayPalStandard" asp-action="ChangeVendorScope" method="post">
-    <div class="cards-group">
-        <div class="card card-default">
-            <div class="card-body">
-                <div class="form-group row">
-                    <div class="col-md-3">
-                        <nop-label asp-for="VendorIdScopeConfiguration" />
-                    </div>
-                    <div class="col-md-9">
-                        <nop-select asp-for="VendorIdScopeConfiguration" asp-items="Model.AvailableVendors"/>
-                        <span asp-validation-for="VendorIdScopeConfiguration"></span>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-md-9 offset-md-3">
-                        <button type="submit" name="VendorScope" class="btn btn-primary">@T("Admin.Common.ChangeVendorScope")</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</form>
-
-<form name="save"  asp-controller="PaymentPayPalStandard" asp-action="Configure" method="post">
+<form asp-controller="PaymentPayPalStandard" asp-action="Configure" method="post">
     <div class="cards-group">
         <div class="card card-default">
             <div class="card-body">
                 @Html.Raw(T("Plugins.Payments.PayPalStandard.Instructions", $"{webHelper.GetStoreLocation()}Plugins/PaymentPayPalStandard/PDTHandler"))
-                <div hidden contenteditable="false" class="form-group row">
-                    <div hidden class="col-md-3">
-                        <nop-label hidden asp-for="VendorIdScopeConfiguration" />
-                    </div>
-                    <div hidden class="col-md-9">
-                        <nop-select hidden contenteditable="false" asp-for="VendorIdScopeConfiguration" asp-items="Model.AvailableVendors"/>
-                        <span hidden asp-validation-for="VendorIdScopeConfiguration"></span>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-md-3">
-                        <nop-label asp-for="VendorIdScopeConfiguration" />
-                    </div>
-                    <div class="col-md-9">
-                        <input disabled value="@Model.AvailableVendors.Where(o => o.Value == Model.VendorIdScopeConfiguration.ToString()).First().Text"/>
-                    </div>
-                </div>
                 <div class="form-group row">
                     <div class="col-md-3">
                         <nop-override-store-checkbox asp-for="UseSandbox_OverrideForStore" asp-input="UseSandbox" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />

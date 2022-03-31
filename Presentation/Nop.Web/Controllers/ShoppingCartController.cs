@@ -14,13 +14,13 @@ using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Security;
 using Nop.Core.Domain.Shipping;
-using Nop.Core.Html;
 using Nop.Core.Infrastructure;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
 using Nop.Services.Discounts;
+using Nop.Services.Html;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Media;
@@ -56,6 +56,7 @@ namespace Nop.Web.Controllers
         private readonly IDownloadService _downloadService;
         private readonly IGenericAttributeService _genericAttributeService;
         private readonly IGiftCardService _giftCardService;
+        private readonly IHtmlFormatter _htmlFormatter;
         private readonly ILocalizationService _localizationService;
         private readonly INopFileProvider _fileProvider;
         private readonly INotificationService _notificationService;
@@ -95,6 +96,7 @@ namespace Nop.Web.Controllers
             IDownloadService downloadService,
             IGenericAttributeService genericAttributeService,
             IGiftCardService giftCardService,
+            IHtmlFormatter htmlFormatter,
             ILocalizationService localizationService,
             INopFileProvider fileProvider,
             INotificationService notificationService,
@@ -130,6 +132,7 @@ namespace Nop.Web.Controllers
             _downloadService = downloadService;
             _genericAttributeService = genericAttributeService;
             _giftCardService = giftCardService;
+            _htmlFormatter = htmlFormatter;
             _localizationService = localizationService;
             _fileProvider = fileProvider;
             _notificationService = notificationService;
@@ -159,7 +162,6 @@ namespace Nop.Web.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task ParseAndSaveCheckoutAttributesAsync(IList<ShoppingCartItem> cart, IFormCollection form)
         {
             if (cart == null)
@@ -170,7 +172,8 @@ namespace Nop.Web.Controllers
 
             var attributesXml = string.Empty;
             var excludeShippableAttributes = !await _shoppingCartService.ShoppingCartRequiresShippingAsync(cart);
-            var checkoutAttributes = await _checkoutAttributeService.GetAllCheckoutAttributesAsync((await _storeContext.GetCurrentStoreAsync()).Id, excludeShippableAttributes);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var checkoutAttributes = await _checkoutAttributeService.GetAllCheckoutAttributesAsync(store.Id, excludeShippableAttributes);
             foreach (var attribute in checkoutAttributes)
             {
                 var controlId = $"checkout_attribute_{attribute.Id}";
@@ -259,7 +262,7 @@ namespace Nop.Web.Controllers
                         break;
                     case AttributeControlType.FileUpload:
                         {
-                            Guid.TryParse(form[controlId], out var downloadGuid);
+                            _ = Guid.TryParse(form[controlId], out var downloadGuid);
                             var download = await _downloadService.GetDownloadByGuidAsync(downloadGuid);
                             if (download != null)
                             {
@@ -283,25 +286,26 @@ namespace Nop.Web.Controllers
             }
 
             //save checkout attributes
-            await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.CheckoutAttributes, attributesXml, (await _storeContext.GetCurrentStoreAsync()).Id);
+            await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.CheckoutAttributes, attributesXml, store.Id);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveItemAsync(ShoppingCartItem updatecartitem, List<string> addToCartWarnings, Product product,
            ShoppingCartType cartType, string attributes, decimal customerEnteredPriceConverted, DateTime? rentalStartDate,
            DateTime? rentalEndDate, int quantity)
         {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
             if (updatecartitem == null)
             {
                 //add to the cart
-                addToCartWarnings.AddRange(await _shoppingCartService.AddToCartAsync(await _workContext.GetCurrentCustomerAsync(),
-                    product, cartType, (await _storeContext.GetCurrentStoreAsync()).Id,
+                addToCartWarnings.AddRange(await _shoppingCartService.AddToCartAsync(customer,
+                    product, cartType, store.Id,
                     attributes, customerEnteredPriceConverted,
                     rentalStartDate, rentalEndDate, quantity, true));
             }
             else
             {
-                var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), updatecartitem.ShoppingCartType, (await _storeContext.GetCurrentStoreAsync()).Id);
+                var cart = await _shoppingCartService.GetShoppingCartAsync(customer, updatecartitem.ShoppingCartType, store.Id);
 
                 var otherCartItemWithSameParameters = await _shoppingCartService.FindShoppingCartItemInTheCartAsync(
                     cart, updatecartitem.ShoppingCartType, product, attributes, customerEnteredPriceConverted,
@@ -313,7 +317,7 @@ namespace Nop.Web.Controllers
                     otherCartItemWithSameParameters = null;
                 }
                 //update existing item
-                addToCartWarnings.AddRange(await _shoppingCartService.UpdateShoppingCartItemAsync(await _workContext.GetCurrentCustomerAsync(),
+                addToCartWarnings.AddRange(await _shoppingCartService.UpdateShoppingCartItemAsync(customer,
                     updatecartitem.Id, attributes, customerEnteredPriceConverted,
                     rentalStartDate, rentalEndDate, quantity + (otherCartItemWithSameParameters?.Quantity ?? 0), true));
                 if (otherCartItemWithSameParameters != null && !addToCartWarnings.Any())
@@ -324,7 +328,6 @@ namespace Nop.Web.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task<IActionResult> GetProductToCartDetailsAsync(List<string> addToCartWarnings, ShoppingCartType cartType,
             Product product)
         {
@@ -340,6 +343,8 @@ namespace Nop.Web.Controllers
             }
 
             //added to the cart/wishlist
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
             switch (cartType)
             {
                 case ShoppingCartType.Wishlist:
@@ -358,7 +363,7 @@ namespace Nop.Web.Controllers
                         }
 
                         //display notification message and update appropriate blocks
-                        var shoppingCarts = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.Wishlist, (await _storeContext.GetCurrentStoreAsync()).Id);
+                        var shoppingCarts = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, store.Id);
 
                         var updateTopWishlistSectionHtml = string.Format(
                             await _localizationService.GetResourceAsync("Wishlist.HeaderQuantity"),
@@ -391,7 +396,7 @@ namespace Nop.Web.Controllers
                         }
 
                         //display notification message and update appropriate blocks
-                        var shoppingCarts = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+                        var shoppingCarts = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
                         var updateTopCartSectionHtml = string.Format(
                             await _localizationService.GetResourceAsync("ShoppingCart.HeaderQuantity"),
@@ -418,14 +423,13 @@ namespace Nop.Web.Controllers
         #region Shopping cart
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SelectShippingOption([FromQuery] string name, [FromQuery] EstimateShippingModel model, IFormCollection form)
         {
             if (model == null)
                 model = new EstimateShippingModel();
 
             var errors = new List<string>();
-            if (string.IsNullOrEmpty(model.ZipPostalCode))
+            if (string.IsNullOrEmpty(model.ZipPostalCode) && !_shippingSettings.EstimateShippingCityNameEnabled)
                 errors.Add(await _localizationService.GetResourceAsync("Shipping.EstimateShipping.ZipPostalCode.Required"));
 
             if (model.CountryId == null || model.CountryId == 0)
@@ -438,7 +442,9 @@ namespace Nop.Web.Controllers
                     errors = errors
                 });
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
             //parse and save checkout attributes
             await ParseAndSaveCheckoutAttributesAsync(cart, form);
 
@@ -449,8 +455,8 @@ namespace Nop.Web.Controllers
             {
                 //find shipping options
                 //performance optimization. try cache first
-                shippingOptions = await _genericAttributeService.GetAttributeAsync<List<ShippingOption>>(await _workContext.GetCurrentCustomerAsync(),
-                    NopCustomerDefaults.OfferedShippingOptionsAttribute, (await _storeContext.GetCurrentStoreAsync()).Id);
+                shippingOptions = await _genericAttributeService.GetAttributeAsync<List<ShippingOption>>(customer,
+                    NopCustomerDefaults.OfferedShippingOptionsAttribute, store.Id);
 
                 if (shippingOptions == null || !shippingOptions.Any())
                 {
@@ -463,7 +469,7 @@ namespace Nop.Web.Controllers
 
                     //not found? let's load them using shipping service
                     var getShippingOptionResponse = await _shippingService.GetShippingOptionsAsync(cart, address,
-                        await _workContext.GetCurrentCustomerAsync(), storeId: (await _storeContext.GetCurrentStoreAsync()).Id);
+                        customer, storeId: store.Id);
 
                     if (getShippingOptionResponse.Success)
                         shippingOptions = getShippingOptionResponse.ShippingOptions.ToList();
@@ -485,12 +491,12 @@ namespace Nop.Web.Controllers
                 });
 
             //reset pickup point
-            await _genericAttributeService.SaveAttributeAsync<PickupPoint>(await _workContext.GetCurrentCustomerAsync(),
-                NopCustomerDefaults.SelectedPickupPointAttribute, null, (await _storeContext.GetCurrentStoreAsync()).Id);
+            await _genericAttributeService.SaveAttributeAsync<PickupPoint>(customer,
+                NopCustomerDefaults.SelectedPickupPointAttribute, null, store.Id);
 
             //cache shipping option
-            await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(),
-                NopCustomerDefaults.SelectedShippingOptionAttribute, selectedShippingOption, (await _storeContext.GetCurrentStoreAsync()).Id);
+            await _genericAttributeService.SaveAttributeAsync(customer,
+                NopCustomerDefaults.SelectedShippingOptionAttribute, selectedShippingOption, store.Id);
 
             var orderTotalsSectionHtml = await RenderViewComponentToStringAsync("OrderTotals", new { isEditable = true });
 
@@ -504,8 +510,6 @@ namespace Nop.Web.Controllers
         //add product to cart using AJAX
         //currently we use this method on catalog pages (category/manufacturer/etc)
         [HttpPost]
-        [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddProductToCart_Catalog(int productId, int shoppingCartTypeId,
             int quantity, bool forceredirection = false)
         {
@@ -597,13 +601,15 @@ namespace Nop.Web.Controllers
 
             //get standard warnings without attribute validations
             //first, try to find existing shopping cart item
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), cartType, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, cartType, store.Id);
             var shoppingCartItem = await _shoppingCartService.FindShoppingCartItemInTheCartAsync(cart, cartType, product);
             //if we already have the same product in the cart, then use the total quantity to validate
             var quantityToValidate = shoppingCartItem != null ? shoppingCartItem.Quantity + quantity : quantity;
             var addToCartWarnings = await _shoppingCartService
-                .GetShoppingCartItemWarningsAsync(await _workContext.GetCurrentCustomerAsync(), cartType,
-                product, (await _storeContext.GetCurrentStoreAsync()).Id, string.Empty,
+                .GetShoppingCartItemWarningsAsync(customer, cartType,
+                product, store.Id, string.Empty,
                 decimal.Zero, null, null, quantityToValidate, false, shoppingCartItem?.Id ?? 0, true, false, false, false);
             if (addToCartWarnings.Any())
             {
@@ -617,10 +623,10 @@ namespace Nop.Web.Controllers
             }
 
             //now let's try adding product to the cart (now including product attribute validation, etc)
-            addToCartWarnings = await _shoppingCartService.AddToCartAsync(customer: await _workContext.GetCurrentCustomerAsync(),
+            addToCartWarnings = await _shoppingCartService.AddToCartAsync(customer: customer,
                 product: product,
                 shoppingCartType: cartType,
-                storeId: (await _storeContext.GetCurrentStoreAsync()).Id,
+                storeId: store.Id,
                 attributesXml: attXml,
                 quantity: quantity);
             if (addToCartWarnings.Any())
@@ -652,7 +658,7 @@ namespace Nop.Web.Controllers
                         }
 
                         //display notification message and update appropriate blocks
-                        var shoppingCarts = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.Wishlist, (await _storeContext.GetCurrentStoreAsync()).Id);
+                        var shoppingCarts = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, store.Id);
 
                         var updatetopwishlistsectionhtml = string.Format(await _localizationService.GetResourceAsync("Wishlist.HeaderQuantity"),
                             shoppingCarts.Sum(item => item.Quantity));
@@ -681,7 +687,7 @@ namespace Nop.Web.Controllers
                         }
 
                         //display notification message and update appropriate blocks
-                        var shoppingCarts = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+                        var shoppingCarts = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
                         var updatetopcartsectionhtml = string.Format(await _localizationService.GetResourceAsync("ShoppingCart.HeaderQuantity"),
                             shoppingCarts.Sum(item => item.Quantity));
@@ -704,8 +710,6 @@ namespace Nop.Web.Controllers
         //add product to cart using AJAX
         //currently we use this method on the product details pages
         [HttpPost]
-        [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddProductToCart_Details(int productId, int shoppingCartTypeId, IFormCollection form)
         {
             var product = await _productService.GetProductByIdAsync(productId);
@@ -732,15 +736,16 @@ namespace Nop.Web.Controllers
             foreach (var formKey in form.Keys)
                 if (formKey.Equals($"addtocart_{productId}.UpdatedShoppingCartItemId", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    int.TryParse(form[formKey], out updatecartitemid);
+                    _ = int.TryParse(form[formKey], out updatecartitemid);
                     break;
                 }
 
             ShoppingCartItem updatecartitem = null;
             if (_shoppingCartSettings.AllowCartItemEditing && updatecartitemid > 0)
             {
+                var store = await _storeContext.GetCurrentStoreAsync();
                 //search with the same cart type as specified
-                var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), (ShoppingCartType)shoppingCartTypeId, (await _storeContext.GetCurrentStoreAsync()).Id);
+                var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), (ShoppingCartType)shoppingCartTypeId, store.Id);
 
                 updatecartitem = cart.FirstOrDefault(x => x.Id == updatecartitemid);
                 //not found? let's ignore it. in this case we'll add a new item
@@ -790,8 +795,6 @@ namespace Nop.Web.Controllers
         //handle product attribute selection event. this way we return new price, overridden gtin/sku/mpn
         //currently we use this method on the product details pages
         [HttpPost]
-        [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductDetails_AttributeChange(int productId, bool validateAttributeConditions,
             bool loadPicture, IFormCollection form)
         {
@@ -942,22 +945,22 @@ namespace Nop.Web.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CheckoutAttributeChange(IFormCollection form, bool isEditable)
         {
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
             //save selected attributes
             await ParseAndSaveCheckoutAttributesAsync(cart, form);
-            var attributeXml = await _genericAttributeService.GetAttributeAsync<string>(await _workContext.GetCurrentCustomerAsync(),
-                NopCustomerDefaults.CheckoutAttributes, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var attributeXml = await _genericAttributeService.GetAttributeAsync<string>(customer,
+                NopCustomerDefaults.CheckoutAttributes, store.Id);
 
             //conditions
             var enabledAttributeIds = new List<int>();
             var disabledAttributeIds = new List<int>();
             var excludeShippableAttributes = !await _shoppingCartService.ShoppingCartRequiresShippingAsync(cart);
-            var attributes = await _checkoutAttributeService.GetAllCheckoutAttributesAsync((await _storeContext.GetCurrentStoreAsync()).Id, excludeShippableAttributes);
+            var attributes = await _checkoutAttributeService.GetAllCheckoutAttributesAsync(store.Id, excludeShippableAttributes);
             foreach (var attribute in attributes)
             {
                 var conditionMet = await _checkoutAttributeParser.IsConditionMetAsync(attribute, attributeXml);
@@ -985,7 +988,6 @@ namespace Nop.Web.Controllers
 
         [HttpPost]
         [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> UploadFileProductAttribute(int attributeId)
         {
             var attribute = await _productAttributeService.GetProductAttributeMappingByIdAsync(attributeId);
@@ -1068,7 +1070,6 @@ namespace Nop.Web.Controllers
 
         [HttpPost]
         [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> UploadFileCheckoutAttribute(int attributeId)
         {
             var attribute = await _checkoutAttributeService.GetCheckoutAttributeByIdAsync(attributeId);
@@ -1149,13 +1150,13 @@ namespace Nop.Web.Controllers
             });
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Cart()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.EnableShoppingCart))
                 return RedirectToRoute("Homepage");
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
             var model = new ShoppingCartModel();
             model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(model, cart);
             return View(model);
@@ -1163,13 +1164,14 @@ namespace Nop.Web.Controllers
 
         [HttpPost, ActionName("Cart")]
         [FormValueRequired("updatecart")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> UpdateCart(IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.EnableShoppingCart))
                 return RedirectToRoute("Homepage");
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
             //get identifiers of items to remove
             var itemIdsToRemove = form["removefromcart"]
@@ -1187,7 +1189,6 @@ namespace Nop.Web.Controllers
                 NewQuantity = itemIdsToRemove.Contains(item.Id) ? 0 : int.TryParse(form[$"itemquantity{item.Id}"], out var quantity) ? quantity : item.Quantity,
                 Item = item,
                 Product = products.ContainsKey(item.ProductId) ? products[item.ProductId] : null
-
             }).Where(item => item.NewQuantity != item.Item.Quantity);
 
             //order cart items
@@ -1204,13 +1205,13 @@ namespace Nop.Web.Controllers
             var warnings = await orderedCart.SelectAwait(async cartItem => new
             {
                 ItemId = cartItem.Item.Id,
-                Warnings = await _shoppingCartService.UpdateShoppingCartItemAsync(await _workContext.GetCurrentCustomerAsync(),
+                Warnings = await _shoppingCartService.UpdateShoppingCartItemAsync(customer,
                     cartItem.Item.Id, cartItem.Item.AttributesXml, cartItem.Item.CustomerEnteredPrice,
                     cartItem.Item.RentalStartDateUtc, cartItem.Item.RentalEndDateUtc, cartItem.NewQuantity, true)
             }).ToListAsync();
 
             //updated cart
-            cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
             //parse and save checkout attributes
             await ParseAndSaveCheckoutAttributesAsync(cart, form);
@@ -1233,10 +1234,10 @@ namespace Nop.Web.Controllers
 
         [HttpPost, ActionName("Cart")]
         [FormValueRequired("continueshopping")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ContinueShopping()
         {
-            var returnUrl = await _genericAttributeService.GetAttributeAsync<string>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.LastContinueShoppingPageAttribute, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var returnUrl = await _genericAttributeService.GetAttributeAsync<string>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.LastContinueShoppingPageAttribute, store.Id);
 
             if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);
@@ -1244,36 +1245,20 @@ namespace Nop.Web.Controllers
             return RedirectToRoute("Homepage");
         }
 
-
         [HttpPost, ActionName("Cart")]
         [FormValueRequired("checkout")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> StartCheckout(IFormCollection form)
         {
-            StringValues vendorIdForCheckoutFromForm = "";
-            string vendorIdForCheckout = null;
-            if (form.ContainsKey("VendorIdForCheckout"))
-            {
-                form.TryGetValue("VendorIdForCheckout", out vendorIdForCheckoutFromForm);
-                vendorIdForCheckout = vendorIdForCheckoutFromForm.ToString();
-                HttpContext.Session.SetString("VendorIdForCheckout", vendorIdForCheckout);
-            }
-
-            //UPDATED FOR VENDOR SUBDIV
-
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id, vendorId: vendorIdForCheckout);
-            if (vendorIdForCheckout != null)
-            {
-                cart = cart.Where(i => i.VendorId.ToString() == vendorIdForCheckout).ToList();
-            }
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
             //parse and save checkout attributes
             await ParseAndSaveCheckoutAttributesAsync(cart, form);
 
             //validate attributes
-            var checkoutAttributes = await _genericAttributeService.GetAttributeAsync<string>(await _workContext.GetCurrentCustomerAsync(),
-                NopCustomerDefaults.CheckoutAttributes, (await _storeContext.GetCurrentStoreAsync()).Id);
-
+            var checkoutAttributes = await _genericAttributeService.GetAttributeAsync<string>(customer,
+                NopCustomerDefaults.CheckoutAttributes, store.Id);
             var checkoutAttributeWarnings = await _shoppingCartService.GetShoppingCartWarningsAsync(cart, checkoutAttributes, true);
             if (checkoutAttributeWarnings.Any())
             {
@@ -1286,7 +1271,7 @@ namespace Nop.Web.Controllers
             var anonymousPermissed = _orderSettings.AnonymousCheckoutAllowed
                                      && _customerSettings.UserRegistrationType == UserRegistrationType.Disabled;
 
-            if (anonymousPermissed || !await _customerService.IsGuestAsync(await _workContext.GetCurrentCustomerAsync()))
+            if (anonymousPermissed || !await _customerService.IsGuestAsync(customer))
                 return RedirectToRoute("Checkout");
 
             var cartProductIds = cart.Select(ci => ci.ProductId).ToArray();
@@ -1304,7 +1289,6 @@ namespace Nop.Web.Controllers
 
         [HttpPost, ActionName("Cart")]
         [FormValueRequired("applydiscountcouponcode")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ApplyDiscountCoupon(string discountcouponcode, IFormCollection form)
         {
             //trim
@@ -1312,7 +1296,9 @@ namespace Nop.Web.Controllers
                 discountcouponcode = discountcouponcode.Trim();
 
             //cart
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
             //parse and save checkout attributes
             await ParseAndSaveCheckoutAttributesAsync(cart, form);
@@ -1329,7 +1315,7 @@ namespace Nop.Web.Controllers
                     var userErrors = new List<string>();
                     var anyValidDiscount = await discounts.AnyAwaitAsync(async discount =>
                     {
-                        var validationResult = await _discountService.ValidateDiscountAsync(discount, await _workContext.GetCurrentCustomerAsync(), new[] { discountcouponcode });
+                        var validationResult = await _discountService.ValidateDiscountAsync(discount, customer, new[] { discountcouponcode });
                         userErrors.AddRange(validationResult.Errors);
 
                         return validationResult.IsValid;
@@ -1338,7 +1324,7 @@ namespace Nop.Web.Controllers
                     if (anyValidDiscount)
                     {
                         //valid
-                        await _customerService.ApplyDiscountCouponCodeAsync(await _workContext.GetCurrentCustomerAsync(), discountcouponcode);
+                        await _customerService.ApplyDiscountCouponCodeAsync(customer, discountcouponcode);
                         model.DiscountBox.Messages.Add(await _localizationService.GetResourceAsync("ShoppingCart.DiscountCouponCode.Applied"));
                         model.DiscountBox.IsApplied = true;
                     }
@@ -1367,7 +1353,6 @@ namespace Nop.Web.Controllers
 
         [HttpPost, ActionName("Cart")]
         [FormValueRequired("applygiftcardcouponcode")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ApplyGiftCard(string giftcardcouponcode, IFormCollection form)
         {
             //trim
@@ -1375,7 +1360,9 @@ namespace Nop.Web.Controllers
                 giftcardcouponcode = giftcardcouponcode.Trim();
 
             //cart
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
             //parse and save checkout attributes
             await ParseAndSaveCheckoutAttributesAsync(cart, form);
@@ -1389,7 +1376,7 @@ namespace Nop.Web.Controllers
                     var isGiftCardValid = giftCard != null && await _giftCardService.IsGiftCardValidAsync(giftCard);
                     if (isGiftCardValid)
                     {
-                        await _customerService.ApplyGiftCardCouponCodeAsync(await _workContext.GetCurrentCustomerAsync(), giftcardcouponcode);
+                        await _customerService.ApplyGiftCardCouponCodeAsync(customer, giftcardcouponcode);
                         model.GiftCardBox.Message = await _localizationService.GetResourceAsync("ShoppingCart.GiftCardCouponCode.Applied");
                         model.GiftCardBox.IsApplied = true;
                     }
@@ -1416,7 +1403,6 @@ namespace Nop.Web.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> GetEstimateShipping(EstimateShippingModel model, IFormCollection form)
         {
             if (model == null)
@@ -1440,7 +1426,8 @@ namespace Nop.Web.Controllers
                     Errors = errors
                 });
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
             //parse and save checkout attributes
             await ParseAndSaveCheckoutAttributesAsync(cart, form);
 
@@ -1451,7 +1438,6 @@ namespace Nop.Web.Controllers
 
         [HttpPost, ActionName("Cart")]
         [FormValueRequired(FormValueRequirement.StartsWith, "removediscount-")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> RemoveDiscountCoupon(IFormCollection form)
         {
             var model = new ShoppingCartModel();
@@ -1462,10 +1448,12 @@ namespace Nop.Web.Controllers
                 if (formValue.StartsWith("removediscount-", StringComparison.InvariantCultureIgnoreCase))
                     discountId = Convert.ToInt32(formValue["removediscount-".Length..]);
             var discount = await _discountService.GetDiscountByIdAsync(discountId);
+            var customer = await _workContext.GetCurrentCustomerAsync();
             if (discount != null)
-                await _customerService.RemoveDiscountCouponCodeAsync(await _workContext.GetCurrentCustomerAsync(), discount.CouponCode);
+                await _customerService.RemoveDiscountCouponCodeAsync(customer, discount.CouponCode);
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
             model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(model, cart);
             return View(model);
@@ -1473,7 +1461,6 @@ namespace Nop.Web.Controllers
 
         [HttpPost, ActionName("Cart")]
         [FormValueRequired(FormValueRequirement.StartsWith, "removegiftcard-")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> RemoveGiftCardCode(IFormCollection form)
         {
             var model = new ShoppingCartModel();
@@ -1484,10 +1471,12 @@ namespace Nop.Web.Controllers
                 if (formValue.StartsWith("removegiftcard-", StringComparison.InvariantCultureIgnoreCase))
                     giftCardId = Convert.ToInt32(formValue["removegiftcard-".Length..]);
             var gc = await _giftCardService.GetGiftCardByIdAsync(giftCardId);
+            var customer = await _workContext.GetCurrentCustomerAsync();
             if (gc != null)
-                await _customerService.RemoveGiftCardCouponCodeAsync(await _workContext.GetCurrentCustomerAsync(), gc.GiftCardCouponCode);
+                await _customerService.RemoveGiftCardCouponCodeAsync(customer, gc.GiftCardCouponCode);
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.ShoppingCart, store.Id);
 
             model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(model, cart);
             return View(model);
@@ -1497,7 +1486,6 @@ namespace Nop.Web.Controllers
 
         #region Wishlist
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Wishlist(Guid? customerGuid)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.EnableWishlist))
@@ -1509,7 +1497,8 @@ namespace Nop.Web.Controllers
             if (customer == null)
                 return RedirectToRoute("Homepage");
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, store.Id);
 
             var model = new WishlistModel();
             model = await _shoppingCartModelFactory.PrepareWishlistModelAsync(model, cart, !customerGuid.HasValue);
@@ -1518,13 +1507,14 @@ namespace Nop.Web.Controllers
 
         [HttpPost, ActionName("Wishlist")]
         [FormValueRequired("updatecart")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> UpdateWishlist(IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.EnableWishlist))
                 return RedirectToRoute("Homepage");
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.Wishlist, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, store.Id);
 
             var allIdsToRemove = form.ContainsKey("removefromcart")
                 ? form["removefromcart"].ToString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
@@ -1546,7 +1536,7 @@ namespace Nop.Web.Controllers
                         {
                             if (int.TryParse(form[formKey], out var newQuantity))
                             {
-                                var currSciWarnings = await _shoppingCartService.UpdateShoppingCartItemAsync(await _workContext.GetCurrentCustomerAsync(),
+                                var currSciWarnings = await _shoppingCartService.UpdateShoppingCartItemAsync(customer,
                                     sci.Id, sci.AttributesXml, sci.CustomerEnteredPrice,
                                     sci.RentalStartDateUtc, sci.RentalEndDateUtc,
                                     newQuantity, true);
@@ -1559,7 +1549,7 @@ namespace Nop.Web.Controllers
             }
 
             //updated wishlist
-            cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.Wishlist, (await _storeContext.GetCurrentStoreAsync()).Id);
+            cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, store.Id);
             var model = new WishlistModel();
             model = await _shoppingCartModelFactory.PrepareWishlistModelAsync(model, cart);
             //update current warnings
@@ -1581,7 +1571,6 @@ namespace Nop.Web.Controllers
 
         [HttpPost, ActionName("Wishlist")]
         [FormValueRequired("addtocartbutton")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddItemsToCartFromWishlist(Guid? customerGuid, IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.EnableShoppingCart))
@@ -1590,13 +1579,15 @@ namespace Nop.Web.Controllers
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.EnableWishlist))
                 return RedirectToRoute("Homepage");
 
+            var customer = await _workContext.GetCurrentCustomerAsync();
             var pageCustomer = customerGuid.HasValue
                 ? await _customerService.GetCustomerByGuidAsync(customerGuid.Value)
-                : await _workContext.GetCurrentCustomerAsync();
+                : customer;
             if (pageCustomer == null)
                 return RedirectToRoute("Homepage");
 
-            var pageCart = await _shoppingCartService.GetShoppingCartAsync(pageCustomer, ShoppingCartType.Wishlist, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var pageCart = await _shoppingCartService.GetShoppingCartAsync(pageCustomer, ShoppingCartType.Wishlist, store.Id);
 
             var allWarnings = new List<string>();
             var countOfAddedItems = 0;
@@ -1609,9 +1600,9 @@ namespace Nop.Web.Controllers
                 {
                     var product = await _productService.GetProductByIdAsync(sci.ProductId);
 
-                    var warnings = await _shoppingCartService.AddToCartAsync(await _workContext.GetCurrentCustomerAsync(),
+                    var warnings = await _shoppingCartService.AddToCartAsync(customer,
                         product, ShoppingCartType.ShoppingCart,
-                        (await _storeContext.GetCurrentStoreAsync()).Id,
+                        store.Id,
                         sci.AttributesXml, sci.CustomerEnteredPrice,
                         sci.RentalStartDateUtc, sci.RentalEndDateUtc, sci.Quantity, true);
                     if (!warnings.Any())
@@ -1650,20 +1641,20 @@ namespace Nop.Web.Controllers
                 _notificationService.ErrorNotification(await _localizationService.GetResourceAsync("Wishlist.AddToCart.Error"));
             }
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(pageCustomer, ShoppingCartType.Wishlist, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var cart = await _shoppingCartService.GetShoppingCartAsync(pageCustomer, ShoppingCartType.Wishlist, store.Id);
 
             var model = new WishlistModel();
             model = await _shoppingCartModelFactory.PrepareWishlistModelAsync(model, cart, !customerGuid.HasValue);
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EmailWishlist()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.EnableWishlist) || !_shoppingCartSettings.EmailWishlistEnabled)
                 return RedirectToRoute("Homepage");
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.Wishlist, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.Wishlist, store.Id);
 
             if (!cart.Any())
                 return RedirectToRoute("Homepage");
@@ -1676,13 +1667,14 @@ namespace Nop.Web.Controllers
         [HttpPost, ActionName("EmailWishlist")]
         [FormValueRequired("send-email")]
         [ValidateCaptcha]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EmailWishlistSend(WishlistEmailAFriendModel model, bool captchaValid)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.EnableWishlist) || !_shoppingCartSettings.EmailWishlistEnabled)
                 return RedirectToRoute("Homepage");
 
-            var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.Wishlist, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var cart = await _shoppingCartService.GetShoppingCartAsync(customer, ShoppingCartType.Wishlist, store.Id);
 
             if (!cart.Any())
                 return RedirectToRoute("Homepage");
@@ -1694,7 +1686,7 @@ namespace Nop.Web.Controllers
             }
 
             //check whether the current customer is guest and ia allowed to email wishlist
-            if (await _customerService.IsGuestAsync(await _workContext.GetCurrentCustomerAsync()) && !_shoppingCartSettings.AllowAnonymousUsersToEmailWishlist)
+            if (await _customerService.IsGuestAsync(customer) && !_shoppingCartSettings.AllowAnonymousUsersToEmailWishlist)
             {
                 ModelState.AddModelError(string.Empty, await _localizationService.GetResourceAsync("Wishlist.EmailAFriend.OnlyRegisteredUsers"));
             }
@@ -1702,9 +1694,9 @@ namespace Nop.Web.Controllers
             if (ModelState.IsValid)
             {
                 //email
-                await _workflowMessageService.SendWishlistEmailAFriendMessageAsync(await _workContext.GetCurrentCustomerAsync(),
+                await _workflowMessageService.SendWishlistEmailAFriendMessageAsync(customer,
                         (await _workContext.GetWorkingLanguageAsync()).Id, model.YourEmailAddress,
-                        model.FriendEmail, HtmlHelper.FormatText(model.PersonalMessage, false, true, false, false, false, false));
+                        model.FriendEmail, _htmlFormatter.FormatText(model.PersonalMessage, false, true, false, false, false, false));
 
                 model.SuccessfullySent = true;
                 model.Result = await _localizationService.GetResourceAsync("Wishlist.EmailAFriend.SuccessfullySent");

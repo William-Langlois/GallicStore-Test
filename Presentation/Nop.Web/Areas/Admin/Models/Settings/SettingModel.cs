@@ -34,10 +34,6 @@ namespace Nop.Web.Areas.Admin.Models.Settings
         public int StoreId { get; set; }
         public IList<SelectListItem> AvailableStores { get; set; }
 
-        [NopResourceDisplayName("Admin.Configuration.Settings.AllSettings.Fields.Vendor")]
-        public int VendorId { get; set; }
-        public IList<SelectListItem> AvailableVendors { get; set; }
-
         #endregion
     }
 }

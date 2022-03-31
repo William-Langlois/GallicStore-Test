@@ -77,7 +77,6 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
 
         #region Methods
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> Configure(bool showtour = false)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageTaxSettings))
@@ -125,9 +124,9 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
             //show configuration tour
             if (showtour)
             {
-                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.HideConfigurationStepsAttribute);
-
-                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.CloseConfigurationStepsAttribute);
+                var customer = await _workContext.GetCurrentCustomerAsync();
+                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.HideConfigurationStepsAttribute);
+                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.CloseConfigurationStepsAttribute);
 
                 if (!hideCard && !closeCard)
                     ViewBag.ShowTour = true;
@@ -137,8 +136,6 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> SaveMode(bool value)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageTaxSettings))
@@ -154,7 +151,6 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
         #region Fixed tax
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> FixedRatesList(ConfigurationModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageTaxSettings))
@@ -178,13 +174,12 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> FixedRateUpdate(FixedTaxRateModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageTaxSettings))
                 return Content("Access denied");
 
-            await _settingService.SetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, model.TaxCategoryId), model.Rate,storeId:0,vendorId:0);
+            await _settingService.SetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, model.TaxCategoryId), model.Rate);
 
             return new NullJsonResult();
         }
@@ -194,7 +189,6 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
         #region Tax by country/state/zip
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> RatesByCountryStateZipList(ConfigurationModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageTaxSettings))
@@ -225,7 +219,6 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> AddRateByCountryStateZip(ConfigurationModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageTaxSettings))
@@ -245,7 +238,6 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> UpdateRateByCountryStateZip(CountryStateZipModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageTaxSettings))
@@ -260,7 +252,6 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> DeleteRateByCountryStateZip(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageTaxSettings))

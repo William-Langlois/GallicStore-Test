@@ -11,6 +11,7 @@ using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Shipping;
+using Nop.Core.Events;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
 using Nop.Services.Customers;
@@ -45,6 +46,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         private readonly IDateTimeHelper _dateTimeHelper;
         private readonly IDownloadService _downloadService;
         private readonly IEncryptionService _encryptionService;
+        private readonly IEventPublisher _eventPublisher;
         private readonly IExportManager _exportManager;
         private readonly IGiftCardService _giftCardService;
         private readonly ILocalizationService _localizationService;
@@ -78,6 +80,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             IDateTimeHelper dateTimeHelper,
             IDownloadService downloadService,
             IEncryptionService encryptionService,
+            IEventPublisher eventPublisher,
             IExportManager exportManager,
             IGiftCardService giftCardService,
             ILocalizationService localizationService,
@@ -107,6 +110,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             _dateTimeHelper = dateTimeHelper;
             _downloadService = downloadService;
             _encryptionService = encryptionService;
+            _eventPublisher = eventPublisher;
             _exportManager = exportManager;
             _giftCardService = giftCardService;
             _localizationService = localizationService;
@@ -139,17 +143,17 @@ namespace Nop.Web.Areas.Admin.Controllers
             return order != null && await HasAccessToOrderAsync(order.Id);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task<bool> HasAccessToOrderAsync(int orderId)
         {
             if (orderId == 0)
                 return false;
 
-            if (await _workContext.GetCurrentVendorAsync() == null)
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor == null)
                 //not a vendor; has access
                 return true;
 
-            var vendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            var vendorId = currentVendor.Id;
             var hasVendorProducts = (await _orderService.GetOrderItemsAsync(orderId, vendorId: vendorId)).Any();
 
             return hasVendorProducts;
@@ -160,11 +164,12 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (orderItem == null || orderItem.ProductId == 0)
                 return false;
 
-            if (await _workContext.GetCurrentVendorAsync() == null)
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor == null)
                 //not a vendor; has access
                 return true;
 
-            var vendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            var vendorId = currentVendor.Id;
 
             return (await _productService.GetProductByIdAsync(orderItem.ProductId))?.VendorId == vendorId;
         }
@@ -181,7 +186,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return await HasAccessToOrderAsync(shipment.OrderId);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task LogEditOrderAsync(int orderId)
         {
             var order = await _orderService.GetOrderByIdAsync(orderId);
@@ -199,7 +203,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("List");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(List<int> orderStatuses = null, List<int> paymentStatuses = null, List<int> shippingStatuses = null)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -217,7 +220,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OrderList(OrderSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -230,7 +232,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReportAggregates(OrderSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -244,7 +245,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("List")]
         [FormValueRequired("go-to-order-by-number")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> GoToOrderId(OrderSearchModel model)
         {
             var order = await _orderService.GetOrderByCustomOrderNumberAsync(model.GoDirectlyToCustomOrderNumber);
@@ -261,7 +261,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("ExportXml")]
         [FormValueRequired("exportxml-all")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ExportXmlAll(OrderSearchModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -274,9 +273,10 @@ namespace Nop.Web.Areas.Admin.Controllers
                             : (DateTime?)_dateTimeHelper.ConvertToUtcTime(model.EndDate.Value, await _dateTimeHelper.GetCurrentTimeZoneAsync()).AddDays(1);
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
             {
-                model.VendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+                model.VendorId = currentVendor.Id;
             }
 
             var orderStatusIds = model.OrderStatusIds != null && !model.OrderStatusIds.Contains(0)
@@ -291,7 +291,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             var filterByProductId = 0;
             var product = await _productService.GetProductByIdAsync(model.ProductId);
-            if (product != null && (await _workContext.GetCurrentVendorAsync() == null || product.VendorId == (await _workContext.GetCurrentVendorAsync()).Id))
+            if (product != null && (currentVendor == null || product.VendorId == currentVendor.Id))
                 filterByProductId = model.ProductId;
 
             //load orders
@@ -331,7 +331,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ExportXmlSelected(string selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -362,7 +361,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("ExportExcel")]
         [FormValueRequired("exportexcel-all")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ExportExcelAll(OrderSearchModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -375,9 +373,10 @@ namespace Nop.Web.Areas.Admin.Controllers
                             : (DateTime?)_dateTimeHelper.ConvertToUtcTime(model.EndDate.Value, await _dateTimeHelper.GetCurrentTimeZoneAsync()).AddDays(1);
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
             {
-                model.VendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+                model.VendorId = currentVendor.Id;
             }
 
             var orderStatusIds = model.OrderStatusIds != null && !model.OrderStatusIds.Contains(0)
@@ -392,7 +391,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             var filterByProductId = 0;
             var product = await _productService.GetProductByIdAsync(model.ProductId);
-            if (product != null && (await _workContext.GetCurrentVendorAsync() == null || product.VendorId == (await _workContext.GetCurrentVendorAsync()).Id))
+            if (product != null && (currentVendor == null || product.VendorId == currentVendor.Id))
                 filterByProductId = model.ProductId;
 
             //load orders
@@ -432,7 +431,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ExportExcelSelected(string selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -468,7 +466,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("cancelorder")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CancelOrder(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -505,7 +502,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("captureorder")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CaptureOrder(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -545,7 +541,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("markorderaspaid")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> MarkOrderAsPaid(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -582,7 +577,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("refundorder")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> RefundOrder(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -622,7 +616,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("refundorderoffline")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> RefundOrderOffline(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -659,7 +652,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("voidorder")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> VoidOrder(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -699,7 +691,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("voidorderoffline")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> VoidOrderOffline(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -734,7 +725,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> PartiallyRefundOrderPopup(int id, bool online)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -757,7 +747,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [FormValueRequired("partialrefundorder")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> PartiallyRefundOrderPopup(int id, bool online, OrderModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -821,7 +810,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("btnSaveOrderStatus")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ChangeOrderStatus(int id, OrderModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -871,7 +859,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Edit, delete
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -893,7 +880,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -917,17 +903,17 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("List");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> PdfInvoice(int orderId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
                 return AccessDeniedView();
 
             //a vendor should have access only to his products
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
             var vendorId = 0;
-            if (await _workContext.GetCurrentVendorAsync() != null)
+            if (currentVendor != null)
             {
-                vendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+                vendorId = currentVendor.Id;
             }
 
             var order = await _orderService.GetOrderByIdAsync(orderId);
@@ -943,21 +929,21 @@ namespace Nop.Web.Areas.Admin.Controllers
                 bytes = stream.ToArray();
             }
 
-            return File(bytes, MimeTypes.ApplicationPdf, $"order_{order.Id}.pdf");
+            return File(bytes, MimeTypes.ApplicationPdf, $"order_{order.CustomOrderNumber}.pdf");
         }
 
         [HttpPost, ActionName("PdfInvoice")]
         [FormValueRequired("pdf-invoice-all")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> PdfInvoiceAll(OrderSearchModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
                 return AccessDeniedView();
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
             {
-                model.VendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+                model.VendorId = currentVendor.Id;
             }
 
             var startDateValue = model.StartDate == null ? null
@@ -978,7 +964,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             var filterByProductId = 0;
             var product = await _productService.GetProductByIdAsync(model.ProductId);
-            if (product != null && (await _workContext.GetCurrentVendorAsync() == null || product.VendorId == (await _workContext.GetCurrentVendorAsync()).Id))
+            if (product != null && (currentVendor == null || product.VendorId == currentVendor.Id))
                 filterByProductId = model.ProductId;
 
             //load orders
@@ -1024,7 +1010,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> PdfInvoiceSelected(string selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1041,11 +1026,12 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
 
             //a vendor should have access only to his products
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
             var vendorId = 0;
-            if (await _workContext.GetCurrentVendorAsync() != null)
+            if (currentVendor != null)
             {
                 orders = await orders.WhereAwait(HasAccessToOrderAsync).ToListAsync();
-                vendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+                vendorId = currentVendor.Id;
             }
 
             try
@@ -1068,7 +1054,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         //currently we use this method on the add product to order details pages
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductDetails_AttributeChange(int productId, bool validateAttributeConditions, IFormCollection form)
         {
             var product = await _productService.GetProductByIdAsync(productId);
@@ -1107,7 +1092,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("btnSaveCC")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EditCreditCardInfo(int id, OrderModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1160,7 +1144,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("btnSaveOrderTotals")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EditOrderTotals(int id, OrderModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1208,7 +1191,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("save-shipping-method")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EditShippingMethod(int id, OrderModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1248,7 +1230,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired(FormValueRequirement.StartsWith, "btnSaveOrderItem")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EditOrderItem(int id, IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1357,7 +1338,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired(FormValueRequirement.StartsWith, "btnDeleteOrderItem")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> DeleteOrderItem(int id, IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1437,7 +1417,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired(FormValueRequirement.StartsWith, "btnResetDownloadCount")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ResetDownloadCount(int id, IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1476,7 +1455,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired(FormValueRequirement.StartsWith, "btnPvActivateDownload")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ActivateDownloadItem(int id, IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1513,7 +1491,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> UploadLicenseFilePopup(int id, int orderItemId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1546,7 +1523,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [FormValueRequired("uploadlicense")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> UploadLicenseFilePopup(UploadLicenseModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1582,7 +1558,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("UploadLicenseFilePopup")]
         [FormValueRequired("deletelicense")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> DeleteLicenseFilePopup(UploadLicenseModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1613,7 +1588,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddProductToOrder(int orderId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1635,7 +1609,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddProductToOrder(AddProductToOrderSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1655,7 +1628,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddProductToOrderDetails(int orderId, int productId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1680,7 +1652,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddProductToOrderDetails(int orderId, int productId, IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1703,11 +1674,11 @@ namespace Nop.Web.Areas.Admin.Controllers
                 ?? throw new ArgumentException("No customer found with the specified id");
 
             //basic properties
-            decimal.TryParse(form["UnitPriceInclTax"], out var unitPriceInclTax);
-            decimal.TryParse(form["UnitPriceExclTax"], out var unitPriceExclTax);
-            int.TryParse(form["Quantity"], out var quantity);
-            decimal.TryParse(form["SubTotalInclTax"], out var priceInclTax);
-            decimal.TryParse(form["SubTotalExclTax"], out var priceExclTax);
+            _ = decimal.TryParse(form["UnitPriceInclTax"], out var unitPriceInclTax);
+            _ = decimal.TryParse(form["UnitPriceExclTax"], out var unitPriceExclTax);
+            _ = int.TryParse(form["Quantity"], out var quantity);
+            _ = decimal.TryParse(form["SubTotalInclTax"], out var priceInclTax);
+            _ = decimal.TryParse(form["SubTotalExclTax"], out var priceExclTax);
 
             //warnings
             var warnings = new List<string>();
@@ -1833,7 +1804,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Addresses
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddressEdit(int addressId, int orderId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1859,7 +1829,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddressEdit(OrderAddressModel model, IFormCollection form)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1919,7 +1888,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Shipments
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ShipmentList()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1932,7 +1900,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ShipmentListSelect(ShipmentSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1945,7 +1912,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ShipmentsByOrder(OrderShipmentSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1966,7 +1932,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ShipmentsItemsByShipmentId(ShipmentItemSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -1977,7 +1942,8 @@ namespace Nop.Web.Areas.Admin.Controllers
                 ?? throw new ArgumentException("No shipment found with the specified id");
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null && !await HasAccessToShipmentAsync(shipment))
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null && !await HasAccessToShipmentAsync(shipment))
                 return Content(string.Empty);
 
             //try to get an order with the specified id
@@ -1985,7 +1951,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 ?? throw new ArgumentException("No order found with the specified id");
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null && !await HasAccessToOrderAsync(order))
+            if (currentVendor != null && !await HasAccessToOrderAsync(order))
                 return Content(string.Empty);
 
             //prepare model
@@ -1995,7 +1961,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddShipment(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2018,7 +1983,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
         [FormValueRequired("save", "save-continue")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> AddShipment(ShipmentModel model, IFormCollection form, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2030,12 +1994,13 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return RedirectToAction("List");
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null && !await HasAccessToOrderAsync(order))
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null && !await HasAccessToOrderAsync(order))
                 return RedirectToAction("List");
 
             var orderItems = await _orderService.GetOrderItemsAsync(order.Id, isShipEnabled: true);
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
+            if (currentVendor != null)
             {
                 orderItems = await orderItems.WhereAwait(HasAccessToProductAsync).ToListAsync();
             }
@@ -2066,7 +2031,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 foreach (var formKey in form.Keys)
                     if (formKey.Equals($"qtyToAdd{orderItem.Id}", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        int.TryParse(form[formKey], out qtyToAdd);
+                        _ = int.TryParse(form[formKey], out qtyToAdd);
                         break;
                     }
 
@@ -2079,7 +2044,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                     foreach (var formKey in form.Keys)
                         if (formKey.Equals($"warehouse_{orderItem.Id}", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            int.TryParse(form[formKey], out warehouseId);
+                            _ = int.TryParse(form[formKey], out warehouseId);
                             break;
                         }
                 }
@@ -2135,10 +2100,17 @@ namespace Nop.Web.Areas.Admin.Controllers
                     CreatedOnUtc = DateTime.UtcNow
                 });
 
-                if (model.CanShip)
+                await _eventPublisher.PublishAsync(new ShipmentCreatedEvent(shipment));
+
+                var canShip = !order.PickupInStore && model.CanShip;
+                if (canShip)
                     await _orderProcessingService.ShipAsync(shipment, true);
 
-                if (model.CanShip && model.CanDeliver)
+                var canMarkAsReadyForPickup = order.PickupInStore && model.CanMarkAsReadyForPickup;
+                if (canMarkAsReadyForPickup)
+                    await _orderProcessingService.ReadyForPickupAsync(shipment, true);
+
+                if ((canShip || canMarkAsReadyForPickup) && model.CanDeliver)
                     await _orderProcessingService.DeliverAsync(shipment, true);
 
                 await LogEditOrderAsync(order.Id);
@@ -2154,7 +2126,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("AddShipment", model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ShipmentDetails(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2176,7 +2147,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> DeleteShipment(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2224,7 +2194,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("ShipmentDetails")]
         [FormValueRequired("settrackingnumber")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetTrackingNumber(ShipmentModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2247,7 +2216,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("ShipmentDetails")]
         [FormValueRequired("setadmincomment")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetShipmentAdminComment(ShipmentModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2270,7 +2238,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("ShipmentDetails")]
         [FormValueRequired("setasshipped")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetAsShipped(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2301,7 +2268,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("ShipmentDetails")]
         [FormValueRequired("saveshippeddate")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EditShippedDate(ShipmentModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2336,8 +2302,69 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ActionName("ShipmentDetails")]
+        [FormValueRequired("setasreadyforpickup")]
+        public virtual async Task<IActionResult> SetAsReadyForPickup(int id)
+        {
+            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
+                return AccessDeniedView();
+
+            //try to get a shipment with the specified id
+            var shipment = await _shipmentService.GetShipmentByIdAsync(id);
+            if (shipment == null)
+                return RedirectToAction("List");
+
+            //a vendor should have access only to his products
+            if (await _workContext.GetCurrentVendorAsync() != null && !await HasAccessToShipmentAsync(shipment))
+                return RedirectToAction("List");
+
+            try
+            {
+                await _orderProcessingService.ReadyForPickupAsync(shipment, true);
+                await LogEditOrderAsync(shipment.OrderId);
+                return RedirectToAction("ShipmentDetails", new { id = shipment.Id });
+            }
+            catch (Exception exc)
+            {
+                //error
+                await _notificationService.ErrorNotificationAsync(exc);
+                return RedirectToAction("ShipmentDetails", new { id = shipment.Id });
+            }
+        }
+
+        [HttpPost, ActionName("ShipmentDetails")]
+        [FormValueRequired("savereadyforpickupdate")]
+        public virtual async Task<IActionResult> EditReadyForPickupDate(ShipmentModel model)
+        {
+            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
+                return AccessDeniedView();
+
+            //try to get a shipment with the specified id
+            var shipment = await _shipmentService.GetShipmentByIdAsync(model.Id);
+            if (shipment == null)
+                return RedirectToAction("List");
+
+            //a vendor should have access only to his products
+            if (await _workContext.GetCurrentVendorAsync() != null && !await HasAccessToShipmentAsync(shipment))
+                return RedirectToAction("List");
+
+            try
+            {
+                if (!model.ReadyForPickupDateUtc.HasValue)
+                    throw new Exception("Enter ready for pickup date");
+
+                shipment.ReadyForPickupDateUtc = model.ReadyForPickupDateUtc;
+                await _shipmentService.UpdateShipmentAsync(shipment);
+                return RedirectToAction("ShipmentDetails", new { id = shipment.Id });
+            }
+            catch (Exception exc)
+            {
+                await _notificationService.ErrorNotificationAsync(exc);
+                return RedirectToAction("ShipmentDetails", new { id = shipment.Id });
+            }
+        }
+
+        [HttpPost, ActionName("ShipmentDetails")]
         [FormValueRequired("setasdelivered")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetAsDelivered(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2368,7 +2395,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("ShipmentDetails")]
         [FormValueRequired("savedeliverydate")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> EditDeliveryDate(ShipmentModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2402,7 +2428,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> PdfPackagingSlip(int shipmentId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2434,7 +2459,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("ShipmentList")]
         [FormValueRequired("exportpackagingslips-all")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> PdfPackagingSlipAll(ShipmentSearchModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2447,9 +2471,10 @@ namespace Nop.Web.Areas.Admin.Controllers
                             : (DateTime?)_dateTimeHelper.ConvertToUtcTime(model.EndDate.Value, await _dateTimeHelper.GetCurrentTimeZoneAsync()).AddDays(1);
 
             //a vendor should have access only to his products
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
             var vendorId = 0;
-            if (await _workContext.GetCurrentVendorAsync() != null)
-                vendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            if (currentVendor != null)
+                vendorId = currentVendor.Id;
 
             //load shipments
             var shipments = await _shipmentService.GetAllShipmentsAsync(vendorId: vendorId,
@@ -2460,6 +2485,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 shippingCity: model.City,
                 trackingNumber: model.TrackingNumber,
                 loadNotShipped: model.LoadNotShipped,
+                loadNotReadyForPickup: model.LoadNotReadyForPickup,
                 createdFromUtc: startDateValue,
                 createdToUtc: endDateValue);
 
@@ -2489,7 +2515,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> PdfPackagingSlipSelected(string selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2529,17 +2554,16 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> SetAsShippedSelected(ICollection<int> selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
                 return AccessDeniedView();
 
-            var shipments = new List<Shipment>();
-            if (selectedIds != null)
-            {
-                shipments.AddRange(await _shipmentService.GetShipmentsByIdsAsync(selectedIds.ToArray()));
-            }
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
+
+            var shipments = await _shipmentService.GetShipmentsByIdsAsync(selectedIds.ToArray());
+
             //a vendor should have access only to his products
             if (await _workContext.GetCurrentVendorAsync() != null)
             {
@@ -2562,17 +2586,48 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
+        public virtual async Task<IActionResult> SetAsReadyForPickupSelected(ICollection<int> selectedIds)
+        {
+            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
+                return AccessDeniedView();
+
+            if (selectedIds == null || selectedIds.Count() == 0)
+                return NoContent();
+
+            var shipments = await _shipmentService.GetShipmentsByIdsAsync(selectedIds.ToArray());
+
+            //a vendor should have access only to his products
+            if (await _workContext.GetCurrentVendorAsync() != null)
+            {
+                shipments = await shipments.WhereAwait(HasAccessToShipmentAsync).ToListAsync();
+            }
+
+            foreach (var shipment in shipments)
+            {
+                try
+                {
+                    await _orderProcessingService.ReadyForPickupAsync(shipment, true);
+                }
+                catch
+                {
+                    //ignore any exception
+                }
+            }
+
+            return Json(new { Result = true });
+        }
+
+        [HttpPost]
         public virtual async Task<IActionResult> SetAsDeliveredSelected(ICollection<int> selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
                 return AccessDeniedView();
 
-            var shipments = new List<Shipment>();
-            if (selectedIds != null)
-            {
-                shipments.AddRange(await _shipmentService.GetShipmentsByIdsAsync(selectedIds.ToArray()));
-            }
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
+
+            var shipments = await _shipmentService.GetShipmentsByIdsAsync(selectedIds.ToArray());
+
             //a vendor should have access only to his products
             if (await _workContext.GetCurrentVendorAsync() != null)
             {
@@ -2599,7 +2654,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Order notes
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OrderNotesSelect(OrderNoteSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2619,7 +2673,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OrderNoteAdd(int orderId, int downloadId, bool displayToCustomer, string message)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2659,7 +2712,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OrderNoteDelete(int id, int orderId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2687,7 +2739,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Reports
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> BestsellersBriefReportByQuantityList(BestsellerBriefSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2700,7 +2751,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> BestsellersBriefReportByAmountList(BestsellerBriefSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2713,7 +2763,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OrderAverageReportList(OrderAverageReportSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2730,7 +2779,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> OrderIncompleteReportList(OrderIncompleteReportSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))
@@ -2746,7 +2794,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> LoadOrderStatistics(string period)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageOrders))

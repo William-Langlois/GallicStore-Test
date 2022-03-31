@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Orders;
+using Nop.Services.Catalog;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Messages;
@@ -25,6 +26,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         private readonly ILocalizedEntityService _localizedEntityService;
         private readonly INotificationService _notificationService;
         private readonly IOrderService _orderService;
+        private readonly IProductService _productService;
         private readonly IPermissionService _permissionService;
         private readonly IReturnRequestModelFactory _returnRequestModelFactory;
         private readonly IReturnRequestService _returnRequestService;
@@ -39,6 +41,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             ILocalizedEntityService localizedEntityService,
             INotificationService notificationService,
             IOrderService orderService,
+            IProductService productService,
             IPermissionService permissionService,
             IReturnRequestModelFactory returnRequestModelFactory,
             IReturnRequestService returnRequestService,
@@ -49,6 +52,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             _localizedEntityService = localizedEntityService;
             _notificationService = notificationService;
             _orderService = orderService;
+            _productService = productService;
             _permissionService = permissionService;
             _returnRequestModelFactory = returnRequestModelFactory;
             _returnRequestService = returnRequestService;
@@ -59,7 +63,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(ReturnRequestReason rrr, ReturnRequestReasonModel model)
         {
             foreach (var localized in model.Locales)
@@ -71,7 +74,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(ReturnRequestAction rra, ReturnRequestActionModel model)
         {
             foreach (var localized in model.Locales)
@@ -92,7 +94,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("List");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageReturnRequests))
@@ -105,7 +106,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(ReturnRequestSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageReturnRequests))
@@ -117,7 +117,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageReturnRequests))
@@ -136,7 +135,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
         [FormValueRequired("save", "save-continue")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(ReturnRequestModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageReturnRequests))
@@ -149,18 +147,41 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                returnRequest = model.ToEntity(returnRequest);
-                returnRequest.UpdatedOnUtc = DateTime.UtcNow;
-                
-                await _returnRequestService.UpdateReturnRequestAsync(returnRequest);
+                var quantityToReturn = model.ReturnedQuantity - returnRequest.ReturnedQuantity;
+                if (quantityToReturn < 0)
+                    _notificationService.ErrorNotification(string.Format(await _localizationService.GetResourceAsync("Admin.ReturnRequests.Fields.ReturnedQuantity.CannotBeLessThanQuantityAlreadyReturned"), returnRequest.ReturnedQuantity));
+                else
+                {
+                    if (quantityToReturn > 0)
+                    {
+                        var orderItem = await _orderService.GetOrderItemByIdAsync(returnRequest.OrderItemId);
+                        if (orderItem != null)
+                        {
+                            var product = await _productService.GetProductByIdAsync(orderItem.ProductId);
+                            if (product != null)
+                            {
+                                var productStockChangedMessage = string.Format(await _localizationService.GetResourceAsync("Admin.ReturnRequests.QuantityReturnedToStock"), quantityToReturn);
+                                
+                                await _productService.AdjustInventoryAsync(product, quantityToReturn, orderItem.AttributesXml, productStockChangedMessage);
 
-                //activity log
-                await _customerActivityService.InsertActivityAsync("EditReturnRequest",
-                    string.Format(await _localizationService.GetResourceAsync("ActivityLog.EditReturnRequest"), returnRequest.Id), returnRequest);
+                                _notificationService.SuccessNotification(productStockChangedMessage);
+                            }
+                        }
+                    }
 
-                _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.ReturnRequests.Updated"));
+                    returnRequest = model.ToEntity(returnRequest);
+                    returnRequest.UpdatedOnUtc = DateTime.UtcNow;
 
-                return continueEditing ? RedirectToAction("Edit", new { id = returnRequest.Id }) : RedirectToAction("List");
+                    await _returnRequestService.UpdateReturnRequestAsync(returnRequest);
+
+                    //activity log
+                    await _customerActivityService.InsertActivityAsync("EditReturnRequest",
+                        string.Format(await _localizationService.GetResourceAsync("ActivityLog.EditReturnRequest"), returnRequest.Id), returnRequest);
+
+                    _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.ReturnRequests.Updated"));
+
+                    return continueEditing ? RedirectToAction("Edit", new { id = returnRequest.Id }) : RedirectToAction("List");
+                }
             }
 
             //prepare model
@@ -172,7 +193,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost, ActionName("Edit")]
         [FormValueRequired("notify-customer")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> NotifyCustomer(ReturnRequestModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageReturnRequests))
@@ -200,7 +220,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageReturnRequests))
@@ -224,7 +243,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Return request reasons
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestReasonList()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -238,7 +256,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestReasonList(ReturnRequestReasonSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -250,7 +267,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestReasonCreate()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -263,7 +279,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestReasonCreate(ReturnRequestReasonModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -291,7 +306,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestReasonEdit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -309,7 +323,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestReasonEdit(ReturnRequestReasonModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -344,7 +357,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestReasonDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -365,7 +377,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Return request actions
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestActionList()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -379,7 +390,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestActionList(ReturnRequestActionSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -391,7 +401,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestActionCreate()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -404,7 +413,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestActionCreate(ReturnRequestActionModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -432,7 +440,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestActionEdit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -450,7 +457,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestActionEdit(ReturnRequestActionModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))
@@ -485,7 +491,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ReturnRequestActionDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageSettings))

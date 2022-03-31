@@ -176,13 +176,13 @@ namespace Nop.Services.Orders
                 if (!customerEnteredPricesEqual)
                     return false;
             }
-            
-            if (!product.IsRental) 
+
+            if (!product.IsRental)
                 return true;
 
             //rental products
             var rentalInfoEqual = shoppingCartItem.RentalStartDateUtc == rentalStartDate && shoppingCartItem.RentalEndDateUtc == rentalEndDate;
-            
+
             return rentalInfoEqual;
         }
 
@@ -303,14 +303,14 @@ namespace Nop.Services.Orders
         /// The task result contains the warnings
         /// </returns>
         protected virtual async Task<IList<string>> GetStandardWarningsAsync(Customer customer, ShoppingCartType shoppingCartType, Product product,
-            string attributesXml, decimal customerEnteredPrice, int quantity, int shoppingCartItemId, int storeId, string vendorId = null)
+            string attributesXml, decimal customerEnteredPrice, int quantity, int shoppingCartItemId, int storeId)
         {
             if (customer == null)
                 throw new ArgumentNullException(nameof(customer));
 
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
-            
+
             var warnings = new List<string>();
 
             //deleted
@@ -339,7 +339,7 @@ namespace Nop.Services.Orders
             }
 
             //Store mapping
-            if (!await _storeMappingService.AuthorizeAsync(product, (await _storeContext.GetCurrentStoreAsync()).Id))
+            if (!await _storeMappingService.AuthorizeAsync(product, storeId))
             {
                 warnings.Add(await _localizationService.GetResourceAsync("ShoppingCart.ProductUnpublished"));
             }
@@ -370,8 +370,9 @@ namespace Nop.Services.Orders
                 if (customerEnteredPrice < product.MinimumCustomerEnteredPrice ||
                     customerEnteredPrice > product.MaximumCustomerEnteredPrice)
                 {
-                    var minimumCustomerEnteredPrice = await _currencyService.ConvertFromPrimaryStoreCurrencyAsync(product.MinimumCustomerEnteredPrice, await _workContext.GetWorkingCurrencyAsync());
-                    var maximumCustomerEnteredPrice = await _currencyService.ConvertFromPrimaryStoreCurrencyAsync(product.MaximumCustomerEnteredPrice, await _workContext.GetWorkingCurrencyAsync());
+                    var currentCurrency = await _workContext.GetWorkingCurrencyAsync();
+                    var minimumCustomerEnteredPrice = await _currencyService.ConvertFromPrimaryStoreCurrencyAsync(product.MinimumCustomerEnteredPrice, currentCurrency);
+                    var maximumCustomerEnteredPrice = await _currencyService.ConvertFromPrimaryStoreCurrencyAsync(product.MaximumCustomerEnteredPrice, currentCurrency);
                     warnings.Add(string.Format(await _localizationService.GetResourceAsync("ShoppingCart.CustomerEnteredPrice.RangeError"),
                         await _priceFormatter.FormatPriceAsync(minimumCustomerEnteredPrice, false, false),
                         await _priceFormatter.FormatPriceAsync(maximumCustomerEnteredPrice, false, false)));
@@ -423,7 +424,7 @@ namespace Nop.Services.Orders
                                 var onlyCombinableAttributes = productAttributeMappings.All(mapping => !mapping.IsNonCombinable());
                                 if (!onlyCombinableAttributes)
                                 {
-                                    var cart = await GetShoppingCartAsync(customer, shoppingCartType, storeId,vendorId: vendorId);
+                                    var cart = await GetShoppingCartAsync(customer, shoppingCartType, storeId);
                                     var totalAddedQuantity = cart
                                         .Where(item => item.ProductId == product.Id && item.Id != shoppingCartItemId)
                                         .Sum(product => product.Quantity);
@@ -451,7 +452,7 @@ namespace Nop.Services.Orders
                             //validate product quantity and product quantity into bundles
                             if (string.IsNullOrEmpty(attributesXml))
                             {
-                                var cart = await GetShoppingCartAsync(customer, shoppingCartType, storeId, vendorId: vendorId);
+                                var cart = await GetShoppingCartAsync(customer, shoppingCartType, storeId);
                                 var totalQuantityInCart = cart.Where(item => item.ProductId == product.Id && item.Id != shoppingCartItemId && string.IsNullOrEmpty(item.AttributesXml))
                                     .Sum(product => product.Quantity);
 
@@ -580,7 +581,7 @@ namespace Nop.Services.Orders
             var storeId = shoppingCartItem.StoreId;
 
             //reset checkout data
-            if (resetCheckoutData) 
+            if (resetCheckoutData)
                 await _customerService.ResetCheckoutDataAsync(customer, shoppingCartItem.StoreId);
 
             //delete item
@@ -661,7 +662,7 @@ namespace Nop.Services.Orders
                         select sci;
 
             var cartItems = await query.ToListAsync();
-            
+
             foreach (var cartItem in cartItems)
                 await DeleteShoppingCartItemAsync(cartItem);
 
@@ -711,16 +712,12 @@ namespace Nop.Services.Orders
         /// The task result contains the shopping Cart
         /// </returns>
         public virtual async Task<IList<ShoppingCartItem>> GetShoppingCartAsync(Customer customer, ShoppingCartType? shoppingCartType = null,
-            int storeId = 0, int? productId = null, DateTime? createdFromUtc = null, DateTime? createdToUtc = null, string vendorId = null)
+            int storeId = 0, int? productId = null, DateTime? createdFromUtc = null, DateTime? createdToUtc = null)
         {
             if (customer == null)
                 throw new ArgumentNullException(nameof(customer));
 
             var items = _sciRepository.Table.Where(sci => sci.CustomerId == customer.Id);
-
-            int parsedVendorId = 0;
-            bool vendorIdIsParsable = false;
-            vendorIdIsParsable = Int32.TryParse(vendorId,out parsedVendorId);
 
             //filter by type
             if (shoppingCartType.HasValue)
@@ -740,17 +737,12 @@ namespace Nop.Services.Orders
             if (createdToUtc.HasValue)
                 items = items.Where(item => createdToUtc.Value >= item.CreatedOnUtc);
 
-            //filter by vendor
-            if (vendorId != null && vendorIdIsParsable == true && parsedVendorId > 0)
-                items = items.Where(item => item.VendorId == (int)parsedVendorId);
-
-            var key = _staticCacheManager.PrepareKeyForShortTermCache(NopOrderDefaults.ShoppingCartItemsAllCacheKey, customer, shoppingCartType, storeId, productId, createdFromUtc, createdToUtc,parsedVendorId);
+            var key = _staticCacheManager.PrepareKeyForShortTermCache(NopOrderDefaults.ShoppingCartItemsAllCacheKey, customer, shoppingCartType, storeId, productId, createdFromUtc, createdToUtc);
 
             return await _staticCacheManager.GetAsync(key, async () => await items.ToListAsync());
         }
 
         /// <summary>
-        /// Temporary solution
         /// Validates shopping cart item attributes
         /// </summary>
         /// <param name="customer">Customer</param>
@@ -765,7 +757,7 @@ namespace Nop.Services.Orders
         /// A task that represents the asynchronous operation
         /// The task result contains the warnings
         /// </returns>
-        protected virtual async Task<IList<string>> GetShoppingCartItemAttributeWarningsAsync(Customer customer,
+        public virtual async Task<IList<string>> GetShoppingCartItemAttributeWarningsAsync(Customer customer,
             ShoppingCartType shoppingCartType,
             Product product,
             int quantity = 1,
@@ -935,9 +927,10 @@ namespace Nop.Services.Orders
                 var associatedProduct = await _productService.GetProductByIdAsync(attributeValue.AssociatedProductId);
                 if (associatedProduct != null)
                 {
+                    var store = await _storeContext.GetCurrentStoreAsync();
                     var totalQty = quantity * attributeValue.Quantity;
                     var associatedProductWarnings = await GetShoppingCartItemWarningsAsync(customer,
-                        shoppingCartType, associatedProduct, (await _storeContext.GetCurrentStoreAsync()).Id,
+                        shoppingCartType, associatedProduct, store.Id,
                         string.Empty, decimal.Zero, null, null, totalQty, false, shoppingCartItemId);
 
                     var productAttribute = await _productAttributeService.GetProductAttributeByIdAsync(productAttributeMapping.ProductAttributeId);
@@ -958,31 +951,6 @@ namespace Nop.Services.Orders
             }
 
             return warnings;
-        }
-
-        /// <summary>
-        /// Validates shopping cart item attributes
-        /// </summary>
-        /// <param name="customer">Customer</param>
-        /// <param name="shoppingCartType">Shopping cart type</param>
-        /// <param name="product">Product</param>
-        /// <param name="quantity">Quantity</param>
-        /// <param name="attributesXml">Attributes in XML format</param>
-        /// <param name="ignoreNonCombinableAttributes">A value indicating whether we should ignore non-combinable attributes</param>
-        /// <param name="ignoreConditionMet">A value indicating whether we should ignore filtering by "is condition met" property</param>
-        /// <returns>
-        /// A task that represents the asynchronous operation
-        /// The task result contains the warnings
-        /// </returns>
-        public virtual async Task<IList<string>> GetShoppingCartItemAttributeWarningsAsync(Customer customer,
-            ShoppingCartType shoppingCartType,
-            Product product,
-            int quantity = 1,
-            string attributesXml = "",
-            bool ignoreNonCombinableAttributes = false,
-            bool ignoreConditionMet = false)
-        {
-            return await GetShoppingCartItemAttributeWarningsAsync(customer, shoppingCartType, product, quantity, attributesXml, ignoreNonCombinableAttributes, ignoreConditionMet, 0);
         }
 
         /// <summary>
@@ -1210,7 +1178,8 @@ namespace Nop.Services.Orders
 
             //existing checkout attributes
             var excludeShippableAttributes = !await ShoppingCartRequiresShippingAsync(shoppingCart);
-            var attributes2 = await _checkoutAttributeService.GetAllCheckoutAttributesAsync((await _storeContext.GetCurrentStoreAsync()).Id, excludeShippableAttributes);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var attributes2 = await _checkoutAttributeService.GetAllCheckoutAttributesAsync(store.Id, excludeShippableAttributes);
 
             //validate conditional attributes only (if specified)
             attributes2 = await attributes2.WhereAwait(async x =>
@@ -1291,13 +1260,13 @@ namespace Nop.Services.Orders
 
             return warnings;
         }
-        
+
         /// <summary>
         /// Gets the shopping cart item sub total
         /// </summary>
         /// <param name="shoppingCartItem">The shopping cart item</param>
         /// <param name="includeDiscounts">A value indicating whether include discounts or not for price computation</param>
-       /// <returns>Shopping cart item sub total. Applied discount amount. Applied discounts. Maximum discounted qty. Return not nullable value if discount cannot be applied to ALL items</returns>
+        /// <returns>Shopping cart item sub total. Applied discount amount. Applied discounts. Maximum discounted qty. Return not nullable value if discount cannot be applied to ALL items</returns>
         public virtual async Task<(decimal subTotal, decimal discountAmount, List<Discount> appliedDiscounts, int? maximumDiscountQty)> GetSubTotalAsync(ShoppingCartItem shoppingCartItem,
             bool includeDiscounts)
         {
@@ -1418,7 +1387,7 @@ namespace Nop.Services.Orders
             var combination = await _productAttributeParser.FindProductAttributeCombinationAsync(product, attributesXml);
             if (combination?.OverriddenPrice.HasValue ?? false)
             {
-                (_, finalPrice, discountAmount, appliedDiscounts) =  await _priceCalculationService.GetFinalPriceAsync(product,
+                (_, finalPrice, discountAmount, appliedDiscounts) = await _priceCalculationService.GetFinalPriceAsync(product,
                         customer,
                         combination.OverriddenPrice.Value,
                         decimal.Zero,
@@ -1642,8 +1611,7 @@ namespace Nop.Services.Orders
                     RentalEndDateUtc = rentalEndDate,
                     CreatedOnUtc = now,
                     UpdatedOnUtc = now,
-                    CustomerId = customer.Id,
-                    VendorId = product.VendorId
+                    CustomerId = customer.Id
                 };
 
                 await _sciRepository.InsertAsync(shoppingCartItem);
@@ -1777,15 +1745,16 @@ namespace Nop.Services.Orders
 
                 //gift card
                 foreach (var code in await _customerService.ParseAppliedGiftCardCouponCodesAsync(fromCustomer))
-                   await _customerService.ApplyGiftCardCouponCodeAsync(toCustomer, code);
+                    await _customerService.ApplyGiftCardCouponCodeAsync(toCustomer, code);
 
                 //save customer
                 await _customerService.UpdateCustomerAsync(toCustomer);
             }
 
             //move selected checkout attributes
-            var checkoutAttributesXml = await _genericAttributeService.GetAttributeAsync<string>(fromCustomer, NopCustomerDefaults.CheckoutAttributes, (await _storeContext.GetCurrentStoreAsync()).Id);
-            await _genericAttributeService.SaveAttributeAsync(toCustomer, NopCustomerDefaults.CheckoutAttributes, checkoutAttributesXml, (await _storeContext.GetCurrentStoreAsync()).Id);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var checkoutAttributesXml = await _genericAttributeService.GetAttributeAsync<string>(fromCustomer, NopCustomerDefaults.CheckoutAttributes, store.Id);
+            await _genericAttributeService.SaveAttributeAsync(toCustomer, NopCustomerDefaults.CheckoutAttributes, checkoutAttributesXml, store.Id);
         }
 
         /// <summary>

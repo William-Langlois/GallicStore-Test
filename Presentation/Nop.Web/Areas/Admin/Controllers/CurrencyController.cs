@@ -69,7 +69,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(Currency currency, CurrencyModel model)
         {
             foreach (var localized in model.Locales)
@@ -78,7 +77,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveStoreMappingsAsync(Currency currency, CurrencyModel model)
         {
             currency.LimitedToStores = model.SelectedStoreIds.Any();
@@ -91,7 +89,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedStoreIds.Contains(store.Id))
                 {
                     //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(currency, store.Id);
                 }
                 else
@@ -113,7 +111,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("List");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(bool liveRates = false)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
@@ -136,7 +133,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [FormValueRequired("save")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(CurrencySearchModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
@@ -144,13 +140,12 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             _currencySettings.ActiveExchangeRateProviderSystemName = model.ExchangeRateProviderModel.ExchangeRateProvider;
             _currencySettings.AutoUpdateEnabled = model.ExchangeRateProviderModel.AutoUpdateEnabled;
-            await _settingService.SaveSettingAsync(_currencySettings, 0, 0);
+            await _settingService.SaveSettingAsync(_currencySettings);
 
             return RedirectToAction("List", "Currency");
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ListGrid(CurrencySearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
@@ -163,7 +158,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ApplyRates(IEnumerable<CurrencyExchangeRateModel> rateModels)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
@@ -184,27 +178,25 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> MarkAsPrimaryExchangeRateCurrency(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
                 return AccessDeniedView();
 
             _currencySettings.PrimaryExchangeRateCurrencyId = id;
-            await _settingService.SaveSettingAsync(_currencySettings, 0, 0);
+            await _settingService.SaveSettingAsync(_currencySettings);
 
             return Json(new { result = true });
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> MarkAsPrimaryStoreCurrency(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
                 return AccessDeniedView();
 
             _currencySettings.PrimaryStoreCurrencyId = id;
-            await _settingService.SaveSettingAsync(_currencySettings, 0);
+            await _settingService.SaveSettingAsync(_currencySettings);
 
             return Json(new { result = true });
         }
@@ -213,7 +205,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Create / Edit / Delete
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
@@ -226,7 +217,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create(CurrencyModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
@@ -264,7 +254,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
@@ -282,7 +271,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(CurrencyModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))
@@ -333,7 +321,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCurrencies))

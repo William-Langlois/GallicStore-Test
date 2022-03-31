@@ -96,7 +96,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
 
         #region Methods
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> Configure()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -115,7 +114,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(FacebookPixelSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -139,7 +137,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -163,7 +160,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Create(FacebookPixelModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -172,7 +168,8 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
             if (ModelState.IsValid)
             {
                 //save configuration
-                model.StoreId = model.StoreId > 0 ? model.StoreId : (await _storeContext.GetCurrentStoreAsync()).Id;
+                var store = await _storeContext.GetCurrentStoreAsync();
+                model.StoreId = model.StoreId > 0 ? model.StoreId : store.Id;
                 var configuration = model.ToEntity<FacebookPixelConfiguration>();
                 await _facebookPixelService.InsertConfigurationAsync(configuration);
 
@@ -188,7 +185,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
             return View("~/Plugins/Widgets.FacebookPixel/Views/Configuration/Create.cshtml", model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -213,7 +209,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Edit(FacebookPixelModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -225,9 +220,10 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
 
             if (ModelState.IsValid)
             {
+                var store = await _storeContext.GetCurrentStoreAsync();
                 //save configuration
                 var customEvents = configuration.CustomEvents;
-                model.StoreId = model.StoreId > 0 ? model.StoreId : (await _storeContext.GetCurrentStoreAsync()).Id;
+                model.StoreId = model.StoreId > 0 ? model.StoreId : store.Id;
                 configuration = model.ToEntity<FacebookPixelConfiguration>();
                 configuration.CustomEvents = customEvents;
                 await _facebookPixelService.UpdateConfigurationAsync(configuration);
@@ -249,7 +245,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -268,7 +263,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CustomEventList(CustomEventSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -294,7 +288,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
 
         //ValidateAttribute is used to force model validation
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CustomEventAdd(int configurationId, [Validate] CustomEventModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -310,7 +303,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CustomEventDelete(int configurationId, string id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
@@ -323,7 +315,6 @@ namespace Nop.Plugin.Widgets.FacebookPixel.Controllers
             return new NullJsonResult();
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public async Task<IActionResult> CookieSettingsWarning(bool disableForUsersNotAcceptingCookieConsent)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))

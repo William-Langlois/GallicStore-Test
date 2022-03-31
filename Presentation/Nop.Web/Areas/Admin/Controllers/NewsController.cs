@@ -66,7 +66,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveStoreMappingsAsync(NewsItem newsItem, NewsItemModel model)
         {
             newsItem.LimitedToStores = model.SelectedStoreIds.Any();
@@ -79,7 +78,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedStoreIds.Contains(store.Id))
                 {
                     //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(newsItem, store.Id);
                 }
                 else
@@ -103,7 +102,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return RedirectToAction("NewsItems");
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> NewsItems(int? filterByNewsItemId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -116,7 +114,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List(NewsItemSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -128,7 +125,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return Json(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> NewsItemCreate()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -141,7 +137,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> NewsItemCreate(NewsItemModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -179,7 +174,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             return View(model);
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> NewsItemEdit(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -197,7 +191,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ParameterBasedOnFormName("save-continue", "continueEditing")]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> NewsItemEdit(NewsItemModel model, bool continueEditing)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -240,7 +233,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Delete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -266,7 +258,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Comments
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> NewsComments(int? filterByNewsItemId)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -284,7 +275,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> Comments(NewsCommentSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -297,7 +287,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CommentUpdate(NewsCommentModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -326,7 +315,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CommentDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
@@ -346,14 +334,13 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> DeleteSelectedComments(ICollection<int> selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
                 return AccessDeniedView();
 
-            if (selectedIds == null)
-                return Json(new { Result = true });
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
 
             var comments = await _newsService.GetNewsCommentsByIdsAsync(selectedIds.ToArray());
 
@@ -370,14 +357,13 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ApproveSelected(ICollection<int> selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
                 return AccessDeniedView();
 
-            if (selectedIds == null)
-                return Json(new { Result = true });
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
 
             //filter not approved comments
             var newsComments = (await _newsService.GetNewsCommentsByIdsAsync(selectedIds.ToArray())).Where(comment => !comment.IsApproved);
@@ -400,14 +386,13 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> DisapproveSelected(ICollection<int> selectedIds)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageNews))
                 return AccessDeniedView();
 
-            if (selectedIds == null)
-                return Json(new { Result = true });
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
 
             //filter approved comments
             var newsComments = (await _newsService.GetNewsCommentsByIdsAsync(selectedIds.ToArray())).Where(comment => comment.IsApproved);

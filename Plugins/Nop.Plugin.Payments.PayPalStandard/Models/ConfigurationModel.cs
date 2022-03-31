@@ -1,7 +1,6 @@
-﻿using Nop.Web.Framework.Mvc.ModelBinding;
+﻿using System.ComponentModel.DataAnnotations;
+using Nop.Web.Framework.Mvc.ModelBinding;
 using Nop.Web.Framework.Models;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Nop.Plugin.Payments.PayPalStandard.Models
 {
@@ -9,15 +8,11 @@ namespace Nop.Plugin.Payments.PayPalStandard.Models
     {
         public int ActiveStoreScopeConfiguration { get; set; }
 
-        [NopResourceDisplayName("Plugins.Payments.PayPalStandard.Fields.VendorIdScopeConfiguration")]
-        public int VendorIdScopeConfiguration { get; set; }
-        public bool VendorIdScopeConfiguration_OverrideForStore { get; set; }
-        public IList<SelectListItem> AvailableVendors { get; set; }
-
         [NopResourceDisplayName("Plugins.Payments.PayPalStandard.Fields.UseSandbox")]
         public bool UseSandbox { get; set; }
         public bool UseSandbox_OverrideForStore { get; set; }
 
+        [DataType(DataType.EmailAddress)]
         [NopResourceDisplayName("Plugins.Payments.PayPalStandard.Fields.BusinessEmail")]
         public string BusinessEmail { get; set; }
         public bool BusinessEmail_OverrideForStore { get; set; }

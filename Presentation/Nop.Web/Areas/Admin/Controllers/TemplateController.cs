@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Topics;
 using Nop.Services.Catalog;
+using Nop.Services.Localization;
 using Nop.Services.Security;
 using Nop.Services.Topics;
 using Nop.Web.Areas.Admin.Factories;
@@ -19,6 +20,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Fields
 
         private readonly ICategoryTemplateService _categoryTemplateService;
+        private readonly ILocalizationService _localizationService;
         private readonly IManufacturerTemplateService _manufacturerTemplateService;
         private readonly IPermissionService _permissionService;
         private readonly IProductTemplateService _productTemplateService;
@@ -30,6 +32,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Ctor
 
         public TemplateController(ICategoryTemplateService categoryTemplateService,
+            ILocalizationService localizationService,
             IManufacturerTemplateService manufacturerTemplateService,
             IPermissionService permissionService,
             IProductTemplateService productTemplateService,
@@ -37,6 +40,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             ITopicTemplateService topicTemplateService)
         {
             _categoryTemplateService = categoryTemplateService;
+            _localizationService = localizationService;
             _manufacturerTemplateService = manufacturerTemplateService;
             _permissionService = permissionService;
             _productTemplateService = productTemplateService;
@@ -48,7 +52,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Methods
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> List()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -63,7 +66,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Category templates        
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CategoryTemplates(CategoryTemplateSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -76,7 +78,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CategoryTemplateUpdate(CategoryTemplateModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -96,7 +97,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CategoryTemplateAdd(CategoryTemplateModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -113,11 +113,13 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> CategoryTemplateDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
                 return AccessDeniedView();
+
+            if ((await _categoryTemplateService.GetAllCategoryTemplatesAsync()).Count == 1)
+                return ErrorJson(await _localizationService.GetResourceAsync("Admin.System.Templates.NotDeleteOnlyOne"));
 
             //try to get a category template with the specified id
             var template = await _categoryTemplateService.GetCategoryTemplateByIdAsync(id)
@@ -133,7 +135,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Manufacturer templates        
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ManufacturerTemplates(ManufacturerTemplateSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -146,7 +147,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ManufacturerTemplateUpdate(ManufacturerTemplateModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -166,7 +166,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ManufacturerTemplateAdd(ManufacturerTemplateModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -183,11 +182,13 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ManufacturerTemplateDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
                 return AccessDeniedView();
+
+            if ((await _manufacturerTemplateService.GetAllManufacturerTemplatesAsync()).Count == 1)
+                return ErrorJson(await _localizationService.GetResourceAsync("Admin.System.Templates.NotDeleteOnlyOne"));
 
             //try to get a manufacturer template with the specified id
             var template = await _manufacturerTemplateService.GetManufacturerTemplateByIdAsync(id)
@@ -203,7 +204,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Product templates
                 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductTemplates(ProductTemplateSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -216,7 +216,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductTemplateUpdate(ProductTemplateModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -236,7 +235,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductTemplateAdd(ProductTemplateModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -253,11 +251,13 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> ProductTemplateDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
                 return AccessDeniedView();
+
+            if ((await _productTemplateService.GetAllProductTemplatesAsync()).Count == 1)
+                return ErrorJson(await _localizationService.GetResourceAsync("Admin.System.Templates.NotDeleteOnlyOne"));
 
             //try to get a product template with the specified id
             var template = await _productTemplateService.GetProductTemplateByIdAsync(id)
@@ -273,7 +273,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         #region Topic templates
         
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> TopicTemplates(TopicTemplateSearchModel searchModel)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -286,7 +285,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> TopicTemplateUpdate(TopicTemplateModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -306,7 +304,6 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> TopicTemplateAdd(TopicTemplateModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
@@ -323,11 +320,13 @@ namespace Nop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<IActionResult> TopicTemplateDelete(int id)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
                 return AccessDeniedView();
+
+            if ((await _topicTemplateService.GetAllTopicTemplatesAsync()).Count == 1)
+                return ErrorJson(await _localizationService.GetResourceAsync("Admin.System.Templates.NotDeleteOnlyOne"));
 
             //try to get a topic template with the specified id
             var template = await _topicTemplateService.GetTopicTemplateByIdAsync(id)

@@ -26,8 +26,8 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Infrastructure.Cache
         /// <summary>
         /// Key for caching all tax rates
         /// </summary>
-        public static CacheKey ALL_TAX_RATES_MODEL_KEY = new CacheKey("Nop.plugins.tax.fixedorbycountrystateziptaxrate.all", TAXRATE_PATTERN_KEY);
-        public static CacheKey TAXRATE_ALL_KEY = new CacheKey("Nop.plugins.tax.fixedorbycountrystateziptaxrate.taxrate.all", TAXRATE_PATTERN_KEY);
+        public static CacheKey ALL_TAX_RATES_MODEL_KEY = new("Nop.plugins.tax.fixedorbycountrystateziptaxrate.all", TAXRATE_PATTERN_KEY);
+        public static CacheKey TAXRATE_ALL_KEY = new("Nop.plugins.tax.fixedorbycountrystateziptaxrate.taxrate.all", TAXRATE_PATTERN_KEY);
         
         public const string TAXRATE_PATTERN_KEY = "Nop.plugins.tax.fixedorbycountrystateziptaxrate.";
 
@@ -108,7 +108,7 @@ namespace Nop.Plugin.Tax.FixedOrByCountryStateZip.Infrastructure.Cache
             }
 
             //delete saved fixed rate if exists
-            var setting = await _settingService.GetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, taxCategory.Id),storeId:0,vendorId:0);
+            var setting = await _settingService.GetSettingAsync(string.Format(FixedOrByCountryStateZipDefaults.FixedRateSettingsKey, taxCategory.Id));
             if (setting != null)
                 await _settingService.DeleteSettingAsync(setting);
         }

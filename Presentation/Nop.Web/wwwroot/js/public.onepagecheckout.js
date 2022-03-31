@@ -145,8 +145,7 @@ var Billing = {
   },
 
   save: function() {
-      if (Checkout.loadWaiting !== false) return;
-      console.log("CALL Billing.Save()")
+    if (Checkout.loadWaiting !== false) return;
 
     Checkout.setLoadWaiting('billing');
 
@@ -560,7 +559,7 @@ var ConfirmOrder = {
         this.successUrl = successUrl;
     },
 
-    save: function () {
+  save: function () {
         if (Checkout.loadWaiting !== false) return;
 
         //terms of service
@@ -576,9 +575,12 @@ var ConfirmOrder = {
         }
         if (termOfServiceOk) {
             Checkout.setLoadWaiting('confirm-order');
+            var postData = {};
+            addAntiForgeryToken(postData);
             $.ajax({
                 cache: false,
                 url: this.saveUrl,
+                data: postData,
                 type: "POST",
                 success: this.nextStep,
                 complete: this.resetLoadWaiting,

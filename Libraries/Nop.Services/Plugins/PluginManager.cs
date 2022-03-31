@@ -18,7 +18,7 @@ namespace Nop.Services.Plugins
         private readonly ICustomerService _customerService;
         private readonly IPluginService _pluginService;
 
-        private readonly Dictionary<string, IList<TPlugin>> _plugins = new Dictionary<string, IList<TPlugin>>();
+        private readonly Dictionary<string, IList<TPlugin>> _plugins = new();
 
         #endregion
 
@@ -47,7 +47,6 @@ namespace Nop.Services.Plugins
         /// </returns>
         protected virtual async Task<string> GetKeyAsync(Customer customer, int storeId, string systemName = null)
         {
-            //var willBeReturned = $"{storeId}-{(customer != null ? string.Join(',', await _customerService.GetCustomerRoleIdsAsync(customer)) : null)}-{systemName}"; //TODO décommenter
             return $"{storeId}-{(customer != null ? string.Join(',', await _customerService.GetCustomerRoleIdsAsync(customer)) : null)}-{systemName}";
         }
 
