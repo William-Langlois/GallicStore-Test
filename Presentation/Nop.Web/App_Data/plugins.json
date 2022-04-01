@@ -138,6 +138,14 @@
     {
       "SystemName": "SevenSpikes.Theme.Emporium",
       "Version": "4.5"
+    },
+    {
+      "SystemName": "Misc.WebApi.Backend",
+      "Version": "4.50.07"
+    },
+    {
+      "SystemName": "Misc.WebApi.Frontend",
+      "Version": "4.50.07"
     }
   ],
   "PluginNamesToUninstall": [],

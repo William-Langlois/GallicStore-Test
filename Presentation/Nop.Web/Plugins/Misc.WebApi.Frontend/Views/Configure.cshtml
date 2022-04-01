@@ -1,25 +1,64 @@
-﻿@{
+﻿@model ConfigurationModel
+
+@using Nop.Plugin.Misc.WebApi.Frontend.Models;
+
+@{
     Layout = "_ConfigurePlugin";
 }
 
+<form asp-controller="WebApiFrontend" asp-action="Configure" method="post">
+    <div class="cards-group">
+        <div class="card card-default">
+            <div class="card-body">
+                <p>
+                    Please find the documentation <a href="https://docs.nopcommerce.com/developer/web-api/index.html" target="_blank">here.</a>
+                </p>
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-label asp-for="DeveloperMode" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="DeveloperMode" />
+                        <span asp-validation-for="DeveloperMode"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-label asp-for="SecretKey" />
+                    </div>
+                    <div class="col-md-7">
+                        <nop-editor asp-for="SecretKey" />
+                        <span asp-validation-for="SecretKey"></span>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="button" id="generate-secret-key" class="btn btn-primary" value="@T("Plugins.WebApi.Backend.SecretKey.Generate")" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-9 offset-md-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
 
-<h1>Web API (official plugin)</h1>
+<script>
+    $(document).ready(function () {
+        $('#generate-secret-key').click(function () {
+            var postData = {};
+            addAntiForgeryToken(postData);
 
-
-<p>The Web API plugin from nopCommerce allows you to develop any integration with third-party services much faster and cheaper.</p>
-
-<p>Such features of Web API plugin as:</p>
-<ul>
-    <li>Open source code.</li>
-    <li>The plugin covers all methods of nopCommerce. There are more than 1.100 methods available.</li>
-    <li>JSON Web Tokens (JWT) authentication.</li>
-</ul>
-<p>allow to reduce the time to develop integrations by up to 80%, which means fewer expenditures and more opportunities for enhancing your store capacities.</p>
-
-<p>The open-source code and the coverage of more than 1.100 nopCommerce methods provide you with unlimited capabilities for developing the integrations with any ERP, PIM, CRM, CMS, WMS systems. </p>
-
-<p>Also, it enables you to develop a mobile application or organize an outstanding headless commerce.</p>
-
-
-<a href="https://www.nopcommerce.com/web-api?utm_source=admin-panel&utm_medium=menu&utm_campaign=WebAPI&utm_content=configuration" target="_blank" class="btn btn-primary">Download plugin</a>
-
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: "@(Url.Action("Generate", "WebApiFrontend"))",
+                data: postData,
+                success: function (data, textStatus, jqXHR) {
+                    $('#@Html.IdFor(model => model.SecretKey)').val(data);
+                }
+            });
+        });
+    });
+</script>

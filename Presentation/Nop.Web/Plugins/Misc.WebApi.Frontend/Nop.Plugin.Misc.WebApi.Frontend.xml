@@ -1,0 +1,1819 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Nop.Plugin.Misc.WebApi.Frontend</name>
+    </assembly>
+    <members>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.AuthenticateController.GetToken(Nop.Plugin.Misc.WebApi.Frontend.Models.AuthenticateCustomerRequest)">
+            <summary>
+            Authenticate user
+            </summary>
+            <param name="request"></param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BackInStockSubscriptionController.SubscribePopup(System.Int32)">
+            <summary>
+            Product details page > back in stock subscribe
+            </summary>
+            <param name="productId">The product identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BackInStockSubscriptionController.SubscribePopupPOST(System.Int32)">
+            <summary>
+            Back in stock subscribe
+            </summary>
+            <param name="productId">Product id</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BackInStockSubscriptionController.CustomerSubscriptions(System.Nullable{System.Int32})">
+            <summary>
+            My account / Back in stock subscriptions
+            </summary>
+            <param name="pageNumber">Page number</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.Index">
+            <summary>
+            Index
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.ActiveDiscussions(System.Int32,System.Int32)">
+            <summary>
+            Active discussions
+            </summary>
+            <param name="forumId">Forum identifier</param>
+            <param name="pageNumber">Number of forum topics page</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.ActiveDiscussionsRss(System.Int32)">
+            <summary>
+            Active discussions RSS
+            </summary>
+            <param name="forumId">Forum identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.ForumGroup(System.Int32)">
+            <summary>
+            Gets a forum group
+            </summary>
+            <param name="id">The forum group identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.Forum(System.Int32,System.Int32)">
+            <summary>
+            Get forum page
+            </summary>
+            <param name="id">Forum identifier</param>
+            <param name="pageNumber">Number of forum page</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.ForumRss(System.Int32)">
+            <summary>
+            Forum RSS
+            </summary>
+            <param name="id">Forum identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.ForumWatch(System.Int32)">
+            <summary>
+            Forum watch
+            </summary>
+            <param name="id">Forum identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.Topic(System.Int32,System.Int32)">
+            <summary>
+            Get topic page
+            </summary>
+            <param name="id">Topic identifier</param>
+            <param name="pageNumber">Number of topic page</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.TopicWatch(System.Int32)">
+            <summary>
+            Topic watch
+            </summary>
+            <param name="id">Topic identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.TopicMove(System.Int32)">
+            <summary>
+            Get topic move model
+            </summary>
+            <param name="id">Topic identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.TopicDelete(System.Int32)">
+            <summary>
+            Topic delete
+            </summary>
+            <param name="id">Topic identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.TopicCreate(System.Int32)">
+            <summary>
+            Prepare the forum topic create model
+            </summary>
+            <param name="id">The forum identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.TopicCreate(Nop.Plugin.Misc.WebApi.Frontend.Dto.Boards.EditForumTopicModelDto)">
+            <summary>
+            Topic create
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.TopicEdit(System.Int32)">
+            <summary>
+            Edit the forum topic
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.TopicEdit(Nop.Plugin.Misc.WebApi.Frontend.Dto.Boards.EditForumTopicModelDto)">
+            <summary>
+            Edit the forum topic
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.PostDelete(System.Int32)">
+            <summary>
+            Delete the forum post
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.PostCreate(System.Int32,System.Int32)">
+            <summary>
+            Prepare forum post model
+            </summary>
+            <param name="id">Forum topic identifier</param>
+            <param name="quoteId">Identifier of the quoted post; pass 0 to load the empty text</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.PostCreate(Nop.Plugin.Misc.WebApi.Frontend.Dto.Boards.EditForumPostModelDto)">
+            <summary>
+            Create forum post
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.PostEdit(System.Int32)">
+            <summary>
+            Prepare the forum post edit model
+            </summary>
+            <param name="id">The forum post identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.PostEdit(Nop.Plugin.Misc.WebApi.Frontend.Dto.Boards.EditForumPostModelDto)">
+            <summary>
+            Edit forum post
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.Search(System.String,System.Nullable{System.Boolean},System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Search terms in forum post
+            </summary>
+            <param name="searchTerms">Search terms</param>
+            <param name="advs">Whether to use the advanced search</param>
+            <param name="forumId">Forum identifier</param>
+            <param name="within">String representation of int value of ForumSearchType</param>
+            <param name="limitDays">Limit by the last number days; 0 to load all topics</param>
+            <param name="page">Number of items page</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.CustomerForumSubscriptions(System.Nullable{System.Int32})">
+            <summary>
+            Prepare the customer forum subscriptions model
+            </summary>
+            <param name="pageNumber">Number of items page; pass null to load the first page</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.CustomerForumSubscriptionsPOST(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Customer forum subscriptions POST
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.BoardsController.PostVote(System.Int32,System.Boolean)">
+            <summary>
+            POst vote
+            </summary>
+            <param name="postId">Post identifier</param>
+            <param name="isUp">Is up</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetCategory(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto,System.Int32)">
+            <summary>
+            Get category
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetCategoryProducts(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto,System.Int32)">
+            <summary>
+            Get the category products
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetCatalogRoot">
+            <summary>
+            Get catalog root (list of categories)
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetCatalogSubCategories(System.Int32)">
+            <summary>
+            Get catalog sub categories
+            </summary>
+            <param name="id">Category identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetManufacturer(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto,System.Int32)">
+            <summary>
+            Get manufacturer
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetManufacturerProducts(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto,System.Int32)">
+            <summary>
+            Get manufacturer products
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.ManufacturerAll">
+            <summary>
+            Get all manufacturers
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetVendor(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto,System.Int32)">
+            <summary>
+            Vendor
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetVendorProducts(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto,System.Int32)">
+            <summary>
+            Get vendor products
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.VendorAll">
+            <summary>
+            Get all vendors
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetProductsByTag(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto,System.Int32)">
+            <summary>
+            Get products by tag
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.GetTagProducts(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto,System.Int32)">
+            <summary>
+            Get tag products
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.ProductTagsAll">
+            <summary>
+            Get all popular product tags
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.Search(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SearchRequest)">
+            <summary>
+            Search
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.SearchTermAutoComplete(System.String)">
+            <summary>
+            Search term auto complete
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CatalogController.SearchProducts(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SearchRequest)">
+            <summary>
+            Search products
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.PreparePaymentInfoCachKey">
+            <summary>
+            Prepare payment info cash key
+            </summary>
+            <returns>Cache key</returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.SavePaymentInfoAsync(Nop.Services.Payments.ProcessPaymentRequest)">
+            <summary>
+            Save process payment request
+            </summary>
+            <param name="processPaymentRequest">Process payment request</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.GetPaymentInfoAsync">
+            <summary>
+            Get process payment request
+            </summary>
+            <returns>Process payment request</returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.ClearPaymentInfoAsync">
+            <summary>
+            Clear payment info
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.GenerateOrderGuidAsync(Nop.Services.Payments.ProcessPaymentRequest)">
+            <summary>
+            Generate an order GUID
+            </summary>
+            <param name="processPaymentRequest">Process payment request</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.ParsePickupInStore(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Parses the value indicating whether the "pickup in store" is allowed
+            </summary>
+            <param name="form">The form</param>
+            <returns>The value indicating whether the "pickup in store" is allowed</returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.ParsePickupOptionAsync(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Parses the pickup option
+            </summary>
+            <param name="form">The form</param>
+            <returns>
+            A task that represents the asynchronous operation
+            The task result contains the pickup option
+            </returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.SavePickupOptionAsync(Nop.Core.Domain.Shipping.PickupPoint)">
+            <summary>
+            Saves the pickup option
+            </summary>
+            <param name="pickupPoint">The pickup option</param>
+            <returns>A task that represents the asynchronous operation</returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.ParseCustomAddressAttributesAsync(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Get custom address attributes from the passed form
+            </summary>
+            <param name="form">Form values</param>
+            <returns>
+            A task that represents the asynchronous operation
+            The task result contains the attributes in XML format
+            </returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.Index">
+            <summary>
+            Index
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.Completed(System.Nullable{System.Int32})">
+            <summary>
+            Prepare checkout completed model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.GetAddressById(System.Int32)">
+            <summary>
+            Get specified Address by addresId
+            </summary>
+            <param name="addressId">Address identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.SaveEditAddress(Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.CheckoutBillingAddressModelDto,System.Boolean)">
+            <summary>
+            Save edited address
+            </summary>        
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.DeleteEditAddress(System.Int32,System.Boolean)">
+            <summary>
+            Delete edited address
+            </summary>
+            <param name="addressId">Address identifier</param>
+            <param name="opc">Is one page checkout</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.BillingAddress(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Prepare billing address model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.SelectBillingAddress(System.Int32,System.Boolean)">
+            <summary>
+            Select billing address
+            </summary>
+            <param name="addressId">Address identifier</param>
+            <param name="shipToSameAddress">A value indicating "Ship to the same address" option is enabled</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.NewBillingAddress(Nop.Plugin.Misc.WebApi.Frontend.Dto.BaseModelDtoRequest{Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.CheckoutBillingAddressModelDto})">
+            <summary>
+            New billing address
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.ShippingAddress">
+            <summary>
+            Prepare shipping address model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.SelectShippingAddress(System.Int32)">
+            <summary>
+            Select shipping address
+            </summary>
+            <param name="addressId">Address identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.NewShippingAddress(Nop.Plugin.Misc.WebApi.Frontend.Dto.BaseModelDtoRequest{Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.CheckoutShippingAddressModelDto})">
+            <summary>
+            New shipping address
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.ShippingMethod">
+            <summary>
+            Prepare shipping method model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.SelectShippingMethod(System.Collections.Generic.IDictionary{System.String,System.String},System.String)">
+            <summary>
+            Select shipping method
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.PaymentMethod">
+            <summary>
+            Prepare payment method model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.SelectPaymentMethod(Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.CheckoutPaymentMethodModelDto,System.String)">
+            <summary>
+            Select payment method
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.PaymentInfo">
+            <summary>
+            Prepare payment info model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.EnterPaymentInfo(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Enter payment Info
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.Confirm">
+            <summary>
+            Prepare confirm order model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.ConfirmOrder">
+            <summary>
+            Confirm order
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.OnePageCheckout">
+            <summary>
+            Prepare one page checkout model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.OpcSaveBilling(Nop.Plugin.Misc.WebApi.Frontend.Dto.BaseModelDtoRequest{Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.CheckoutBillingAddressModelDto})">
+            <summary>
+            Save billing (OPC)
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.OpcSaveShipping(Nop.Plugin.Misc.WebApi.Frontend.Dto.BaseModelDtoRequest{Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.CheckoutShippingAddressModelDto})">
+            <summary>
+            Save shipping (OPC)
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.OpcSaveShippingMethod(System.Collections.Generic.IDictionary{System.String,System.String},System.String)">
+            <summary>
+            Save shipping method (OPC)
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.OpcSavePaymentMethod(Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.CheckoutPaymentMethodModelDto,System.String)">
+            <summary>
+            Save payment method (OPC)
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.OpcSavePaymentInfo(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Save payment info (OPC)
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.OpcConfirmOrder">
+            <summary>
+            Confirm order (OPC)
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CheckoutController.OpcCompleteRedirectionPayment">
+            <summary>
+            Complete redirection payment (OPC)
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.SetLanguage(System.Int32,System.String)">
+            <summary>
+            Set language
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.SetCurrency(System.Int32,System.String)">
+            <summary>
+            Set currency
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.SetTaxType(Nop.Core.Domain.Tax.TaxDisplayType,System.String)">
+            <summary>
+            Set tax type
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.ContactUs">
+            <summary>
+            Contact us page
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.ContactUsSend(Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.ContactUsModelDto)">
+            <summary>
+            Contact us send
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.ContactVendor(System.Int32)">
+            <summary>
+            contact vendor page
+            </summary>
+            <param name="vendorId">Vendor identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.ContactVendorSend(Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.ContactVendorModelDto)">
+            <summary>
+            Contact vendor vend
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.Sitemap(Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.SitemapPageModelDto)">
+            <summary>
+            sitemap page
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.SitemapXml(System.Int32)">
+            <summary>
+            SEO sitemap page
+            </summary>
+            <param name="id">Sitemap identifier; pass 0 to load the first sitemap or sitemap index file</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.SetStoreTheme(System.String)">
+            <summary>
+            Set store theme
+            </summary>
+            <param name="themeName">Theme name</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.EuCookieLawAccept">
+            <summary>
+            Eu cookie law accept
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonController.RobotsTextFile">
+            <summary>
+            robots.txt file
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CommonInfoController.GetSwaggerDocVersion">
+            <summary>
+            Gets swagger doc version API
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.ParseCustomAddressAttributesAsync(System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Get custom address attributes from the passed form
+            </summary>
+            <param name="form">Form values</param>
+            <returns>
+            A task that represents the asynchronous operation
+            The task result contains the attributes in XML format
+            </returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.Logout">
+            <summary>
+            Logout
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.PasswordRecovery">
+            <summary>
+            Prepare the password recovery model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.PasswordRecoverySend(Nop.Plugin.Misc.WebApi.Frontend.Dto.Customer.PasswordRecoveryModelDto)">
+            <summary>
+            Password recovery send
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.PasswordRecoveryConfirm(System.String,System.String,System.Guid)">
+            <summary>
+            Password recovery confirm
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.PasswordRecoveryConfirmPOST(Nop.Plugin.Misc.WebApi.Frontend.Dto.Customer.PasswordRecoveryConfirmModelDto,System.String,System.String,System.Guid)">
+            <summary>
+            Password recovery confirm post
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.Register">
+            <summary>
+             Prepare the customer register model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.Register(Nop.Plugin.Misc.WebApi.Frontend.Dto.BaseModelDtoRequest{Nop.Plugin.Misc.WebApi.Frontend.Dto.Customer.RegisterModelDto},System.String)">
+            <summary>
+            Register
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.RegisterResult(System.Int32,System.String)">
+            <summary>
+            Prepare the register result model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.CheckUsernameAvailability(System.String)">
+            <summary>
+            Check Username availability
+            </summary>
+            <param name="username">Username</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.AccountActivation(System.String,System.String,System.Guid)">
+            <summary>
+            Account activation
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.Info">
+            <summary>
+            Prepare the customer info model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.Info(Nop.Plugin.Misc.WebApi.Frontend.Dto.BaseModelDtoRequest{Nop.Plugin.Misc.WebApi.Frontend.Dto.Customer.CustomerInfoModelDto})">
+            <summary>
+            Customer info
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.RemoveExternalAssociation(System.Int32)">
+            <summary>
+            Delete the external authentication record
+            </summary>
+            <param name="id">External authentication record identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.EmailRevalidation(System.String,System.String,System.Guid)">
+            <summary>
+            Email revalidation
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.Addresses">
+            <summary>
+            Prepare the customer address list model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.AddressDelete(System.Int32)">
+            <summary>
+            Address delete
+            </summary>
+            <param name="addressId">Address identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.AddressAdd">
+            <summary>
+            Prepare address model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.AddressAdd(Nop.Plugin.Misc.WebApi.Frontend.Dto.BaseModelDtoRequest{Nop.Plugin.Misc.WebApi.Frontend.Dto.Customer.CustomerAddressEditModelDto})">
+            <summary>
+            Address add
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.AddressEdit(System.Int32)">
+            <summary>
+            Prepare address model
+            </summary>
+            <param name="addressId">Address identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.AddressEdit(Nop.Plugin.Misc.WebApi.Frontend.Dto.BaseModelDtoRequest{Nop.Plugin.Misc.WebApi.Frontend.Dto.Customer.CustomerAddressEditModelDto},System.Int32)">
+            <summary>
+            Update address
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.DownloadableProducts">
+            <summary>
+            Prepare the customer downloadable products model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.UserAgreement(System.Guid)">
+            <summary>
+            Prepare the user agreement model
+            </summary>
+            <param name="orderItemId">Order item guid identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.ChangePassword">
+            <summary>
+            Prepare the change password model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.ChangePassword(Nop.Plugin.Misc.WebApi.Frontend.Dto.Customer.ChangePasswordModelDto)">
+            <summary>
+            Change password
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.Avatar">
+            <summary>
+            Prepare the customer avatar model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.UploadAvatar(Microsoft.AspNetCore.Http.IFormFile,System.String,System.String)">
+            <summary>
+            Upload avatar
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.RemoveAvatar">
+            <summary>
+            Remove avatar
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.GdprTools">
+            <summary>
+            Prepare the GDPR tools model
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.GdprToolsExport">
+            <summary>
+            Export customer info (GDPR request) to XLSX
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.GdprToolsDelete">
+            <summary>
+            Gdpr tools delete
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.CheckGiftCardBalance">
+            <summary>
+            Prepare the check gift card balance madel
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.CustomerController.CheckBalance(Nop.Plugin.Misc.WebApi.Frontend.Dto.Customer.CheckGiftCardBalanceModelDto)">
+            <summary>
+            Check GiftCard balance
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.DownloadController.Sample(System.Int32)">
+            <summary>
+            Sample
+            </summary>
+            <param name="productId">Product identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.DownloadController.GetDownload(System.Guid,System.Boolean)">
+            <summary>
+            Get download
+            </summary>
+            <param name="orderItemGuid">Order item GUID</param>
+            <param name="agree">Is agree</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.DownloadController.GetLicense(System.Guid)">
+            <summary>
+            Get license
+            </summary>
+            <param name="orderItemGuid">Orer item GUID</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.DownloadController.GetFileUpload(System.Guid)">
+            <summary>
+            Get file upload
+            </summary>
+            <param name="downloadGuid">Download GUID</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.DownloadController.GetOrderNoteFile(System.Int32)">
+            <summary>
+            Get order note file
+            </summary>
+            <param name="orderNoteId">Order note identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.ParseCustomerEnteredPriceAsync(Nop.Core.Domain.Catalog.Product,System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Parse a customer entered price of the product
+            </summary>
+            <param name="product">Product</param>
+            <param name="form">Form</param>
+            <returns>
+            A task that represents the asynchronous operation
+            The task result contains the customer entered price of the product
+            </returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.ParseEnteredQuantity(Nop.Core.Domain.Catalog.Product,System.Collections.Generic.IDictionary{System.String,System.String})">
+            <summary>
+            Parse a entered quantity of the product
+            </summary>
+            <param name="product">Product</param>
+            <param name="form">Form</param>
+            <returns>Customer entered price of the product</returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.ParseProductAttributesAsync(Nop.Core.Domain.Catalog.Product,System.Collections.Generic.IDictionary{System.String,System.String},System.Collections.Generic.List{System.String})">
+            <summary>
+            Get product attributes from the passed form
+            </summary>
+            <param name="product">Product</param>
+            <param name="form">Form values</param>
+            <param name="errors">Errors</param>
+            <returns>
+            A task that represents the asynchronous operation
+            The task result contains the attributes in XML format
+            </returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.GetProductAttributesXmlAsync(Nop.Core.Domain.Catalog.Product,System.Collections.Generic.IDictionary{System.String,System.String},System.Collections.Generic.List{System.String})">
+            <summary>
+            Gets product attributes in XML format
+            </summary>
+            <param name="product">Product</param>
+            <param name="form">Form</param>
+            <param name="errors">Errors</param>
+            <returns>
+            A task that represents the asynchronous operation
+            The task result contains the attributes in XML format
+            </returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.AddGiftCardsAttributesXml(Nop.Core.Domain.Catalog.Product,System.Collections.Generic.IDictionary{System.String,System.String},System.String@)">
+            <summary>
+            Adds gift cards attributes in XML format
+            </summary>
+            <param name="product">Product</param>
+            <param name="form">Form</param>
+            <param name="attributesXml">Attributes in XML format</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.ParseRentalDates(Nop.Core.Domain.Catalog.Product,System.Collections.Generic.IDictionary{System.String,System.String},System.Nullable{System.DateTime}@,System.Nullable{System.DateTime}@)">
+            <summary>
+            Parse product rental dates on the product details page
+            </summary>
+            <param name="product">Product</param>
+            <param name="form">Form</param>
+            <param name="startDate">Start date</param>
+            <param name="endDate">End date</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.GetProductDetails(System.Int32,System.Int32)">
+            <summary>
+            Get the product details
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.EstimateShipping(Nop.Plugin.Misc.WebApi.Frontend.Dto.BaseModelDtoRequest{Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductEstimateShippingModelDto})">
+            <summary>
+            Get the estimate shipping
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.GetProductCombinations(System.Int32)">
+            <summary>
+            Get product combinations
+            </summary>
+            <param name="productId">Product identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.RecentlyViewedProducts">
+            <summary>
+            Get recently viewed products
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.NewProducts">
+            <summary>
+            Get a new products
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.NewProductsRss">
+            <summary>
+            New products RSS
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.ProductReviews(System.Int32)">
+            <summary>
+            Get product reviews
+            </summary>
+            <param name="productId">Product identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.ProductReviewsAdd(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductReviewsModelDto,System.Int32)">
+            <summary>
+            Add product reviews
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.SetProductReviewHelpfulness(System.Int32,System.Boolean)">
+            <summary>
+            Set product review helpfulness
+            </summary>
+            <param name="productReviewId">Product review identifier</param>
+            <param name="washelpful">Indicator if the review was helpful</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.CustomerProductReviews(System.Nullable{System.Int32})">
+            <summary>
+            Customer product reviews for current customer
+            </summary>
+            <param name="pageNumber">Page number</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.ProductEmailAFriend(System.Int32)">
+            <summary>
+            ProductEmailAFriend
+            </summary>
+            <param name="productId">Product identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.ProductEmailAFriendSend(Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductEmailAFriendModelDto)">
+            <summary>
+            Send the product email a friend
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.AddProductToCompareList(System.Int32)">
+            <summary>
+            Add product to compare list
+            </summary>
+            <param name="productId">Product identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.RemoveProductFromCompareList(System.Int32)">
+            <summary>
+            Remove product from compare list
+            </summary>
+            <param name="productId">Product identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.CompareProducts">
+            <summary>
+            Compare products
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ProductController.ClearCompareList">
+            <summary>
+            Clear compare products list
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.ScheduleTaskController.RunTask(System.String)">
+            <summary>
+            Run task
+            </summary>
+            <param name="taskType">Task type</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.TopicController.GetTopicDetails(System.Int32)">
+            <summary>
+            Gets a topic details
+            </summary>
+            <param name="id">The topic identifier</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Controllers.UrlRecordController.GetBySlug(System.String)">
+            <summary>
+            Gets a URL record by slug
+            </summary>
+            <param name="slug">Slug</param>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.BasePageableModelDto.PageIndex">
+            <summary>
+            The current page index (starts from 0)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.BasePageableModelDto.PageNumber">
+            <summary>
+            The current page number (starts from 1)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.BasePageableModelDto.PageSize">
+            <summary>
+            The number of items in each page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.BasePageableModelDto.TotalItems">
+            <summary>
+            The total number of items.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.BasePageableModelDto.TotalPages">
+            <summary>
+            The total number of pages.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.BasePageableModelDto.FirstItem">
+            <summary>
+            The index of the first item in the page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.BasePageableModelDto.LastItem">
+            <summary>
+            The index of the last item in the page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.BasePageableModelDto.HasPreviousPage">
+            <summary>
+            Whether there are pages before the current page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.BasePageableModelDto.HasNextPage">
+            <summary>
+            Whether there are pages after the current page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Blog.BlogPagingFilteringModelDto.PageNumber">
+            <summary>
+            The current page number (starts from 1)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Blog.BlogPagingFilteringModelDto.PageSize">
+            <summary>
+            The number of items in each page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Blog.BlogPagingFilteringModelDto.TotalItems">
+            <summary>
+            The total number of items.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Blog.BlogPagingFilteringModelDto.TotalPages">
+            <summary>
+            The total number of pages.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Blog.BlogPagingFilteringModelDto.FirstItem">
+            <summary>
+            The index of the first item in the page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Blog.BlogPagingFilteringModelDto.LastItem">
+            <summary>
+            The index of the last item in the page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Blog.BlogPagingFilteringModelDto.HasPreviousPage">
+            <summary>
+            Whether there are pages before the current page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Blog.BlogPagingFilteringModelDto.HasNextPage">
+            <summary>
+            Whether there are pages after the current page.
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto">
+            <summary>
+            Represents a model to get the catalog products
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto.Price">
+            <summary>
+            Gets or sets the price ('min-max' format)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto.SpecificationOptionIds">
+            <summary>
+            Gets or sets the specification attribute option ids
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto.ManufacturerIds">
+            <summary>
+            Gets or sets the manufacturer ids
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto.OrderBy">
+            <summary>
+            Gets or sets a order by
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsCommandDto.ViewMode">
+            <summary>
+            Gets or sets a product sorting
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto">
+            <summary>
+            Represents a catalog products model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.UseAjaxLoading">
+            <summary>
+            Get or set a value indicating whether use standart or AJAX products loading (applicable to 'paging', 'filtering', 'view modes') in catalog
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.WarningMessage">
+            <summary>
+            Gets or sets the warning message
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.NoResultMessage">
+            <summary>
+            Gets or sets the message if there are no products to return
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.PriceRangeFilter">
+            <summary>
+            Gets or sets the price range filter model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.SpecificationFilter">
+            <summary>
+            Gets or sets the specification filter model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.ManufacturerFilter">
+            <summary>
+            Gets or sets the manufacturer filter model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.AllowProductSorting">
+            <summary>
+            Gets or sets a value indicating whether product sorting is allowed
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.AvailableSortOptions">
+            <summary>
+            Gets or sets available sort options
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.AllowProductViewModeChanging">
+            <summary>
+            Gets or sets a value indicating whether customers are allowed to change view mode
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.AvailableViewModes">
+            <summary>
+            Gets or sets available view mode options
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.AllowCustomersToSelectPageSize">
+            <summary>
+            Gets or sets a value indicating whether customers are allowed to select page size
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.PageSizeOptions">
+            <summary>
+            Gets or sets available page size options
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.OrderBy">
+            <summary>
+            Gets or sets a order by
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.ViewMode">
+            <summary>
+            Gets or sets a product sorting
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.CatalogProductsModelDto.Products">
+            <summary>
+            Gets or sets the products
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ManufacturerFilterModelDto">
+            <summary>
+            Represents a manufacturer filter model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ManufacturerFilterModelDto.Enabled">
+            <summary>
+            Gets or sets a value indicating whether filtering is enabled
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ManufacturerFilterModelDto.Manufacturers">
+            <summary>
+            Gets or sets the filtrable manufacturers
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.PriceRangeFilterModelDto">
+            <summary>
+            Represents a products price range filter model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.PriceRangeFilterModelDto.Enabled">
+            <summary>
+            Gets or sets a value indicating whether filtering is enabled
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.PriceRangeFilterModelDto.SelectedPriceRange">
+            <summary>
+            Gets or sets the selected price range
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.PriceRangeFilterModelDto.AvailablePriceRange">
+            <summary>
+            Gets or sets the available price range
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.PriceRangeModelDto">
+            <summary>
+            Represents a price range model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.PriceRangeModelDto.From">
+            <summary>
+            Gets or sets the "from" price
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.PriceRangeModelDto.To">
+            <summary>
+            Gets or sets the "to" price
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductAttributeModelDto.ValueIds">
+            <summary>
+            Gets or sets the value IDs of the attribute
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductCombinationModelDto.Attributes">
+            <summary>
+            Gets or sets the attributes
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductCombinationModelDto.InStock">
+            <summary>
+            Gets or sets a value indicating whether to the combination have stock
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductOverviewModelDto.ProductOverviewProductPriceModelDto.BasePricePAngV">
+            <summary>
+            PAngV base price (used in Germany)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductOverviewModelDto.ProductOverviewProductPriceModelDto.DisplayTaxShippingInfo">
+            <summary>
+            A value indicating whether we should display tax/shipping info (used in Germany)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductSpecificationAttributeGroupModelDto.Name">
+            <summary>
+            Gets or sets the specification attribute group name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductSpecificationAttributeGroupModelDto.Attributes">
+            <summary>
+            Gets or sets the specification attribute group attributes
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductSpecificationAttributeModelDto.Name">
+            <summary>
+            Gets or sets the name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductSpecificationAttributeModelDto.Values">
+            <summary>
+            Gets or sets the values
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductSpecificationAttributeValueModelDto.AttributeTypeId">
+            <summary>
+            Gets or sets the attribute type id
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductSpecificationAttributeValueModelDto.ValueRaw">
+            <summary>
+            Gets or sets the value raw. This value is already HTML encoded
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductSpecificationAttributeValueModelDto.ColorSquaresRgb">
+            <summary>
+            Gets or sets the option color (if specified). Used to display color squares
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.ProductSpecificationModelDto.Groups">
+            <summary>
+            Gets or sets the grouped specification attribute models
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SearchModelDto.Q">
+            <summary>
+            Query string
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SearchModelDto.Cid">
+            <summary>
+            Category ID
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SearchModelDto.Mid">
+            <summary>
+            Manufacturer ID
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SearchModelDto.Vid">
+            <summary>
+            Vendor ID
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SearchModelDto.Sid">
+            <summary>
+            A value indicating whether to search in descriptions
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SearchModelDto.Advs">
+            <summary>
+            A value indicating whether "advanced search" is enabled
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SearchModelDto.Asv">
+            <summary>
+            A value indicating whether "allow search by vendor" is enabled
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationAttributeFilterModelDto">
+            <summary>
+            Represents a specification attribute filter model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationAttributeFilterModelDto.Name">
+            <summary>
+            Gets or sets the specification attribute name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationAttributeFilterModelDto.Values">
+            <summary>
+            Gets or sets the values
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationAttributeValueFilterModelDto">
+            <summary>
+            Represents a specification attribute value filter model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationAttributeValueFilterModelDto.Name">
+            <summary>
+            Gets or sets the specification attribute option name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationAttributeValueFilterModelDto.ColorSquaresRgb">
+            <summary>
+            Gets or sets the specification attribute option color (RGB)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationAttributeValueFilterModelDto.Selected">
+            <summary>
+            Gets or sets the value indicating whether the value is selected
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationFilterModelDto">
+            <summary>
+            Represents a specification filter model
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationFilterModelDto.Enabled">
+            <summary>
+            Gets or sets a value indicating whether filtering is enabled
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Catalog.SpecificationFilterModelDto.Attributes">
+            <summary>
+            Gets or sets the filtrable specification attributes
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.CheckoutBillingAddressModelDto.NewAddressPreselected">
+            <summary>
+            Used on one-page checkout page
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.CheckoutPaymentInfoModelDto.DisplayOrderTotals">
+            <summary>
+            Used on one-page checkout page
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.ShippingOptionDto">
+            <summary>
+            Represents a shipping option
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.ShippingOptionDto.ShippingRateComputationMethodSystemName">
+            <summary>
+            Gets or sets the system name of shipping rate computation method
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.ShippingOptionDto.Rate">
+            <summary>
+            Gets or sets a shipping rate (without discounts, additional shipping charges, etc)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.ShippingOptionDto.Name">
+            <summary>
+            Gets or sets a shipping option name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.ShippingOptionDto.Description">
+            <summary>
+            Gets or sets a shipping option description
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.ShippingOptionDto.TransitDays">
+            <summary>
+            Gets or sets a transit days
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.ShippingOptionDto.IsPickupInStore">
+            <summary>
+            Gets or sets a value indicating if it's pickup in store shipping option
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Checkout.ShippingOptionDto.DisplayOrder">
+            <summary>
+            Gets or sets a display order
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.CurrentPage">
+            <summary>
+            Gets the current page index
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.IndividualPagesDisplayedCount">
+            <summary>
+            Gets or sets a count of individual pages to be displayed
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.PageIndex">
+            <summary>
+            Gets the current page index
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.PageSize">
+            <summary>
+            Gets or sets a page size
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.ShowFirst">
+            <summary>
+            Gets or sets a value indicating whether to show "first"
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.ShowIndividualPages">
+            <summary>
+            Gets or sets a value indicating whether to show "individual pages"
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.ShowLast">
+            <summary>
+            Gets or sets a value indicating whether to show "last"
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.ShowNext">
+            <summary>
+            Gets or sets a value indicating whether to show "next"
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.ShowPagerItems">
+            <summary>
+            Gets or sets a value indicating whether to show pager items
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.ShowPrevious">
+            <summary>
+            Gets or sets a value indicating whether to show "previous"
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.ShowTotalSummary">
+            <summary>
+            Gets or sets a value indicating whether to show "total summary"
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.TotalPages">
+            <summary>
+            Gets a total pages count
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.TotalRecords">
+            <summary>
+            Gets or sets a total records count
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.RouteActionName">
+            <summary>
+            Gets or sets the route name or action name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.UseRouteLinks">
+            <summary>
+            Gets or sets whether the links are created using RouteLink instead of Action Link 
+            (for additional route values such as slugs or page numbers)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Common.PagerModelDto.RouteValues">
+            <summary>
+            Gets or sets the RouteValues object. Allows for custom route values other than page.
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Customer.CustomerAttributeModelDto.DefaultValue">
+            <summary>
+            Default value
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.AddToCartModelDto.EnteredQuantity">
+            <summary>
+            qty
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.AddToCartModelDto.CustomerEntersPrice">
+            <summary>
+            price entered by customers
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.AddToCartModelDto.IsRental">
+            <summary>
+            rental
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.AddToCartModelDto.AvailableForPreOrder">
+            <summary>
+            pre-order
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.AddToCartModelDto.UpdatedShoppingCartItemId">
+            <summary>
+            updating existing shopping cart or wishlist item?
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.AssociatedProducts">
+            <summary>
+            a list of associated products. For example, "Grouped" products could have several child "simple" products
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductPriceModelDto.CurrencyCode">
+            <summary>
+            The currency (in 3-letter ISO 4217 format) of the offer price 
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductPriceModelDto.IsRental">
+            <summary>
+            rental
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductPriceModelDto.DisplayTaxShippingInfo">
+            <summary>
+            A value indicating whether we should display tax/shipping info (used in Germany)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductPriceModelDto.BasePricePAngV">
+            <summary>
+            PAngV baseprice (used in Germany)
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductDetailsAttributeModelDto.DefaultValue">
+            <summary>
+            Default value for textboxes
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductDetailsAttributeModelDto.SelectedDay">
+            <summary>
+            Selected day value for datepicker
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductDetailsAttributeModelDto.SelectedMonth">
+            <summary>
+            Selected month value for datepicker
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductDetailsAttributeModelDto.SelectedYear">
+            <summary>
+            Selected year value for datepicker
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductDetailsAttributeModelDto.HasCondition">
+            <summary>
+            A value indicating whether this attribute depends on some other attribute
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsModelDto.ProductDetailsAttributeModelDto.AllowedFileExtensions">
+            <summary>
+            Allowed file extensions for customer uploaded files
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsResponse.ProductTemplateViewPath">
+            <summary>
+            The product template view path
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Product.ProductDetailsResponse.ProductDetailsModel">
+            <summary>
+            The product details model
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Dto.Seo.UrlRecordDto">
+            <summary>
+            Represents an URL record
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Seo.UrlRecordDto.EntityId">
+            <summary>
+            Gets or sets the entity identifier
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Seo.UrlRecordDto.EntityName">
+            <summary>
+            Gets or sets the entity name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Seo.UrlRecordDto.Slug">
+            <summary>
+            Gets or sets the slug
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Seo.UrlRecordDto.IsActive">
+            <summary>
+            Gets or sets the value indicating whether the record is active
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Seo.UrlRecordDto.LanguageId">
+            <summary>
+            Gets or sets the language identifier
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.SystemName">
+            <summary>
+            Gets or sets the name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.IncludeInSitemap">
+            <summary>
+            Gets or sets the value indicating whether this topic should be included in sitemap
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.IsPasswordProtected">
+            <summary>
+            Gets or sets the value indicating whether this topic is password protected
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.Title">
+            <summary>
+            Gets or sets the title
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.Body">
+            <summary>
+            Gets or sets the body
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.TopicTemplateId">
+            <summary>
+            Gets or sets a value of used topic template identifier
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.MetaKeywords">
+            <summary>
+            Gets or sets the meta keywords
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.MetaDescription">
+            <summary>
+            Gets or sets the meta description
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.MetaTitle">
+            <summary>
+            Gets or sets the meta title
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Dto.Topics.TopicModelDto.SeName">
+            <summary>
+            Gets or sets the SeName
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration">
+            <summary>
+            AutoMapper configuration for frontend Web API DTO
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateTopicsMaps">
+            <summary>
+            Create topics maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateVendorMaps">
+            <summary>
+            Create vendor maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateProfileMaps">
+            <summary>
+            Create profile maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateReturnRequestsMaps">
+            <summary>
+            Create return request maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateOrdersMaps">
+            <summary>
+            Create orders maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreatePrivateMessageMaps">
+            <summary>
+            Create private message maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreatePollMaps">
+            <summary>
+            Create poll maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateNewsletterMaps">
+            <summary>
+            Create subscription maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateCommonMaps">
+            <summary>
+            Create common maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateBaseModelsMaps">
+            <summary>
+            Create base models maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateNewsMaps">
+            <summary>
+            Create news maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateCountryMaps">
+            <summary>
+            Create country maps 
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateBackInStockSubscriptionMaps">
+            <summary>
+            Create back in stock subscription maps
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateProductMaps">
+            <summary>
+            Create product maps
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateCategoryMaps">
+            <summary>
+            Create category maps
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateShoppingCartMaps">
+            <summary>
+            Create shopping cart maps
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateBoardsMaps">
+            <summary>
+            Create boards maps
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateWishlistMaps">
+            <summary>
+            Create wishlist maps
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateCustomerMaps">
+            <summary>
+            Create customer maps
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateBlogMaps">
+            <summary>
+            Create blog maps
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateCheckoutMaps">
+            <summary>
+            Create checkout maps
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.Mapper.WebApiFrontendMapperConfiguration.CreateUrlRecordMaps">
+            <summary>
+            Create url record maps
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.PluginNopStartup">
+            <summary>
+            Represents object for the configuring services on application startup
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.PluginNopStartup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Add and configure any of the middleware
+            </summary>
+            <param name="services">Collection of service descriptors</param>
+            <param name="configuration">Configuration of the application</param>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.PluginNopStartup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Configure the using of added middleware
+            </summary>
+            <param name="application">Builder for configuring an application's request pipeline</param>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.PluginNopStartup.Order">
+            <summary>
+            Gets order of this startup configuration implementation
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.RouteProvider">
+            <summary>
+            Represents plugin route provider
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.RouteProvider.RegisterRoutes(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>
+            Register routes
+            </summary>
+            <param name="endpointRouteBuilder">Route builder</param>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.Infrastructure.RouteProvider.Priority">
+            <summary>
+            Gets a priority of route provider
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Models.ConfigurationModel">
+            <summary>
+            Represents plugin configuration model
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.Validators.ConfigurationValidator">
+            <summary>
+            Represents configuration model validator
+            </summary>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.WebApiFrontendDefaults">
+            <summary>
+            Represents plugin constants
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.WebApiFrontendDefaults.SystemName">
+            <summary>
+            Gets a plugin system name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.WebApiFrontendDefaults.ConfigurationRouteName">
+            <summary>
+            Gets the configuration route name
+            </summary>
+        </member>
+        <member name="P:Nop.Plugin.Misc.WebApi.Frontend.WebApiFrontendDefaults.PaymentInfoKeyCache">
+            <summary>
+            Gets a key of cache PaymentInfo
+            </summary>
+            /// <remarks>
+            {0} : current store ID
+            {1} : customer GUID
+            </remarks>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.WebApiFrontendPlugin">
+            <summary>
+            Represents the Web API frontend plugin
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.WebApiFrontendPlugin.GetConfigurationPageUrl">
+            <summary>
+            Gets a configuration page URL
+            </summary>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.WebApiFrontendPlugin.InstallAsync">
+            <summary>
+            Install the plugin
+            </summary>
+            <returns>A task that represents the asynchronous operation</returns>
+        </member>
+        <member name="M:Nop.Plugin.Misc.WebApi.Frontend.WebApiFrontendPlugin.UninstallAsync">
+            <summary>
+            Uninstall the plugin
+            </summary>
+            <returns>A task that represents the asynchronous operation</returns>
+        </member>
+        <member name="T:Nop.Plugin.Misc.WebApi.Frontend.WebApiFrontendSettings">
+            <summary>
+            Represents settings of the Web API Frontend
+            </summary>
+        </member>
+    </members>
+</doc>
